@@ -98,15 +98,25 @@ function AuthPage() {
         <div className="rounded-3xl bg-white shadow-2xl shadow-slate-200/60 overflow-hidden grid lg:grid-cols-2 min-h-[640px]">
 
           {/* ── Left Panel: Branding ─────────────────────────── */}
-          <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800 p-10 text-white relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 blur-3xl -translate-y-1/2 translate-x-1/3" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-cyan-400/10 blur-2xl translate-y-1/3 -translate-x-1/4" />
+          <div className="hidden lg:flex flex-col justify-between p-0 text-white relative overflow-hidden">
+            {/* Video Background */}
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            >
+              <source src="/video/register-login.mp4" type="video/mp4" />
+            </video>
+            
+            {/* Dark Overlay for readability */}
+            <div className="absolute inset-0 bg-gradient-to-br from-sky-900/60 via-blue-900/50 to-indigo-900/60" />
 
-            <div className="relative z-10">
+            <div className="relative z-10 p-10">
               {/* Logo */}
               <div className="flex items-center gap-3 mb-12">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20 backdrop-blur-sm">
                   <Heart className="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -134,14 +144,14 @@ function AuthPage() {
             </div>
 
             {/* Feature highlights */}
-            <div className="relative z-10 space-y-3">
+            <div className="relative z-10 p-10 space-y-3">
               {[
                 { icon: Stethoscope, text: 'Konsultasi dokter 24/7' },
                 { icon: Shield, text: 'Data terenkripsi & aman' },
                 { icon: CheckCircle2, text: 'Screening kesehatan AI' },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm">
                     <Icon className="h-4 w-4 text-sky-200" />
                   </div>
                   <span className="text-sm text-sky-100">{text}</span>
@@ -150,12 +160,12 @@ function AuthPage() {
             </div>
 
             {/* Testimonial */}
-            <div className="relative z-10 p-4 rounded-xl bg-white/10 border border-white/10 backdrop-blur-sm">
+            <div className="relative z-10 mx-10 mb-10 p-4 rounded-xl bg-white/10 border border-white/10 backdrop-blur-sm">
               <p className="text-sm text-sky-50 italic leading-relaxed">
                 "Sembuhin membantu saya memantau kesehatan keluarga dengan mudah. Fitur screening dan CBT sangat bermanfaat!"
               </p>
               <div className="flex items-center gap-2 mt-3">
-                <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">RA</div>
+                <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold backdrop-blur-sm">RA</div>
                 <div>
                   <p className="text-xs font-semibold">Rina A.</p>
                   <p className="text-[10px] text-sky-200">Pengguna sejak 2025</p>
