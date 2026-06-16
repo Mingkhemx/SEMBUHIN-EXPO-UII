@@ -117,8 +117,8 @@ function AuthPage() {
               {/* Logo */}
               <div className="flex items-center gap-3 mb-12">
                 <img 
-                  src="/gif_logo/logo.png" 
-                  alt="Sembuhin Logo" 
+                  src="/gif_logo/icon.png" 
+                  alt="Sembuhin Icon" 
                   className="h-12 w-12 object-contain"
                 />
                 <div>
@@ -200,8 +200,8 @@ function AuthPage() {
             {/* Logo Center */}
             <div className="flex flex-col items-center justify-center gap-3 mb-8">
               <img 
-                src="/gif_logo/icon.png" 
-                alt="Sembuhin Icon" 
+                src="/gif_logo/logo.png" 
+                alt="Sembuhin Logo" 
                 className="h-16 w-16 object-contain"
               />
               <p className="text-xl font-bold text-slate-800">Sembuhin</p>
