@@ -116,11 +116,9 @@ function AuthPage() {
             <div className="relative z-10 p-10">
               {/* Logo */}
               <div className="flex items-center gap-3 mb-12">
-                <img 
-                  src="/gif_logo/logo.png" 
-                  alt="Sembuhin Logo" 
-                  className="h-12 w-12 object-contain"
-                />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20 backdrop-blur-sm">
+                  <Heart className="h-5 w-5 text-white" />
+                </div>
                 <div>
                   <p className="text-lg font-bold">Sembuhin</p>
                   <p className="text-[10px] text-sky-200">Kesehatan & Kesejahteraan</p>
@@ -197,23 +195,15 @@ function AuthPage() {
 
           {/* ── Right Panel: Form ────────────────────────────── */}
           <div className="flex flex-col justify-center p-6 sm:p-10">
-            {/* Mobile logo */}
-            <div className="flex lg:hidden items-center gap-2 mb-8">
+            {/* Logo Center */}
+            <div className="flex flex-col items-center justify-center gap-3 mb-8">
               <img 
                 src="/gif_logo/logo.png" 
                 alt="Sembuhin Logo" 
-                className="h-10 w-10 object-contain"
+                className="h-16 w-16 object-contain"
               />
-              <p className="text-lg font-bold text-slate-800">Sembuhin</p>
+              <p className="text-xl font-bold text-slate-800">Sembuhin</p>
             </div>
-
-            {/* Back button */}
-            <button
-              onClick={() => navigate({ to: '/beranda' })}
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors mb-6"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> Kembali ke Beranda
-            </button>
 
             {/* Mode Toggle */}
             <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 mb-8">
