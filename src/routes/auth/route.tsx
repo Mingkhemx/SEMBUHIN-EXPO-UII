@@ -116,9 +116,11 @@ function AuthPage() {
             <div className="relative z-10 p-10">
               {/* Logo */}
               <div className="flex items-center gap-3 mb-12">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20 backdrop-blur-sm">
-                  <Heart className="h-5 w-5 text-white" />
-                </div>
+                <img 
+                  src="/gif_logo/logo.png" 
+                  alt="Sembuhin Logo" 
+                  className="h-12 w-12 object-contain"
+                />
                 <div>
                   <p className="text-lg font-bold">Sembuhin</p>
                   <p className="text-[10px] text-sky-200">Kesehatan & Kesejahteraan</p>
