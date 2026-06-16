@@ -116,9 +116,11 @@ function AuthPage() {
             <div className="relative z-10 p-10">
               {/* Logo */}
               <div className="flex items-center gap-3 mb-12">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20 backdrop-blur-sm">
-                  <Heart className="h-5 w-5 text-white" />
-                </div>
+                <img 
+                  src="/gif_logo/logo.png" 
+                  alt="Sembuhin Logo" 
+                  className="h-12 w-12 object-contain"
+                />
                 <div>
                   <p className="text-lg font-bold">Sembuhin</p>
                   <p className="text-[10px] text-sky-200">Kesehatan & Kesejahteraan</p>
@@ -159,16 +161,35 @@ function AuthPage() {
               ))}
             </div>
 
-            {/* Testimonial */}
-            <div className="relative z-10 mx-10 mb-10 p-4 rounded-xl bg-white/10 border border-white/10 backdrop-blur-sm">
-              <p className="text-sm text-sky-50 italic leading-relaxed">
-                "Sembuhin membantu saya memantau kesehatan keluarga dengan mudah. Fitur screening dan CBT sangat bermanfaat!"
-              </p>
-              <div className="flex items-center gap-2 mt-3">
-                <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold backdrop-blur-sm">RA</div>
-                <div>
-                  <p className="text-xs font-semibold">Rina A.</p>
-                  <p className="text-[10px] text-sky-200">Pengguna sejak 2025</p>
+            {/* Professional Info Card */}
+            <div className="relative z-10 mx-10 mb-10 p-5 rounded-2xl bg-white/15 border border-white/20 backdrop-blur-md shadow-lg">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Keamanan Terjamin</p>
+                    <p className="text-[11px] text-sky-100">Semua data Anda dienkripsi dan aman</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+                    <Stethoscope className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Akses Mudah</p>
+                    <p className="text-[11px] text-sky-100">Konsultasi dan layanan kesehatan kapan saja</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+                    <Heart className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Layanan Lengkap</p>
+                    <p className="text-[11px] text-sky-100">Semua kebutuhan kesehatan dalam satu platform</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -178,9 +199,11 @@ function AuthPage() {
           <div className="flex flex-col justify-center p-6 sm:p-10">
             {/* Mobile logo */}
             <div className="flex lg:hidden items-center gap-2 mb-8">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100">
-                <Heart className="h-5 w-5 text-sky-600" />
-              </div>
+              <img 
+                src="/gif_logo/logo.png" 
+                alt="Sembuhin Logo" 
+                className="h-10 w-10 object-contain"
+              />
               <p className="text-lg font-bold text-slate-800">Sembuhin</p>
             </div>
 
