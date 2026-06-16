@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="frontend/public/gif_logo/logo.png" alt="Sembuhin Logo" width="120" />
+<img src="public/gif_logo/logo.png" alt="Sembuhin Logo" width="120" />
 
 # **SEMBUHIN**
 
@@ -85,8 +85,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/migwara/web-sehat.git
-cd web-sehat/frontend
+git clone https://github.com/Mingkhemx/SEMBUHIN-EXPO-UII.git
+cd SEMBUHIN-EXPO-UII
 
 # Install dependencies
 npm install
@@ -118,7 +118,7 @@ npm run format
 ## 📁 Struktur Proyek
 
 ```
-frontend/src/
+src/
 ├── components/
 │   ├── ui/               # Komponen UI dasar (shadcn/ui)
 │   ├── three/            # Komponen 3D (Three.js)
