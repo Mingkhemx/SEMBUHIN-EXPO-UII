@@ -198,13 +198,12 @@ function AuthPage() {
           {/* ── Right Panel: Form ────────────────────────────── */}
           <div className="flex flex-col justify-center p-6 sm:p-10">
             {/* Logo Center */}
-            <div className="flex flex-col items-center justify-center gap-3 mb-8">
+            <div className="flex flex-col items-center justify-center mb-8">
               <img 
                 src="/gif_logo/logo.png" 
                 alt="Sembuhin Logo" 
-                className="h-16 w-16 object-contain"
+                className="h-24 w-24 object-contain"
               />
-              <p className="text-xl font-bold text-slate-800">Sembuhin</p>
             </div>
 
             {/* Mode Toggle */}
