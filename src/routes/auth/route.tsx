@@ -143,23 +143,7 @@ function AuthPage() {
                     : 'Daftar untuk mendapatkan akses ke layanan kesehatan terlengkap: screening, CBT, konsultasi dokter, dan lainnya.'}
                 </p>
               </motion.div>
-            </div>
-
-            {/* Feature highlights */}
-            <div className="relative z-10 p-10 space-y-3">
-              {[
-                { icon: Stethoscope, text: 'Konsultasi dokter 24/7' },
-                { icon: Shield, text: 'Data terenkripsi & aman' },
-                { icon: CheckCircle2, text: 'Screening kesehatan AI' },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm">
-                    <Icon className="h-4 w-4 text-sky-200" />
-                  </div>
-                  <span className="text-sm text-sky-100">{text}</span>
-                </div>
-              ))}
-            </div>
+          </div>
 
             {/* Professional Info Card */}
             <div className="relative z-10 mx-10 mb-10 p-5 rounded-2xl bg-white/15 border border-white/20 backdrop-blur-md shadow-lg">
