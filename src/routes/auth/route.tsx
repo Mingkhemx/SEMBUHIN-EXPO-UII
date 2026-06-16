@@ -186,7 +186,7 @@ function AuthPage() {
               <img 
                 src="/gif_logo/logo.png" 
                 alt="Sembuhin Logo" 
-                className="h-24 w-24 object-contain"
+                className="h-32 w-32 object-contain"
               />
             </div>
 
