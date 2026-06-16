@@ -175,23 +175,12 @@ function Index() {
         </div>
       </section>
 
-      {/* GRADIENT DIVIDER BEFORE TRUST */}
-      <div className="relative w-screen left-1/2 right-1/2 -mx-[50vw] h-0 pointer-events-none z-0">
-        <div className="absolute top-[-100px] left-0 right-0 h-[200px] bg-gradient-to-b from-transparent via-sky-100/25 to-transparent" />
-        <div className="absolute left-1/4 top-[-100px] w-[600px] h-[200px] rounded-full bg-cyan-200/20 blur-[80px]" />
-      </div>
-
       {/* TRUST SECTION */}
       <section className="px-4 py-12 relative">
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[800px] h-[300px] rounded-full bg-gradient-to-r from-sky-200/20 via-blue-100/15 to-sky-200/20 blur-[70px]" />
-        </div>
         <div className="group max-w-6xl mx-auto glass-strong rounded-[3rem] p-12 border border-sky-100/40 shadow-lg relative overflow-hidden transition-all duration-700 hover:border-sky-200/60"
           onMouseMove={(e) => { const rect = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`); e.currentTarget.style.setProperty('--y', `${e.clientY - rect.top}px`); }}>
           <div className="pointer-events-none absolute -inset-px transition-opacity duration-500 opacity-0 group-hover:opacity-100 z-0" style={{ background: `radial-gradient(circle 800px at var(--x) var(--y), rgba(100, 180, 220, 0.08), transparent 40%)` }} />
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: `linear-gradient(rgba(100, 180, 220, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100, 180, 220, 0.3) 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-sky-300/6 blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-sky-300/6 blur-[120px] pointer-events-none" />
           <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden"><div className="w-full h-32 bg-gradient-to-b from-transparent via-sky-300/[0.02] to-transparent -translate-y-full animate-[scanline_10s_linear_infinite]" /></div>
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
