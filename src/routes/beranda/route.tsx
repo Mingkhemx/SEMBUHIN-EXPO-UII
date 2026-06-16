@@ -42,10 +42,6 @@ function Index() {
     <div className="space-y-32 pb-24">
       {/* HERO SECTION WITH VIDEO BACKGROUND */}
       <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-8 flex min-h-screen flex-col items-center justify-center pt-40 pb-24 text-center px-4 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-sky-300/30 via-blue-200/20 to-transparent blur-[100px] pointer-events-none z-[2]" />
-        <div className="absolute -top-20 -right-32 w-[600px] h-[600px] rounded-full bg-gradient-to-bl from-cyan-300/25 via-sky-200/15 to-transparent blur-[90px] pointer-events-none z-[2]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-gradient-to-t from-sky-200/20 via-blue-100/10 to-transparent blur-[80px] pointer-events-none z-[2]" />
-
         {/* VIDEO BACKGROUND */}
         <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 75%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 75%, transparent 100%)' }}>
           <video
@@ -103,16 +99,8 @@ function Index() {
         </motion.div>
       </section>
 
-      {/* GRADIENT DIVIDER */}
-      <div className="relative w-screen left-1/2 right-1/2 -mx-[50vw] h-32 -mt-32 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-sky-200/30 via-sky-100/15 to-transparent" />
-      </div>
-
       {/* FEATURE BENTO GRID */}
       <section className="px-4 max-w-7xl mx-auto relative">
-        <div className="absolute -top-40 right-0 w-[500px] h-[500px] rounded-full bg-gradient-to-bl from-sky-200/30 via-blue-100/20 to-transparent blur-[80px] pointer-events-none" />
-        <div className="absolute -bottom-40 -left-20 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-cyan-200/25 via-sky-100/15 to-transparent blur-[70px] pointer-events-none" />
-
         <div className="relative z-10 mb-16 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">Ekosistem Kesehatan Smart</div>
           <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight">Empat Pilar <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Sembuhin</span></h2>
@@ -210,8 +198,6 @@ function Index() {
 
       {/* HOSPITALS SECTION */}
       <section className="px-4 max-w-7xl mx-auto mt-24 relative">
-        <div className="absolute -top-32 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-bl from-sky-200/30 via-blue-100/15 to-transparent blur-[90px] pointer-events-none" />
-        <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-cyan-200/25 via-sky-100/10 to-transparent blur-[80px] pointer-events-none" />
         <div className="relative z-10 mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">SEMBUHIN GRID</div>
           <h2 className="font-display text-3xl font-bold sm:text-5xl text-foreground tracking-tight">Cari Fasilitas <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Medis Terdekat</span></h2>

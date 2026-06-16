@@ -62,8 +62,8 @@ export function Header() {
   const isApotekinActive = matchRoute({ to: "/marketplace" });
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-sm w-full">
-      <div className="glass bg-white/60 backdrop-blur-md mx-auto flex max-w-7xl items-center justify-between rounded-xl px-4 py-2 sm:px-6 shadow-md border border-sky-100/40">
+    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 w-full">
+      <div className="bg-white mx-auto flex max-w-7xl items-center justify-between rounded-xl px-4 py-2 sm:px-6 shadow-md border border-sky-100/40">
         <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <img
             src="gif_logo/logo.png"
