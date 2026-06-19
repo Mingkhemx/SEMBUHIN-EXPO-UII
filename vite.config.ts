@@ -1,0 +1,28 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+
+export default defineConfig({
+  plugins: [
+    TanStackRouterVite(),
+    react(),
+    tailwindcss(),
+    tsconfigPaths(),
+  ],
+  server: {
+    port: 8080,
+  },
+  build: {
+    outDir: "dist",
+  },
+  optimizeDeps: {
+    include: ["hls.js"],
+  },
+  resolve: {
+    alias: {
+      "hls.js": "hls.js/dist/hls.min.js",
+    },
+  },
+});
