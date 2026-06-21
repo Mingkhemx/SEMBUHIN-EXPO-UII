@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 
+
 /* ─── Model Config ─────────────────────────────────────────── */
 type ModelId = "1.1" | "1.2" | "1.3";
 
@@ -88,7 +89,7 @@ type Msg = { id: string; role: "user" | "doc"; text: string; rating?: number };
 function Konsul() {
   const [mode, setMode] = useState<"chat" | "voice">("chat");
   const [messages, setMessages] = useState<Msg[]>([
-    { id: Date.now().toString(), role: "doc", text: "Halo! Saya Dr. Sembuhin, asisten kesehatan AI kamu. Apa yang bisa saya bantu hari ini?" },
+    { id: Date.now().toString(), role: "doc", text: "Halo! Saya **Dr. Sembuhin AI**, asisten kesehatan virtual berbasis kecerdasan buatan. Saya bukan dokter manusia, tapi saya siap membantu menjawab pertanyaan kesehatan Anda dengan informasi terpercaya! Apa yang ingin Anda tanyakan hari ini?" },
   ]);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
@@ -300,17 +301,20 @@ Pertanyaan pasien: ${t}`
 
   return (
     <div className="space-y-6 pb-12">
-      {/* ── Header ─────────────────────────────────────────── */}
-      <header className="pt-4 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-          <div>
-            <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              Konsul <span className="text-gradient">Dr. Sembuhin</span>
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Dokter AI 24/7 — chat atau voice, kamu pilih.
-            </p>
-          </div>
+        {/* ── Header ─────────────────────────────────────────── */}
+        <header className="pt-4 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+                Konsul <span className="text-gradient">Dr. Sembuhin AI</span>
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                Asisten kesehatan virtual berbasis AI 24/7 — chat atau voice, kamu pilih.
+              </p>
+              <p className="mt-1 text-xs text-amber-600 font-medium">
+                ⚠️ Ini adalah chat dengan AI, bukan dokter manusia. Untuk kondisi darurat, hubungi fasilitas kesehatan terdekat.
+              </p>
+            </div>
           {/* Usage counter pill */}
           {user && (
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/80 px-4 py-2 text-xs font-medium text-slate-600 shadow-sm">
@@ -355,21 +359,21 @@ Pertanyaan pasien: ${t}`
             <div className="flex items-center justify-between border-b border-white/40 px-5 py-3.5">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <img src="/gif_logo/icon.png" alt="Sembuhin" className="h-10 w-10 object-contain" />
+                  <img src="/gif_logo/icon.png" alt="Sembuhin AI" className="h-10 w-10 object-contain" />
                   <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-400 border-2 border-white">
                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
                   </span>
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[15px]">Dr. Sembuhin</span>
+                    <span className="font-semibold text-[15px]">Dr. Sembuhin AI</span>
                     <span className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${selectedModel.accent} px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide`}>
                       {selectedModel.badge}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-emerald-600">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Online sekarang • {selectedModel.name}
+                    Online • {selectedModel.name} • Asisten Kesehatan Virtual
                   </div>
                 </div>
               </div>

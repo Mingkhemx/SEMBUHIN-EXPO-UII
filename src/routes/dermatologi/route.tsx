@@ -1,26 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import {
-  ScanLine,
-  Camera,
-  X,
-  Loader2,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  ChevronRight,
-  Image as ImageIcon,
-  Clock,
-  User,
-  ShieldCheck,
-  Stethoscope,
-  Zap,
-  Eye,
-  Search,
-  RotateCcw,
+  ScanLine, Camera, X, Loader2, CheckCircle2, AlertTriangle,
+  Info, ChevronRight, Image as ImageIcon, Clock, ShieldCheck,
+  Stethoscope, Zap, Eye, Search, RotateCcw, Sparkles, LogIn,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
+import { useNavigate } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/dermatologi')({
   head: () => ({
@@ -43,6 +32,7 @@ interface ScanResult {
   description: string
   recommendation: string
   characteristics: string[]
+  aiSource?: 'claude' | 'mock'
 }
 
 interface SkinCondition {
@@ -61,6 +51,112 @@ interface PastScan {
   confidence: number
   severity: Severity
   thumbnail: string
+  description?: string
+  recommendation?: string
+  characteristics?: string[]
+}
+
+/* ─── OpenRouter Skin Analysis ───────────────────────────────────── */
+const OPENROUTER_KEY = import.meta.env.VITE_GEMINI_FACE_API_KEY as string | undefined
+
+/* Kompres gambar ke max 800px supaya tidak 400 error */
+async function compressImage(base64: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const MAX = 800
+      let { width, height } = img
+      if (width > MAX || height > MAX) {
+        if (width > height) { height = Math.round(height * MAX / width); width = MAX }
+        else { width = Math.round(width * MAX / height); height = MAX }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width; canvas.height = height
+      canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL('image/jpeg', 0.75).split(',')[1])
+    }
+    img.onerror = () => resolve(base64)
+    img.src = `data:image/jpeg;base64,${base64}`
+  })
+}
+
+async function analyzeSkinWithAI(imageBase64: string): Promise<ScanResult | null> {
+  if (!OPENROUTER_KEY) return null
+
+  // Kompres dulu supaya tidak 400
+  const compressed = await compressImage(imageBase64)
+
+  const prompt = `Kamu adalah dokter spesialis dermatologi AI yang sangat berpengalaman dengan keahlian tingkat tinggi dalam diagnosis visual kondisi kulit.
+
+Analisis gambar kulit ini secara mendetail dan berikan pre-screening medis yang akurat.
+
+Perhatikan dengan seksama:
+- Warna, tekstur, dan pola kulit
+- Adanya kemerahan, pembengkakan, atau lesi
+- Bentuk, ukuran, dan batas area yang abnormal
+- Tanda-tanda infeksi, peradangan, atau kondisi kronis
+- Distribusi dan pola lesi jika ada
+
+Kemungkinan kondisi: jerawat, eksim, psoriasis, kurap, rosacea, dermatitis kontak, melanoma, kutil, herpes zoster, vitiligo, selulitis, impetigo, urtikaria, seborrheic dermatitis, dll. Jika kulit terlihat normal dan sehat, tulis "Kulit Normal".
+
+WAJIB jawab HANYA dalam format JSON valid ini (tanpa markdown, tanpa teks lain):
+{
+  "condition": "nama kondisi dalam Bahasa Indonesia",
+  "confidence": 85,
+  "severity": "ringan",
+  "description": "Deskripsi 2-3 kalimat tentang kondisi yang terdeteksi dalam Bahasa Indonesia",
+  "recommendation": "Rekomendasi tindakan spesifik dan praktis dalam Bahasa Indonesia",
+  "characteristics": ["karakteristik visual 1", "karakteristik visual 2", "karakteristik visual 3", "karakteristik visual 4"]
+}
+
+severity hanya boleh: "ringan", "sedang", atau "perlu-perhatian"
+confidence adalah angka 0-100`
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Sembuhin Dermatologi AI',
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-opus-4.8',
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${compressed}` } },
+          ],
+        }],
+        temperature: 0.1,
+        max_tokens: 700,
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error('[DermaAI Claude] HTTP', res.status, err)
+      return null
+    }
+
+    const data = await res.json()
+    const text: string = data?.choices?.[0]?.message?.content ?? ''
+    const clean = text.replace(/```json|```/g, '').trim()
+    // Extract JSON object even if Claude adds text before/after
+    const jsonMatch = clean.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) { console.error('[DermaAI] No JSON in response:', clean); return null }
+    const parsed = JSON.parse(jsonMatch[0]) as ScanResult
+    if (!['ringan', 'sedang', 'perlu-perhatian'].includes(parsed.severity)) {
+      parsed.severity = 'ringan'
+    }
+    parsed.aiSource = 'claude'
+    return parsed
+  } catch (err) {
+    console.error('[DermaAI Claude] Error:', err)
+    return null
+  }
 }
 
 /* ─── Mock Data ──────────────────────────────────────────────────── */
@@ -81,19 +177,47 @@ const PAST_SCANS: PastScan[] = [
   { id: '3', date: '15 Jan 2026', condition: 'Normal', confidence: 95, severity: 'ringan', thumbnail: '🟢' },
 ]
 
-const MOCK_RESULT: ScanResult = {
-  condition: 'Dermatitis Kontak Iritan',
-  confidence: 78,
-  severity: 'sedang',
-  description: 'Kondisi peradangan kulit yang disebabkan oleh paparan zat iritan seperti deterjen, sabun, atau bahan kimia. Ditandai dengan kemerahan, gatal, dan kulit kering pada area yang terpapar.',
-  recommendation: 'Hindari kontak dengan zat iritan. Gunakan pelembap hypoallergenic. Jika gejala tidak membaik dalam 1-2 minggu, konsultasi dengan dokter kulit sangat disarankan.',
-  characteristics: [
-    'Kemerahan pada area kulit yang terpapar',
-    'Gatal atau rasa terbakar',
-    'Kulit kering dan mungkin mengelupas',
-    'Biasanya terlokalisir pada area kontak',
-  ],
+// Mock result for both healthy and sick cases
+const getMockResult = (isHealthy: boolean = Math.random() > 0.5): ScanResult => {
+  if (isHealthy) {
+    return {
+      condition: 'Kulit Normal',
+      confidence: 92,
+      severity: 'ringan',
+      description: 'Kulit Anda terlihat sehat dan tidak ada tanda-tanda kondisi kulit yang perlu dikhawatirkan. Tetap jaga kebersihan dan kelembapan kulit!',
+      recommendation: 'Lanjutkan rutinitas perawatan kulit yang sehat: cuci dengan sabun lembut, gunakan pelembap, dan lindungi dari sinar matahari.',
+      characteristics: [
+        'Tekstur kulit halus dan sehat',
+        'Tidak ada kemerahan atau iritasi',
+        'Tidak ada bintik atau lesi abnormal',
+        'Kulit terhidrasi dengan baik',
+      ],
+    }
+  } else {
+    const randomCondition = [
+      { condition: 'Dermatitis Kontak Iritan', severity: 'sedang' as Severity, desc: 'Kondisi peradangan kulit yang disebabkan oleh paparan zat iritan.', rec: 'Hindari kontak dengan zat iritan. Gunakan pelembap hypoallergenic.' },
+      { condition: 'Jerawat (Acne Vulgaris)', severity: 'ringan' as Severity, desc: 'Kondisi kulit umum akibat pori-pori tersumbat, ditandai dengan komedo atau pustul.', rec: 'Jaga kebersihan kulit, gunakan produk non-comedogenic, konsultasi jika memburuk.' },
+      { condition: 'Eksim (Dermatitis Atopik)', severity: 'sedang' as Severity, desc: 'Peradangan kulit kronis yang menyebabkan gatal, kemerahan, dan kulit kering bersisik.', rec: 'Gunakan pelembap secara rutin, hindari pemicu, konsultasi dengan dokter.' },
+    ][Math.floor(Math.random() * 3)]
+    
+    return {
+      condition: randomCondition.condition,
+      confidence: 75 + Math.floor(Math.random() * 15),
+      severity: randomCondition.severity,
+      description: randomCondition.desc,
+      recommendation: randomCondition.rec,
+      characteristics: [
+        'Kemerahan pada area kulit',
+        'Gatal atau rasa tidak nyaman',
+        'Perubahan tekstur kulit',
+        'Tanda-tanda peradangan',
+      ],
+    }
+  }
 }
+
+// Default mock result
+const MOCK_RESULT: ScanResult = getMockResult()
 
 const SEVERITY_CONFIG: Record<Severity, { label: string; color: string; bgColor: string; icon: typeof CheckCircle2 }> = {
   ringan: { label: 'Ringan', color: 'text-emerald-700', bgColor: 'bg-emerald-50 border-emerald-200', icon: CheckCircle2 },
@@ -108,6 +232,9 @@ const fadeIn: Variants = {
 
 /* ─── Component ──────────────────────────────────────────────────── */
 function DermatologiPage() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
   const [viewMode, setViewMode] = useState<ViewMode>('upload')
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
@@ -115,36 +242,131 @@ function DermatologiPage() {
   const [cameraActive, setCameraActive] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
   const [liveDetections, setLiveDetections] = useState<{ name: string; pct: number; severity: Severity }[]>([])
+  const [aiAnalyzing, setAiAnalyzing] = useState(false)
+  // Real history from Supabase
+  const [pastScans, setPastScans] = useState<PastScan[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const liveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const captureAndAnalyzeRef = useRef<(() => void) | null>(null)
+
+  /* Attach stream ke video saat cameraActive jadi true */
+  useEffect(() => {
+    if (cameraActive && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current
+      videoRef.current.play().catch(() => {})
+    }
+  }, [cameraActive])
+
+  /* Cleanup on unmount */
+  useEffect(() => {
+    return () => {
+      if (liveIntervalRef.current) clearInterval(liveIntervalRef.current)
+      streamRef.current?.getTracks().forEach(t => t.stop())
+    }
+  }, [])
+
+  /* Load riwayat scan dari Supabase */
+  const loadHistory = useCallback(async () => {
+    if (!user) return
+    setHistoryLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('skin_scans')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      if (error) throw error
+      const mapped: PastScan[] = (data ?? []).map(row => ({
+        id: row.id,
+        date: new Date(row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        condition: row.condition,
+        confidence: row.confidence,
+        severity: row.severity as Severity,
+        thumbnail: row.thumbnail ?? (row.severity === 'ringan' ? '🟢' : row.severity === 'sedang' ? '🟡' : '🔴'),
+        description: row.description,
+        recommendation: row.recommendation,
+        characteristics: row.characteristics,
+      }))
+      setPastScans(mapped)
+    } catch (e) {
+      console.error('Load history error:', e)
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [user])
+
+  /* Load history saat tab riwayat dibuka */
+  useEffect(() => {
+    if (viewMode === 'history') loadHistory()
+  }, [viewMode, loadHistory])
+
+  /* Simpan hasil scan ke Supabase */
+  const saveScan = useCallback(async (result: ScanResult) => {
+    if (!user) return
+    const thumbnail = result.severity === 'ringan' ? '🟢' : result.severity === 'sedang' ? '🟡' : '🔴'
+    try {
+      await supabase.from('skin_scans').insert({
+        user_id: user.id,
+        condition: result.condition,
+        confidence: result.confidence,
+        severity: result.severity,
+        description: result.description,
+        recommendation: result.recommendation,
+        characteristics: result.characteristics,
+        ai_source: result.aiSource ?? 'mock',
+        thumbnail,
+      })
+    } catch (e) {
+      console.error('Save scan error:', e)
+    }
+  }, [user])
 
   // Start live camera
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      })
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        streamRef.current = stream
+      let stream: MediaStream | null = null
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        })
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        })
       }
+
+      streamRef.current = stream
       setCameraActive(true)
-      // Simulate live AI detection
       startLiveDetection()
-    } catch {
-      // Fallback: show simulated camera
+
+      // Attach stream after React renders the video element
+      setTimeout(() => {
+        if (videoRef.current && streamRef.current) {
+          videoRef.current.srcObject = streamRef.current
+          videoRef.current.play().catch(() => {})
+        }
+      }, 100)
+    } catch (err) {
+      console.error('Gagal mengaktifkan kamera:', err)
       setCameraActive(true)
       startLiveDetection()
     }
   }
 
   const stopCamera = () => {
+    if (liveIntervalRef.current) { clearInterval(liveIntervalRef.current); liveIntervalRef.current = null }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop())
       streamRef.current = null
     }
+    if (videoRef.current) videoRef.current.srcObject = null
     setCameraActive(false)
     setScanProgress(0)
     setLiveDetections([])
@@ -153,27 +375,31 @@ function DermatologiPage() {
   // Simulate live AI detections
   const startLiveDetection = () => {
     const conditions = [
-      { name: 'Kulit Normal', pct: 45, severity: 'ringan' as Severity },
-      { name: 'Dermatitis Kontak', pct: 28, severity: 'sedang' as Severity },
-      { name: 'Jerawat', pct: 15, severity: 'ringan' as Severity },
-      { name: 'Eksim', pct: 8, severity: 'sedang' as Severity },
-      { name: 'Infeksi Jamur', pct: 4, severity: 'perlu-perhatian' as Severity },
+      { name: 'Kulit Normal',      pct: 45, severity: 'ringan'           as Severity },
+      { name: 'Dermatitis Kontak', pct: 28, severity: 'sedang'           as Severity },
+      { name: 'Jerawat',           pct: 15, severity: 'ringan'           as Severity },
+      { name: 'Eksim',             pct:  8, severity: 'sedang'           as Severity },
+      { name: 'Infeksi Jamur',     pct:  4, severity: 'perlu-perhatian'  as Severity },
     ]
 
     let step = 0
-    const interval = setInterval(() => {
+    liveIntervalRef.current = setInterval(() => {
       step++
-      // Gradually reveal detections with fluctuating percentages
       const revealed = conditions.slice(0, Math.min(step, conditions.length)).map((c) => ({
         ...c,
         pct: Math.max(1, Math.min(99, c.pct + Math.floor(Math.random() * 7) - 3)),
-      }))
-      // Sort by percentage descending
-      revealed.sort((a, b) => b.pct - a.pct)
+      })).sort((a, b) => b.pct - a.pct)
       setLiveDetections(revealed)
       setScanProgress(Math.min(step * 12, 100))
 
-      if (step >= 10) clearInterval(interval)
+      if (step >= 10) {
+        clearInterval(liveIntervalRef.current!)
+        liveIntervalRef.current = null
+        // Auto capture & analyze when 100%
+        setTimeout(() => {
+          captureAndAnalyzeRef.current?.()
+        }, 800)
+      }
     }, 800)
   }
 
@@ -182,22 +408,43 @@ function DermatologiPage() {
     if (!file) return
     const reader = new FileReader()
     reader.onload = (ev) => {
-      setUploadedImage(ev.target?.result as string)
-      startAnalysis()
+      const dataUrl = ev.target?.result as string
+      setUploadedImage(dataUrl)
+      // Extract base64 (remove data:image/...;base64, prefix)
+      const base64 = dataUrl.split(',')[1]
+      startAnalysis(base64)
     }
     reader.readAsDataURL(file)
   }
 
-  const startAnalysis = () => {
+  const startAnalysis = useCallback(async (imageBase64?: string) => {
     setViewMode('analyzing')
-    setTimeout(() => {
-      setScanResult(MOCK_RESULT)
-      setViewMode('result')
-    }, 3000)
-  }
+    setAiAnalyzing(true)
 
-  const captureAndAnalyze = () => {
-    // Capture current frame from video
+    if (imageBase64 && OPENROUTER_KEY) {
+      const result = await analyzeSkinWithAI(imageBase64)
+      setAiAnalyzing(false)
+      if (result) {
+        setScanResult(result)
+        setViewMode('result')
+        // Simpan ke Supabase kalau user sudah login
+        if (user) saveScan(result)
+        return
+      }
+    }
+
+    // Fallback mock
+    setAiAnalyzing(false)
+    setTimeout(() => {
+      const mock = getMockResult()
+      setScanResult(mock)
+      setViewMode('result')
+      if (user) saveScan(mock)
+    }, 2500)
+  }, [user, saveScan])
+
+  const captureAndAnalyze = useCallback(() => {
+    let base64: string | undefined
     if (videoRef.current) {
       const canvas = document.createElement('canvas')
       canvas.width = videoRef.current.videoWidth || 640
@@ -205,12 +452,17 @@ function DermatologiPage() {
       const ctx = canvas.getContext('2d')
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0)
-        setUploadedImage(canvas.toDataURL('image/jpeg'))
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+        setUploadedImage(dataUrl)
+        base64 = dataUrl.split(',')[1]
       }
     }
     stopCamera()
-    startAnalysis()
-  }
+    startAnalysis(base64)
+  }, [startAnalysis])
+
+  // Keep ref in sync so startLiveDetection can call it without stale closure
+  useEffect(() => { captureAndAnalyzeRef.current = captureAndAnalyze }, [captureAndAnalyze])
 
   const resetAll = () => {
     setViewMode('upload')
@@ -230,7 +482,7 @@ function DermatologiPage() {
     <div className="relative z-10 min-h-screen">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
 
-        {/* ── Hero ──────────────────────────────────────────────── */}
+      {/* ── Hero ──────────────────────────────────────────────── */}
         <motion.header variants={fadeIn} initial="hidden" animate="visible" className="max-w-2xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-pink-100/80 border border-pink-200/60 px-4 py-1.5 mb-5">
             <ScanLine className="h-3.5 w-3.5 text-pink-600" />
@@ -272,33 +524,70 @@ function DermatologiPage() {
             {!cameraActive ? (
               /* ── Start Camera CTA ── */
               <div className="space-y-6">
-                <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 sm:p-12 text-center shadow-2xl">
-                  <div className="flex flex-col items-center gap-5">
-                    <div className="relative">
-                      <div className="absolute inset-0 rounded-full bg-pink-500/20 animate-ping" />
-                      <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-rose-600 shadow-2xl shadow-pink-500/30">
-                        <Camera className="h-12 w-12 text-white" />
+                <div className="rounded-2xl glass-strong border border-slate-200/60 p-8 sm:p-10 shadow-xl">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {/* Opsi Kamera */}
+                    <div className="text-center space-y-5">
+                      <div className="relative inline-flex mx-auto">
+                        <div className="absolute inset-0 rounded-full bg-pink-500/10 animate-pulse" />
+                        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-100 to-rose-100 border border-pink-200 shadow-lg">
+                          <Camera className="h-12 w-12 text-pink-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-800">Scan dengan Kamera</h3>
+                        <p className="text-sm text-slate-600 mt-1 max-w-xs mx-auto">
+                          Arahkan kamera ke area kulit yang bermasalah untuk scan real-time.
+                        </p>
+                      </div>
+                      <button
+                        onClick={startCamera}
+                        className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-pink-500/30 hover:scale-105 transition-all w-full max-w-xs mx-auto"
+                      >
+                        <Camera className="h-5 w-5" />
+                        Nyalakan Kamera
+                      </button>
+                    </div>
+                    
+                    {/* Opsi Upload & Demo */}
+                    <div className="space-y-4">
+                      {/* Upload Foto */}
+                      <div className="text-center space-y-4 p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-600 mx-auto">
+                          <ImageIcon className="h-8 w-8" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-800">Upload Foto Kulit</h4>
+                          <p className="text-xs text-slate-500 mt-1">Upload foto area kulit dari galeri Anda.</p>
+                        </div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center justify-center gap-2 rounded-xl border-2 border-sky-200 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-700 hover:bg-sky-100 transition-all w-full max-w-xs mx-auto"
+                        >
+                          <ImageIcon className="h-4 w-4" />
+                          Pilih Foto
+                        </button>
+                      </div>
+                      
+                      {/* Demo Tanpa Kamera */}
+                      <div className="text-center space-y-2">
+                        <button
+                          onClick={() => startAnalysis(undefined)}
+                          className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all w-full max-w-xs mx-auto"
+                        >
+                          <Zap className="h-4 w-4" />
+                          Coba Demo Tanpa Kamera
+                        </button>
+                        <p className="text-[11px] text-slate-400">Lihat bagaimana AI bekerja tanpa foto asli.</p>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-white">Nyalakan Kamera</h3>
-                      <p className="text-sm text-slate-400 mt-1 max-w-sm mx-auto">
-                        Arahkan kamera ke area kulit yang bermasalah. AI akan menganalisis secara real-time.
-                      </p>
-                    </div>
-                    <button
-                      onClick={startCamera}
-                      className="flex items-center gap-2 rounded-xl bg-pink-600 px-8 py-4 text-base font-bold text-white hover:bg-pink-700 shadow-lg shadow-pink-600/30 transition-all hover:scale-105"
-                    >
-                      <Camera className="h-5 w-5" />
-                      Mulai Scan
-                    </button>
-                    <button
-                      onClick={startAnalysis}
-                      className="text-xs text-slate-400 hover:text-white transition-colors underline"
-                    >
-                      Atau coba demo tanpa kamera
-                    </button>
                   </div>
                 </div>
 
@@ -525,12 +814,19 @@ function DermatologiPage() {
                 <div className="space-y-2">
                   <Loader2 className="h-8 w-8 text-pink-600 animate-spin mx-auto" />
                   <h3 className="text-lg font-bold text-slate-800">AI Sedang Menganalisis</h3>
-                  <p className="text-sm text-slate-500">Mengenali pola, tekstur, dan karakteristik kulit...</p>
+                  <p className="text-sm text-slate-500">
+                    {OPENROUTER_KEY ? 'Sembuhin AI 1.2 menganalisis kondisi kulit Anda...' : 'Mengenali pola, tekstur, dan karakteristik kulit...'}
+                  </p>
                 </div>
 
                 {/* Analysis steps */}
                 <div className="space-y-2 w-full max-w-sm">
-                  {['Deteksi area kulit', 'Analisis pola & tekstur', 'Pencocokan dengan database', 'Generate rekomendasi'].map((step, i) => (
+                  {[
+                    OPENROUTER_KEY ? 'Mengirim ke Sembuhin AI 1.2' : 'Deteksi area kulit',
+                    'Analisis pola & tekstur kulit',
+                    'Pencocokan dengan database dermatologi',
+                    'Generate diagnosis & rekomendasi',
+                  ].map((step, i) => (
                     <motion.div
                       key={step}
                       initial={{ opacity: 0, x: -10 }}
@@ -557,20 +853,50 @@ function DermatologiPage() {
         {/* ═══════════════════ RESULT ═══════════════════ */}
         {viewMode === 'result' && scanResult && (
           <motion.div key="result" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            {/* Severity Badge */}
-            <div className={cn('rounded-2xl border overflow-hidden shadow-lg', SEVERITY_CONFIG[scanResult.severity].bgColor)}>
+            {/* Status Badge: Sehat / Sakit */}
+            <div className={cn(
+              'rounded-2xl border overflow-hidden shadow-lg',
+              scanResult.condition === 'Kulit Normal' 
+                ? 'bg-emerald-50 border-emerald-200' 
+                : SEVERITY_CONFIG[scanResult.severity].bgColor
+            )}>
               <div className="p-6 sm:p-8">
                 <div className="flex items-start gap-4">
                   {(() => {
-                    const Icon = SEVERITY_CONFIG[scanResult.severity].icon
-                    return <Icon className={cn('h-12 w-12 shrink-0', SEVERITY_CONFIG[scanResult.severity].color)} />
+                    const isHealthy = scanResult.condition === 'Kulit Normal'
+                    const Icon = isHealthy ? CheckCircle2 : SEVERITY_CONFIG[scanResult.severity].icon
+                    return (
+                      <div className={cn(
+                        'flex h-14 w-14 items-center justify-center rounded-2xl shrink-0',
+                        isHealthy ? 'bg-emerald-100 border border-emerald-200' : ''
+                      )}>
+                        <Icon className={cn(
+                          'h-8 w-8',
+                          isHealthy ? 'text-emerald-600' : SEVERITY_CONFIG[scanResult.severity].color
+                        )} />
+                      </div>
+                    )
                   })()}
                   <div className="flex-1">
+                    {/* Sehat/Sakit Label */}
                     <div className="flex items-center gap-2 mb-1">
-                      <p className={cn('text-lg font-bold', SEVERITY_CONFIG[scanResult.severity].color)}>
-                        {SEVERITY_CONFIG[scanResult.severity].label}
-                      </p>
+                      {scanResult.condition === 'Kulit Normal' ? (
+                        <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-lg">
+                          <CheckCircle2 className="h-5 w-5" />
+                          Sehat
+                        </span>
+                      ) : (
+                        <span className={cn('inline-flex items-center gap-1.5 text-lg font-bold', SEVERITY_CONFIG[scanResult.severity].color)}>
+                          <AlertTriangle className="h-5 w-5" />
+                          Terdeteksi
+                        </span>
+                      )}
                       <span className="text-xs text-slate-500">• Akurasi {scanResult.confidence}%</span>
+                      {scanResult.aiSource === 'claude' && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">
+                          <Sparkles className="h-3 w-3" /> Sembuhin AI 1.2
+                        </span>
+                      )}
                     </div>
                     <h2 className="text-xl font-bold text-slate-900 mb-2">{scanResult.condition}</h2>
                     <p className="text-sm text-slate-700 leading-relaxed">{scanResult.description}</p>
@@ -646,30 +972,67 @@ function DermatologiPage() {
         {viewMode === 'history' && (
           <motion.div key="history" variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
             <h2 className="text-lg font-semibold text-slate-800">Riwayat Scan</h2>
-            <div className="space-y-3">
-              {PAST_SCANS.map((scan) => (
-                <div key={scan.id} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-3xl">
-                      {scan.thumbnail}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full', SEVERITY_CONFIG[scan.severity].bgColor, SEVERITY_CONFIG[scan.severity].color)}>
-                          {SEVERITY_CONFIG[scan.severity].label}
-                        </span>
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-800">{scan.condition}</h3>
-                      <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-400">
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {scan.date}</span>
-                        <span>Akurasi {scan.confidence}%</span>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-slate-300" />
-                  </div>
+
+            {/* Login gate */}
+            {!user ? (
+              <div className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-10 text-center space-y-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-pink-100 mx-auto">
+                  <LogIn className="h-8 w-8 text-pink-600" />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Login untuk melihat riwayat</p>
+                  <p className="text-xs text-slate-500 mt-1">Riwayat scan tersimpan per akun pengguna</p>
+                </div>
+                <button
+                  onClick={() => navigate({ to: '/auth' })}
+                  className="inline-flex items-center gap-2 rounded-xl bg-pink-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-pink-700 transition-colors shadow-md"
+                >
+                  <LogIn className="h-4 w-4" /> Login / Daftar
+                </button>
+              </div>
+            ) : historyLoading ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 text-pink-400 animate-spin mb-3" />
+                <p className="text-sm text-slate-400">Memuat riwayat...</p>
+              </div>
+            ) : pastScans.length === 0 ? (
+              <div className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-10 text-center space-y-3">
+                <div className="text-4xl">🔍</div>
+                <p className="text-sm font-semibold text-slate-700">Belum ada riwayat scan</p>
+                <p className="text-xs text-slate-400">Lakukan scan kulit pertamamu!</p>
+                <button
+                  onClick={() => setViewMode('upload')}
+                  className="inline-flex items-center gap-2 rounded-xl bg-pink-600 px-5 py-2 text-sm font-bold text-white hover:bg-pink-700 transition-colors"
+                >
+                  <ScanLine className="h-4 w-4" /> Scan Sekarang
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pastScans.map((scan) => (
+                  <div key={scan.id} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-2xl">
+                        {scan.thumbnail}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border', SEVERITY_CONFIG[scan.severity].bgColor, SEVERITY_CONFIG[scan.severity].color)}>
+                            {SEVERITY_CONFIG[scan.severity].label}
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-800">{scan.condition}</h3>
+                        <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-400">
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {scan.date}</span>
+                          <span>Akurasi {scan.confidence}%</span>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-slate-300 shrink-0" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 

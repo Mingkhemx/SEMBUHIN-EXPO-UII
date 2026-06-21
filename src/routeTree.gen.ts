@@ -18,11 +18,13 @@ import { Route as RekamMedisRouteRouteImport } from './routes/rekam-medis/route'
 import { Route as ProfilRouteRouteImport } from './routes/profil/route'
 import { Route as MoodCheckRouteRouteImport } from './routes/mood-check/route'
 import { Route as MentalHealthRouteRouteImport } from './routes/mental-health/route'
+import { Route as MembershipRouteRouteImport } from './routes/membership/route'
 import { Route as MarketplaceRouteRouteImport } from './routes/marketplace/route'
 import { Route as KonsulRouteRouteImport } from './routes/konsul/route'
 import { Route as KomunitasPasienRouteRouteImport } from './routes/komunitas-pasien/route'
 import { Route as DokterRouteRouteImport } from './routes/dokter/route'
 import { Route as DermatologiRouteRouteImport } from './routes/dermatologi/route'
+import { Route as ChatRouteRouteImport } from './routes/chat/route'
 import { Route as CekJantungRouteRouteImport } from './routes/cek-jantung/route'
 import { Route as BerandaRouteRouteImport } from './routes/beranda/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
@@ -74,6 +76,11 @@ const MentalHealthRouteRoute = MentalHealthRouteRouteImport.update({
   path: '/mental-health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MembershipRouteRoute = MembershipRouteRouteImport.update({
+  id: '/membership',
+  path: '/membership',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceRouteRoute = MarketplaceRouteRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
@@ -97,6 +104,11 @@ const DokterRouteRoute = DokterRouteRouteImport.update({
 const DermatologiRouteRoute = DermatologiRouteRouteImport.update({
   id: '/dermatologi',
   path: '/dermatologi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRouteRoute = ChatRouteRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CekJantungRouteRoute = CekJantungRouteRouteImport.update({
@@ -131,11 +143,13 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
+  '/chat': typeof ChatRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
   '/marketplace': typeof MarketplaceRouteRoute
+  '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
   '/mood-check': typeof MoodCheckRouteRoute
   '/profil': typeof ProfilRouteRoute
@@ -152,11 +166,13 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
+  '/chat': typeof ChatRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
   '/marketplace': typeof MarketplaceRouteRoute
+  '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
   '/mood-check': typeof MoodCheckRouteRoute
   '/profil': typeof ProfilRouteRoute
@@ -174,11 +190,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
+  '/chat': typeof ChatRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
   '/marketplace': typeof MarketplaceRouteRoute
+  '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
   '/mood-check': typeof MoodCheckRouteRoute
   '/profil': typeof ProfilRouteRoute
@@ -197,11 +215,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/beranda'
     | '/cek-jantung'
+    | '/chat'
     | '/dermatologi'
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
     | '/marketplace'
+    | '/membership'
     | '/mental-health'
     | '/mood-check'
     | '/profil'
@@ -218,11 +238,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/beranda'
     | '/cek-jantung'
+    | '/chat'
     | '/dermatologi'
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
     | '/marketplace'
+    | '/membership'
     | '/mental-health'
     | '/mood-check'
     | '/profil'
@@ -239,11 +261,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/beranda'
     | '/cek-jantung'
+    | '/chat'
     | '/dermatologi'
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
     | '/marketplace'
+    | '/membership'
     | '/mental-health'
     | '/mood-check'
     | '/profil'
@@ -261,11 +285,13 @@ export interface RootRouteChildren {
   AuthRouteRoute: typeof AuthRouteRoute
   BerandaRouteRoute: typeof BerandaRouteRoute
   CekJantungRouteRoute: typeof CekJantungRouteRoute
+  ChatRouteRoute: typeof ChatRouteRoute
   DermatologiRouteRoute: typeof DermatologiRouteRoute
   DokterRouteRoute: typeof DokterRouteRoute
   KomunitasPasienRouteRoute: typeof KomunitasPasienRouteRoute
   KonsulRouteRoute: typeof KonsulRouteRoute
   MarketplaceRouteRoute: typeof MarketplaceRouteRoute
+  MembershipRouteRoute: typeof MembershipRouteRoute
   MentalHealthRouteRoute: typeof MentalHealthRouteRoute
   MoodCheckRouteRoute: typeof MoodCheckRouteRoute
   ProfilRouteRoute: typeof ProfilRouteRoute
@@ -342,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentalHealthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/membership': {
+      id: '/membership'
+      path: '/membership'
+      fullPath: '/membership'
+      preLoaderRoute: typeof MembershipRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace': {
       id: '/marketplace'
       path: '/marketplace'
@@ -375,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/dermatologi'
       fullPath: '/dermatologi'
       preLoaderRoute: typeof DermatologiRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cek-jantung': {
@@ -421,11 +461,13 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRouteRoute: AuthRouteRoute,
   BerandaRouteRoute: BerandaRouteRoute,
   CekJantungRouteRoute: CekJantungRouteRoute,
+  ChatRouteRoute: ChatRouteRoute,
   DermatologiRouteRoute: DermatologiRouteRoute,
   DokterRouteRoute: DokterRouteRoute,
   KomunitasPasienRouteRoute: KomunitasPasienRouteRoute,
   KonsulRouteRoute: KonsulRouteRoute,
   MarketplaceRouteRoute: MarketplaceRouteRoute,
+  MembershipRouteRoute: MembershipRouteRoute,
   MentalHealthRouteRoute: MentalHealthRouteRoute,
   MoodCheckRouteRoute: MoodCheckRouteRoute,
   ProfilRouteRoute: ProfilRouteRoute,

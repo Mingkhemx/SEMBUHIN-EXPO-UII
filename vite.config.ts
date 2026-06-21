@@ -13,12 +13,18 @@ export default defineConfig({
   ],
   server: {
     port: 8080,
+    fs: {
+      // Allow serving files from node_modules (for Human.js model files)
+      allow: ['..'],
+    },
   },
   build: {
     outDir: "dist",
   },
   optimizeDeps: {
     include: ["hls.js"],
+    // Exclude @vladmandic/human — very large, load dynamically at runtime
+    exclude: ["@vladmandic/human"],
   },
   resolve: {
     alias: {
