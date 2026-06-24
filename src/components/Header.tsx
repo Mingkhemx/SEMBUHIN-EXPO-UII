@@ -36,7 +36,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
   const matchRoute = useMatchRoute();
-  const { user, signOut, isPremium } = useAuth();
+  const { user, signOut, isPremium, isDoctor } = useAuth();
   const [langOpen, setLangOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState("id");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -75,11 +75,9 @@ export function Header() {
     matchRoute({ to: "/twin" }) ||
     matchRoute({ to: "/cek-jantung" });
 
-  // Check if any Edukasi Kesehatan routes are active (currently all point to /)
-  // You can update these paths when you create specific routes
+  // Check if any Edukasi Kesehatan routes are active
   const isEdukasiActive =
     matchRoute({ to: "/artikel" }) ||
-    matchRoute({ to: "/tips-sehat" }) ||
     matchRoute({ to: "/video-edukasi" });
 
   // Check if Beranda is active
@@ -95,8 +93,8 @@ export function Header() {
   const isApotekinActive = matchRoute({ to: "/marketplace" });
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-sm w-full">
-      <div className="glass bg-white/60 backdrop-blur-md mx-auto flex max-w-7xl items-center justify-between rounded-xl px-4 py-2 sm:px-6 shadow-md border border-sky-100/40">
+    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-xl w-full bg-white/30">
+      <div className="glass bg-white/70 backdrop-blur-md mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-2 sm:px-6 shadow-lg border border-sky-200/50">
         <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <img src="gif_logo/logo.png" alt="Sembuhin" className="h-16 w-auto object-contain" />
         </Link>
@@ -240,13 +238,6 @@ export function Header() {
                       icon={<BookOpen className="h-4 w-4" />}
                     >
                       Kumpulan riset dan artikel medis terpercaya untuk Anda.
-                    </ListItem>
-                    <ListItem
-                      to="/tips-sehat"
-                      title="Tips Hidup Sehat"
-                      icon={<HeartPulse className="h-4 w-4" />}
-                    >
-                      Panduan nutrisi dan pola hidup sehat harian.
                     </ListItem>
                     <ListItem
                       to="/video-edukasi"
@@ -421,11 +412,27 @@ export function Header() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 h-9 px-2.5 rounded-lg border border-slate-200 bg-white/80 backdrop-blur-sm hover:bg-white hover:border-slate-300 transition-all shadow-sm"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-sky-600 text-white">
-                  <User className="h-3.5 w-3.5" />
+                {/* Avatar: foto jika ada, fallback ke inisial */}
+                {user.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="avatar"
+                    className="h-7 w-7 rounded-full object-cover ring-1 ring-slate-200 flex-shrink-0"
+                    onError={(e) => {
+                      // fallback ke inisial jika gambar gagal load
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      (e.currentTarget.nextSibling as HTMLElement)?.style.setProperty("display", "flex");
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="h-7 w-7 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 text-white text-xs font-bold items-center justify-center flex-shrink-0"
+                  style={{ display: user.user_metadata?.avatar_url ? "none" : "flex" }}
+                >
+                  {(user.user_metadata?.full_name || user.email || "U")[0].toUpperCase()}
                 </div>
                 <span className="text-xs font-bold text-slate-700">
-                  {user.email?.split("@")[0]}
+                  {user.user_metadata?.full_name?.split(" ")[0] || user.email?.split("@")[0]}
                 </span>
                 <ChevronDown
                   className={cn(
@@ -454,6 +461,16 @@ export function Header() {
                     <User className="h-4 w-4" />
                     <span>Profil</span>
                   </Link>
+                  {isDoctor && (
+                    <Link
+                      to="/doctor"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-sky-600 hover:bg-sky-50 w-full"
+                    >
+                      <Stethoscope className="h-4 w-4" />
+                      <span>Doctor Panel</span>
+                    </Link>
+                  )}
                   <button
                     onClick={async () => {
                       await signOut();

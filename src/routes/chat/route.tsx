@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,11 +18,17 @@ import {
   Heart,
   Leaf,
   Sparkles,
+  Users,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/chat")({
+  validateSearch: (s: any) => ({
+    consultationId: s.consultationId as string | undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Chat Dokter — Sembuhin" },
@@ -37,200 +43,40 @@ export const Route = createFileRoute("/chat")({
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface Doctor {
+interface Consultation {
   id: string;
-  name: string;
-  spec: string;
-  category: string;
-  img: string;
-  online: boolean;
-  lastSeen: string;
-  badge: string;
-  accent: string;
-  accentFrom: string;
-  accentTo: string;
-  iconBg: string;
-  iconColor: string;
-  tagline: string;
-  responses: string[];
+  doctor_id: string | null;
+  patient_id: string;
+  doctor_name: string;
+  doctor_specialty: string | null;
+  doctor_hospital: string | null;
+  doctor_avatar_url: string | null;
+  appointment_date: string;
+  appointment_time: string;
+  consultation_type: string;
+  complaint: string | null;
+  consultation_status: string;
+  payment_status: string;
+  created_at: string;
 }
 
-interface Message {
+interface ChatMessage {
   id: string;
-  text: string;
-  sender: "user" | "doctor";
-  timestamp: string;
-  status: "sent" | "delivered" | "read";
+  consultation_id: string;
+  sender_id: string;
+  sender_type: "patient" | "doctor";
+  message_text: string;
+  read_at: string | null;
+  created_at: string;
 }
 
-type Conversations = Record<string, Message[]>;
-
-// ─── Doctor Data ──────────────────────────────────────────────────────────────
-
-const DOCTORS: Doctor[] = [
-  {
-    id: "dr-sarah",
-    name: "Dr. Sarah Wijaya",
-    spec: "Bedah Kardiovaskular",
-    category: "Jantung",
-    img: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=200",
-    online: true,
-    lastSeen: "Online",
-    badge: "Spesialis",
-    accent: "from-sky-500 to-cyan-400",
-    accentFrom: "from-sky-500",
-    accentTo: "to-cyan-400",
-    iconBg: "bg-sky-50",
-    iconColor: "text-sky-600",
-    tagline: "Spesialis Jantung & Pembuluh Darah",
-    responses: [
-      "Halo! Saya Dr. Sarah. Ada yang bisa saya bantu hari ini?",
-      "Terima kasih sudah menghubungi saya. Bisa ceritakan keluhan Anda lebih detail?",
-      "Saya mengerti. Sudah berapa lama keluhan ini berlangsung?",
-      "Apakah ada riwayat penyakit jantung di keluarga Anda?",
-      "Baik, saya sarankan untuk melakukan EKG dan cek darah lengkap terlebih dahulu.",
-      "Untuk kondisi seperti ini, segera ke IGD jika nyeri dada semakin parah.",
-      "Saya akan buatkan rujukan ke laboratorium untuk pemeriksaan lebih lanjut.",
-      "Apakah Anda rutin berolahraga dan menjaga pola makan?",
-      "Hindari makanan tinggi lemak jenuh dan garam. Perbanyak sayur dan buah.",
-    ],
-  },
-  {
-    id: "dr-budi",
-    name: "Dr. Budi Santoso",
-    spec: "Neurologi",
-    category: "Saraf",
-    img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200",
-    online: true,
-    lastSeen: "Online",
-    badge: "Top Rated",
-    accent: "from-violet-500 to-purple-400",
-    accentFrom: "from-violet-500",
-    accentTo: "to-purple-400",
-    iconBg: "bg-violet-50",
-    iconColor: "text-violet-600",
-    tagline: "Spesialis Saraf & Neurologi",
-    responses: [
-      "Selamat datang! Saya Dr. Budi, spesialis neurologi. Ada yang bisa saya bantu?",
-      "Bisa ceritakan lebih lanjut gejala yang Anda rasakan?",
-      "Apakah sakit kepala Anda terasa berdenyut atau seperti ditekan?",
-      "Sudah periksa tekanan darah belakangan ini?",
-      "Saya sarankan untuk istirahat cukup dan hindari stres berlebihan.",
-      "Untuk migrain, kita bisa mulai dengan terapi non-farmakologi terlebih dahulu.",
-      "Mari kita jadwalkan pertemuan langsung untuk pemeriksaan neurologis lebih lengkap.",
-      "Apakah keluhan ini mengganggu aktivitas sehari-hari Anda?",
-    ],
-  },
-  {
-    id: "dr-rina",
-    name: "Dr. Rina Kusuma",
-    spec: "Psikologi Klinis",
-    category: "Mental Health",
-    img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200",
-    online: false,
-    lastSeen: "1 jam lalu",
-    badge: "Psikolog",
-    accent: "from-rose-500 to-pink-400",
-    accentFrom: "from-rose-500",
-    accentTo: "to-pink-400",
-    iconBg: "bg-rose-50",
-    iconColor: "text-rose-600",
-    tagline: "Psikolog Klinis & Konselor",
-    responses: [
-      "Halo, saya Dr. Rina. Senang bisa berbicara dengan Anda. Ada yang ingin Anda ceritakan?",
-      "Terima kasih sudah mempercayai saya. Ini adalah ruang aman untuk bercerita.",
-      "Saya mendengar Anda. Perasaan seperti itu sangat wajar dialami.",
-      "Sudah berapa lama Anda merasakan perasaan ini?",
-      "Apakah ada pemicu tertentu yang membuat perasaan ini muncul?",
-      "Mari kita coba teknik pernapasan sederhana untuk membantu menenangkan pikiran.",
-      "Anda tidak sendirian dalam menghadapi ini. Kita akan lalui bersama.",
-      "Boleh saya bertanya, bagaimana pola tidur dan makan Anda belakangan ini?",
-    ],
-  },
-  {
-    id: "dr-ahmad",
-    name: "Dr. Ahmad Fauzi",
-    spec: "Dokter Umum",
-    category: "Umum",
-    img: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200",
-    online: true,
-    lastSeen: "Online",
-    badge: "Umum",
-    accent: "from-teal-500 to-emerald-400",
-    accentFrom: "from-teal-500",
-    accentTo: "to-emerald-400",
-    iconBg: "bg-teal-50",
-    iconColor: "text-teal-600",
-    tagline: "Dokter Umum & Layanan Primer",
-    responses: [
-      "Halo! Saya Dr. Ahmad. Silakan ceritakan keluhan Anda.",
-      "Sudah berapa lama Anda merasakan gejala ini?",
-      "Apakah disertai dengan demam atau gejala lain?",
-      "Apakah Anda memiliki alergi terhadap obat-obatan tertentu?",
-      "Saya akan resepkan obat untuk meredakan gejala Anda.",
-      "Jika dalam 3 hari tidak membaik, segera kembali konsultasi.",
-      "Pastikan istirahat cukup, minum air yang banyak, dan konsumsi makanan bergizi.",
-      "Apakah ada riwayat penyakit bawaan seperti diabetes atau hipertensi?",
-    ],
-  },
-  {
-    id: "dr-siti",
-    name: "Dr. Siti Rahayu",
-    spec: "Dermatologi",
-    category: "Kulit",
-    img: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=200",
-    online: false,
-    lastSeen: "30 menit lalu",
-    badge: "Spesialis",
-    accent: "from-amber-500 to-orange-400",
-    accentFrom: "from-amber-500",
-    accentTo: "to-orange-400",
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-600",
-    tagline: "Spesialis Kulit & Kelamin",
-    responses: [
-      "Halo! Saya Dr. Siti. Ada masalah kulit yang ingin Anda konsultasikan?",
-      "Bisa kirimkan foto area yang bermasalah? Itu akan membantu diagnosis saya.",
-      "Sudah berapa lama kondisi ini muncul?",
-      "Apakah terasa gatal, perih, atau keduanya?",
-      "Apakah ada perubahan setelah menggunakan produk perawatan baru?",
-      "Untuk sementara, hindari paparan sinar matahari langsung dan gunakan pelembab.",
-      "Saya sarankan pemeriksaan langsung agar bisa melihat kondisi kulit lebih detail.",
-      "Apakah kondisi ini menyebar atau hanya di satu area tertentu?",
-    ],
-  },
-  {
-    id: "dr-hendra",
-    name: "Dr. Hendra Pratama",
-    spec: "Ortopedi",
-    category: "Tulang & Sendi",
-    img: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200",
-    online: true,
-    lastSeen: "Online",
-    badge: "Spesialis",
-    accent: "from-indigo-500 to-blue-400",
-    accentFrom: "from-indigo-500",
-    accentTo: "to-blue-400",
-    iconBg: "bg-indigo-50",
-    iconColor: "text-indigo-600",
-    tagline: "Spesialis Ortopedi & Traumatologi",
-    responses: [
-      "Halo! Saya Dr. Hendra, spesialis ortopedi. Ada keluhan sendi atau tulang?",
-      "Di bagian mana Anda merasakan nyeri? Bisa tunjukkan lebih spesifik?",
-      "Apakah nyeri ini muncul saat bergerak atau saat diam juga?",
-      "Sudah berapa lama keluhan ini berlangsung?",
-      "Apakah pernah mengalami cedera di area tersebut sebelumnya?",
-      "Saya sarankan untuk sementara kurangi aktivitas yang membebani sendi tersebut.",
-      "Kita perlu rontgen untuk melihat kondisi tulang lebih jelas.",
-    ],
-  },
-];
+interface DoctorListItem {
+  consultation: Consultation;
+  lastMessage: ChatMessage | null;
+  unreadCount: number;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function genId() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("id-ID", {
@@ -263,139 +109,199 @@ function formatDayLabel(iso: string) {
   return d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" });
 }
 
-const STORAGE_KEY = "sembuhin_chat_v1";
-
-function loadConversations(): Conversations {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveConversations(c: Conversations) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(c));
-  } catch {
-    /* ignore quota errors */
-  }
+function defaultAvatar(name: string) {
+  // Generate a consistent gradient based on name
+  const colors = [
+    "from-sky-500 to-cyan-400",
+    "from-violet-500 to-purple-400",
+    "from-rose-500 to-pink-400",
+    "from-teal-500 to-emerald-400",
+    "from-amber-500 to-orange-400",
+  ];
+  const idx = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % colors.length;
+  return colors[idx];
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 function ChatPage() {
-  const { user } = useAuth();
-  const [conversations, setConversations] = useState<Conversations>(() => loadConversations());
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const searchParams = useSearch({ from: "/chat" }) as { consultationId?: string };
+
+  // Consultations list
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [consultationMessages, setConsultationMessages] = useState<Record<string, ChatMessage[]>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // UI state
+  const [selectedConsultationId, setSelectedConsultationId] = useState<string | null>(
+    searchParams.consultationId || null
+  );
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [sending, setSending] = useState(false);
+  const [mobileView, setMobileView] = useState<"list" | "chat">(
+    searchParams.consultationId ? "chat" : "list"
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const selectedDoctor = DOCTORS.find((d) => d.id === selectedId) ?? null;
-  const currentMessages = selectedId ? (conversations[selectedId] ?? []) : [];
+  const currentMessages = selectedConsultationId
+    ? (consultationMessages[selectedConsultationId] ?? [])
+    : [];
 
-  // Persist to localStorage
+  const selectedConsultation = consultations.find((c) => c.id === selectedConsultationId) ?? null;
+
+  // ── Fetch consultations & messages ──
   useEffect(() => {
-    saveConversations(conversations);
-  }, [conversations]);
+    if (!user || authLoading) return;
+    let active = true;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+
+      // Fetch all paid consultations for this patient
+      const { data, error: fetchErr } = await supabase
+        .from("consultations")
+        .select("*")
+        .eq("patient_id", user.id)
+        .eq("payment_status", "paid")
+        .order("created_at", { ascending: false });
+
+      if (!active) return;
+
+      if (fetchErr) {
+        console.warn("Gagal memuat konsultasi:", fetchErr.message);
+        setError("Gagal memuat konsultasi. Pastikan tabel sudah dibuat.");
+        setLoading(false);
+        return;
+      }
+
+      const cons = data || [];
+      setConsultations(cons);
+
+      // Fetch messages for each consultation (last 50 each)
+      const messagePromises = cons.map((c) =>
+        supabase
+          .from("consultation_messages")
+          .select("*")
+          .eq("consultation_id", c.id)
+          .order("created_at", { ascending: true })
+          .limit(50)
+      );
+
+      const messageResults = await Promise.all(messagePromises);
+      if (!active) return;
+
+      const msgMap: Record<string, ChatMessage[]> = {};
+      messageResults.forEach((result, i) => {
+        msgMap[cons[i].id] = (result.data || []) as ChatMessage[];
+      });
+      setConsultationMessages(msgMap);
+      setLoading(false);
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [user, authLoading]);
+
+  // ── Realtime: subscribe to new messages for all patient consultations ──
+  useEffect(() => {
+    if (!user || consultations.length === 0) return;
+
+    const channel = supabase
+      .channel("patient-chat-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "consultation_messages",
+        },
+        async (payload) => {
+          const newMsg = payload.new as ChatMessage;
+          if (!newMsg) return;
+
+          // Only process messages for our consultations
+          const belongsToUs = consultations.some((c) => c.id === newMsg.consultation_id);
+          if (!belongsToUs) return;
+
+          // Mark messages from doctor as read
+          if (newMsg.sender_type === "doctor") {
+            await supabase.rpc("mark_messages_read", {
+              p_consultation_id: newMsg.consultation_id,
+              p_as_sender_type: "patient",
+            });
+          }
+
+          // Append to local state
+          setConsultationMessages((prev) => {
+            const existing = prev[newMsg.consultation_id] || [];
+            // Avoid duplicate
+            if (existing.some((m) => m.id === newMsg.id)) return prev;
+            return {
+              ...prev,
+              [newMsg.consultation_id]: [...existing, newMsg],
+            };
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, consultations.length]);
 
   // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     }
-  }, [currentMessages, isTyping]);
+  }, [currentMessages]);
 
-  const filteredDoctors = DOCTORS.filter(
-    (d) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.spec.toLowerCase().includes(search.toLowerCase()) ||
-      d.category.toLowerCase().includes(search.toLowerCase()),
+  // ── Build doctor list items (grouped by doctor, show latest message) ──
+  const doctorListItems: DoctorListItem[] = consultations.map((c) => {
+    const msgs = consultationMessages[c.id] || [];
+    const lastMessage = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+    const unreadCount = msgs.filter(
+      (m) => m.sender_type === "doctor" && m.read_at === null
+    ).length;
+    return { consultation: c, lastMessage, unreadCount };
+  });
+
+  const filteredDoctors = doctorListItems.filter(
+    (item) =>
+      item.consultation.doctor_name.toLowerCase().includes(search.toLowerCase()) ||
+      (item.consultation.doctor_specialty || "").toLowerCase().includes(search.toLowerCase()) ||
+      (item.consultation.complaint || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const getLastMsg = (doctorId: string) => {
-    const msgs = conversations[doctorId];
-    if (!msgs?.length) return null;
-    return msgs[msgs.length - 1];
-  };
-
-  const getUnread = (doctorId: string) => {
-    if (doctorId === selectedId) return 0;
-    const msgs = conversations[doctorId];
-    if (!msgs) return 0;
-    let n = 0;
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      if (msgs[i].sender === "doctor") n++;
-      else break;
-    }
-    return n;
-  };
-
-  const sendMessage = useCallback(() => {
-    if (!input.trim() || !selectedId) return;
+  // ── Send message ──
+  const sendMessage = useCallback(async () => {
+    if (!input.trim() || !selectedConsultationId || !user || sending) return;
     const text = input.trim();
     setInput("");
+    setSending(true);
 
-    const userMsg: Message = {
-      id: genId(),
-      text,
-      sender: "user",
-      timestamp: new Date().toISOString(),
-      status: "sent",
-    };
+    const { error } = await supabase.from("consultation_messages").insert({
+      consultation_id: selectedConsultationId,
+      sender_id: user.id,
+      sender_type: "patient",
+      message_text: text,
+    });
 
-    setConversations((prev) => ({
-      ...prev,
-      [selectedId]: [...(prev[selectedId] ?? []), userMsg],
-    }));
+    if (error) {
+      console.error("Gagal kirim pesan:", error);
+      setInput(text); // restore
+    }
 
-    // Delivered status after 600ms
-    setTimeout(() => {
-      setConversations((prev) => ({
-        ...prev,
-        [selectedId]: (prev[selectedId] ?? []).map((m) =>
-          m.id === userMsg.id ? { ...m, status: "delivered" as const } : m,
-        ),
-      }));
-    }, 600);
-
-    // Doctor typing
-    const replyDelay = 1200 + Math.random() * 1200;
-    setTimeout(() => setIsTyping(true), 900);
-
-    if (typingTimer.current) clearTimeout(typingTimer.current);
-    typingTimer.current = setTimeout(() => {
-      setIsTyping(false);
-
-      setConversations((prev) => {
-        const msgs = prev[selectedId] ?? [];
-        const doctor = DOCTORS.find((d) => d.id === selectedId);
-        if (!doctor) return prev;
-
-        const doctorMsgCount = msgs.filter((m) => m.sender === "doctor").length;
-        const reply = doctor.responses[doctorMsgCount % doctor.responses.length];
-
-        const doctorMsg: Message = {
-          id: genId(),
-          text: reply,
-          sender: "doctor",
-          timestamp: new Date().toISOString(),
-          status: "read",
-        };
-
-        const updated = msgs.map((m) =>
-          m.sender === "user" ? { ...m, status: "read" as const } : m,
-        );
-
-        return { ...prev, [selectedId]: [...updated, doctorMsg] };
-      });
-    }, replyDelay + 900);
-  }, [input, selectedId]);
+    setSending(false);
+  }, [input, selectedConsultationId, user, sending]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -404,17 +310,17 @@ function ChatPage() {
     }
   };
 
-  const openChat = (id: string) => {
-    setSelectedId(id);
+  const openChat = (consultationId: string) => {
+    setSelectedConsultationId(consultationId);
     setMobileView("chat");
     setTimeout(() => inputRef.current?.focus(), 150);
   };
 
   // Group messages by day for date separators
   const groupedMessages = (() => {
-    const groups: { date: string; messages: Message[] }[] = [];
+    const groups: { date: string; messages: ChatMessage[] }[] = [];
     for (const msg of currentMessages) {
-      const day = new Date(msg.timestamp).toDateString();
+      const day = new Date(msg.created_at).toDateString();
       const last = groups[groups.length - 1];
       if (last && last.date === day) {
         last.messages.push(msg);
@@ -424,6 +330,25 @@ function ChatPage() {
     }
     return groups;
   })();
+
+  // ── Auth guard ──
+  if (!user && !authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <div className="h-20 w-20 rounded-3xl bg-sky-50 flex items-center justify-center border border-sky-100">
+          <MessageCircle className="h-10 w-10 text-sky-400" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-700">Login untuk Chat</h3>
+        <p className="text-sm text-slate-500">Silakan login untuk melihat dan membalas pesan konsultasi.</p>
+        <button
+          onClick={() => navigate({ to: "/auth" })}
+          className="px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 transition-all"
+        >
+          Login / Register
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative z-10 flex h-[calc(100vh-7.5rem)] overflow-hidden rounded-2xl border border-slate-200/80 shadow-2xl shadow-slate-200/40 bg-white -mx-4">
@@ -439,18 +364,18 @@ function ChatPage() {
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-xl font-bold text-slate-800">Pesan</h2>
             <span className="text-xs font-medium text-sky-600 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full">
-              {DOCTORS.filter((d) => d.online).length} online
+              {filteredDoctors.length} konsultasi
             </span>
           </div>
           <p className="text-xs text-slate-500 mb-4">
-            Konsultasi langsung dengan dokter & psikolog
+            Chat langsung dengan dokter setelah pembayaran
           </p>
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Cari nama atau spesialisasi..."
+              placeholder="Cari nama dokter atau keluhan..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400/30 focus:border-sky-400 transition-all placeholder-slate-400"
@@ -458,23 +383,44 @@ function ChatPage() {
           </div>
         </div>
 
-        {/* Doctor List */}
+        {/* Doctor/Consultation List */}
         <div className="flex-1 overflow-y-auto bg-white">
-          {filteredDoctors.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <Loader2 className="h-6 w-6 animate-spin text-sky-400" />
+              <p className="text-sm text-slate-400">Memuat konsultasi...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3 px-6 text-center">
+              <p className="text-sm text-rose-500">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-xs px-4 py-2 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          ) : filteredDoctors.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-2 text-slate-400">
               <Search className="h-8 w-8 opacity-40" />
-              <p className="text-sm">Dokter tidak ditemukan</p>
+              <p className="text-sm">Belum ada konsultasi yang dibayar</p>
+              <button
+                onClick={() => navigate({ to: "/dokter" })}
+                className="text-xs px-4 py-2 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors mt-2"
+              >
+                Pilih Dokter →
+              </button>
             </div>
           ) : (
-            filteredDoctors.map((doc) => {
-              const lastMsg = getLastMsg(doc.id);
-              const unread = getUnread(doc.id);
-              const isActive = selectedId === doc.id;
+            filteredDoctors.map((item) => {
+              const { consultation: c, lastMessage, unreadCount } = item;
+              const isActive = selectedConsultationId === c.id;
+              const doctorAvatar = c.doctor_avatar_url;
 
               return (
                 <motion.button
-                  key={doc.id}
-                  onClick={() => openChat(doc.id)}
+                  key={c.id}
+                  onClick={() => openChat(c.id)}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-slate-50 transition-colors",
@@ -483,17 +429,22 @@ function ChatPage() {
                 >
                   {/* Avatar */}
                   <div className="relative flex-shrink-0">
-                    <img
-                      src={doc.img}
-                      alt={doc.name}
-                      className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm"
-                    />
-                    <span
-                      className={cn(
-                        "absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white",
-                        doc.online ? "bg-emerald-500" : "bg-slate-300",
-                      )}
-                    />
+                    {doctorAvatar ? (
+                      <img
+                        src={doctorAvatar}
+                        alt={c.doctor_name}
+                        className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm"
+                      />
+                    ) : (
+                      <div
+                        className={cn(
+                          "h-12 w-12 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm",
+                          defaultAvatar(c.doctor_name)
+                        )}
+                      >
+                        {c.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
@@ -505,23 +456,23 @@ function ChatPage() {
                           isActive ? "text-sky-700" : "text-slate-800",
                         )}
                       >
-                        {doc.name}
+                        {c.doctor_name}
                       </span>
-                      {lastMsg && (
+                      {lastMessage && (
                         <span className="text-[10px] text-slate-400 flex-shrink-0">
-                          {formatLastSeen(lastMsg.timestamp)}
+                          {formatLastSeen(lastMessage.created_at)}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center justify-between gap-1 mt-0.5">
                       <span className="text-xs text-slate-500 truncate">
-                        {lastMsg
-                          ? (lastMsg.sender === "user" ? "Anda: " : "") + lastMsg.text
-                          : doc.tagline}
+                        {lastMessage
+                          ? (lastMessage.sender_type === "patient" ? "Anda: " : "") + lastMessage.message_text
+                          : c.consultation_type + " · " + c.doctor_specialty}
                       </span>
-                      {unread > 0 && (
+                      {unreadCount > 0 && (
                         <span className="flex-shrink-0 h-5 min-w-[20px] px-1 rounded-full bg-sky-500 text-white text-[10px] font-bold flex items-center justify-center">
-                          {unread}
+                          {unreadCount}
                         </span>
                       )}
                     </div>
@@ -531,15 +482,6 @@ function ChatPage() {
             })
           )}
         </div>
-
-        {/* Login notice */}
-        {!user && (
-          <div className="px-4 py-3 bg-amber-50 border-t border-amber-100">
-            <p className="text-xs text-amber-700 text-center font-medium">
-              🔐 Login untuk menyimpan riwayat chat
-            </p>
-          </div>
-        )}
       </div>
 
       {/* ── RIGHT CHAT AREA ─────────────────────────────────────────── */}
@@ -549,7 +491,7 @@ function ChatPage() {
           mobileView === "list" ? "hidden md:flex" : "flex",
         )}
       >
-        {selectedDoctor ? (
+        {selectedConsultation ? (
           <>
             {/* Chat Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 bg-white shadow-sm z-10">
@@ -561,21 +503,28 @@ function ChatPage() {
                 <ArrowLeft className="h-5 w-5" />
               </button>
 
-              <img
-                src={selectedDoctor.img}
-                alt={selectedDoctor.name}
-                className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
-              />
+              {selectedConsultation.doctor_avatar_url ? (
+                <img
+                  src={selectedConsultation.doctor_avatar_url}
+                  alt={selectedConsultation.doctor_name}
+                  className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
+                />
+              ) : (
+                <div
+                  className={cn(
+                    "h-10 w-10 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0",
+                    defaultAvatar(selectedConsultation.doctor_name)
+                  )}
+                >
+                  {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 2).toUpperCase()}
+                </div>
+              )}
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-slate-800 truncate">{selectedDoctor.name}</h3>
+                <h3 className="text-sm font-bold text-slate-800 truncate">{selectedConsultation.doctor_name}</h3>
                 <p className="text-xs truncate">
-                  {selectedDoctor.online ? (
-                    <span className="text-emerald-600 font-medium">● Online</span>
-                  ) : (
-                    <span className="text-slate-400">Terakhir aktif {selectedDoctor.lastSeen}</span>
-                  )}
-                  <span className="text-slate-400"> · {selectedDoctor.spec}</span>
+                  <span className="text-emerald-600 font-medium">● Online</span>
+                  <span className="text-slate-400"> · {selectedConsultation.doctor_specialty || "Dokter"}</span>
                 </p>
               </div>
 
@@ -614,31 +563,17 @@ function ChatPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col items-center justify-center py-12 gap-4"
                 >
-                  <div
-                    className={cn(
-                      "h-20 w-20 rounded-3xl flex items-center justify-center shadow-lg bg-gradient-to-br",
-                      selectedDoctor.accent,
-                    )}
-                  >
-                    <img
-                      src={selectedDoctor.img}
-                      alt=""
-                      className="h-16 w-16 rounded-2xl object-cover"
-                    />
+                  <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 flex items-center justify-center shadow-inner border border-sky-200/50">
+                    <Users className="h-10 w-10 text-sky-400" />
                   </div>
                   <div className="text-center">
-                    <p className="font-bold text-slate-700 text-base">{selectedDoctor.name}</p>
-                    <p className="text-sm text-slate-500 mt-0.5">{selectedDoctor.tagline}</p>
-                    <span
-                      className={cn(
-                        "inline-block mt-2 text-xs font-medium px-2.5 py-1 rounded-full border",
-                        selectedDoctor.iconBg,
-                        selectedDoctor.iconColor,
-                        "border-current/20",
-                      )}
-                    >
-                      {selectedDoctor.badge}
-                    </span>
+                    <p className="font-bold text-slate-700 text-base">{selectedConsultation.doctor_name}</p>
+                    <p className="text-sm text-slate-500 mt-0.5">{selectedConsultation.doctor_specialty || "Dokter Spesialis"}</p>
+                    {selectedConsultation.complaint && (
+                      <span className="inline-block mt-2 text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
+                        Keluhan: {selectedConsultation.complaint}
+                      </span>
+                    )}
                   </div>
                   <div className="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl px-5 py-3 shadow-sm text-center max-w-xs">
                     <p className="text-xs text-slate-500">
@@ -673,16 +608,16 @@ function ChatPage() {
                   {/* Date separator */}
                   <div className="flex justify-center my-4">
                     <span className="text-[10px] text-slate-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-100 shadow-sm">
-                      {formatDayLabel(group.messages[0].timestamp)}
+                      {formatDayLabel(group.messages[0].created_at)}
                     </span>
                   </div>
 
                   {/* Messages */}
                   <AnimatePresence initial={false}>
                     {group.messages.map((msg, i) => {
-                      const isUser = msg.sender === "user";
+                      const isUser = msg.sender_type === "patient";
                       const prevMsg = group.messages[i - 1];
-                      const showAvatar = !isUser && (!prevMsg || prevMsg.sender !== "doctor");
+                      const showAvatar = !isUser && (!prevMsg || prevMsg.sender_type !== "doctor");
 
                       return (
                         <motion.div
@@ -699,11 +634,22 @@ function ChatPage() {
                           {!isUser && (
                             <div className="flex-shrink-0 self-end mb-0.5">
                               {showAvatar ? (
-                                <img
-                                  src={selectedDoctor.img}
-                                  alt=""
-                                  className="h-7 w-7 rounded-full object-cover border-2 border-white shadow-sm"
-                                />
+                                selectedConsultation.doctor_avatar_url ? (
+                                  <img
+                                    src={selectedConsultation.doctor_avatar_url}
+                                    alt=""
+                                    className="h-7 w-7 rounded-full object-cover border-2 border-white shadow-sm"
+                                  />
+                                ) : (
+                                  <div
+                                    className={cn(
+                                      "h-7 w-7 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-[9px] font-bold",
+                                      defaultAvatar(selectedConsultation.doctor_name)
+                                    )}
+                                  >
+                                    {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 1)}
+                                  </div>
+                                )
                               ) : (
                                 <div className="h-7 w-7" />
                               )}
@@ -724,7 +670,7 @@ function ChatPage() {
                                   : "bg-white border border-slate-100 text-slate-700 rounded-bl-md",
                               )}
                             >
-                              {msg.text}
+                              {msg.message_text}
                             </div>
 
                             {/* Timestamp + status */}
@@ -735,15 +681,13 @@ function ChatPage() {
                               )}
                             >
                               {isUser &&
-                                (msg.status === "read" ? (
+                                (msg.read_at ? (
                                   <CheckCheck className="h-3 w-3 text-sky-400" />
-                                ) : msg.status === "delivered" ? (
-                                  <CheckCheck className="h-3 w-3 text-slate-400" />
                                 ) : (
                                   <Check className="h-3 w-3 text-slate-400" />
                                 ))}
                               <span className="text-[10px] text-slate-400">
-                                {formatTime(msg.timestamp)}
+                                {formatTime(msg.created_at)}
                               </span>
                             </div>
                           </div>
@@ -754,41 +698,18 @@ function ChatPage() {
                 </div>
               ))}
 
-              {/* Typing indicator */}
-              <AnimatePresence>
-                {isTyping && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.18 }}
-                    className="flex gap-2 items-end mt-1"
-                  >
-                    <img
-                      src={selectedDoctor.img}
-                      alt=""
-                      className="h-7 w-7 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
-                    />
-                    <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                      <div className="flex gap-1.5 items-center h-4">
-                        {[0, 1, 2].map((i) => (
-                          <motion.span
-                            key={i}
-                            className="block h-2 w-2 rounded-full bg-slate-400"
-                            animate={{ y: [0, -5, 0] }}
-                            transition={{
-                              duration: 0.7,
-                              delay: i * 0.15,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Sending indicator */}
+              {sending && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-2 items-end mt-1 justify-end"
+                >
+                  <div className="bg-sky-400 text-white rounded-2xl rounded-br-md px-4 py-3 shadow-sm">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </div>
+                </motion.div>
+              )}
             </div>
 
             {/* Input Bar */}
@@ -804,7 +725,7 @@ function ChatPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={`Kirim pesan ke ${selectedDoctor.name.split(" ").slice(1).join(" ")}...`}
+                  placeholder={`Kirim pesan ke ${selectedConsultation.doctor_name.split(" ").slice(1).join(" ")}...`}
                   className="flex-1 bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none py-1.5 min-w-0"
                 />
 
@@ -814,16 +735,20 @@ function ChatPage() {
 
                 <motion.button
                   onClick={sendMessage}
-                  disabled={!input.trim()}
-                  whileTap={input.trim() ? { scale: 0.9 } : undefined}
+                  disabled={!input.trim() || sending}
+                  whileTap={input.trim() && !sending ? { scale: 0.9 } : undefined}
                   className={cn(
                     "flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center transition-all",
-                    input.trim()
+                    input.trim() && !sending
                       ? "bg-sky-500 text-white hover:bg-sky-600 shadow-md shadow-sky-500/25"
                       : "bg-slate-200 text-slate-400 cursor-not-allowed",
                   )}
                 >
-                  <Send className="h-4 w-4" />
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </motion.button>
               </div>
 
@@ -833,7 +758,7 @@ function ChatPage() {
             </div>
           </>
         ) : (
-          /* ── Empty / No doctor selected ── */
+          /* ── Empty / No consultation selected ── */
           <div className="flex-1 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-sky-50/40 to-white px-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -846,21 +771,20 @@ function ChatPage() {
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-700">Pilih Dokter untuk Konsultasi</h3>
+                <h3 className="text-xl font-bold text-slate-700">Pilih Konsultasi</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                  Pilih dokter atau psikolog di sebelah kiri untuk memulai sesi konsultasi secara
-                  langsung
+                  Chat tersedia setelah pembayaran berhasil. Pilih konsultasi di sebelah kiri untuk memulai chat dengan dokter.
                 </p>
               </div>
 
               {/* Category pills */}
               <div className="flex flex-wrap gap-2 justify-center">
                 {[
-                  { label: "Jantung", icon: <Heart className="h-3 w-3" />, color: "sky" },
-                  { label: "Saraf", icon: <Brain className="h-3 w-3" />, color: "violet" },
-                  { label: "Mental Health", icon: <Sparkles className="h-3 w-3" />, color: "rose" },
-                  { label: "Umum", icon: <Stethoscope className="h-3 w-3" />, color: "teal" },
-                  { label: "Kulit", icon: <Leaf className="h-3 w-3" />, color: "amber" },
+                  { label: "Jantung", icon: <Heart className="h-3 w-3" /> },
+                  { label: "Saraf", icon: <Brain className="h-3 w-3" /> },
+                  { label: "Mental Health", icon: <Sparkles className="h-3 w-3" /> },
+                  { label: "Umum", icon: <Stethoscope className="h-3 w-3" /> },
+                  { label: "Kulit", icon: <Leaf className="h-3 w-3" /> },
                 ].map((cat) => (
                   <span
                     key={cat.label}
@@ -874,7 +798,7 @@ function ChatPage() {
 
               <div className="bg-sky-50 border border-sky-100 rounded-2xl px-5 py-3 w-full">
                 <p className="text-xs text-sky-700 font-medium">
-                  💬 Chat tersimpan otomatis — riwayat konsultasi bisa dibuka kapan saja
+                  💬 Pesan tersimpan otomatis — riwayat konsultasi bisa dibaca kapan saja
                 </p>
               </div>
             </motion.div>

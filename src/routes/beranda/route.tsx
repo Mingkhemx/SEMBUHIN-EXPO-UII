@@ -1,9 +1,8 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from "react";
 import { ArrowRight, Sparkles, ShoppingBag, Stethoscope, User2, FileText, Activity, Heart, Shield, Brain } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SpotlightCard } from "./-SpotlightCard";
-import { Pill3D } from "./-Pill3D";
 import { HospitalCarousel } from "./-HospitalCarousel";
 import { DoctorSection } from "./-DoctorSection";
 import { BlogSection } from "./-BlogSection";
@@ -118,7 +117,7 @@ function Index() {
                 <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-sky-600 transition-colors group-hover:text-sky-500">Akses Konsultasi <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></div>
               </div>
               <div className="w-full md:w-1/3">
-                <img src="/images/konsul-dokter.png" alt="Konsultasi Dokter" className="w-full h-32 md:h-40 object-cover" />
+                <img src="/images/konsul-dokter.png" alt="Konsultasi Dokter" className="w-full h-32 md:h-40 object-contain" />
               </div>
             </div>
           </SpotlightCard>
@@ -126,7 +125,7 @@ function Index() {
           {/* Cek Jantung */}
           <SpotlightCard to="/cek-jantung" glowColor="#f87171">
             <div className="flex flex-col h-full">
-              <img src="/images/cek-jantung.png" alt="Cek Jantung" className="w-full h-16 object-cover mb-4" />
+              <img src="/images/cek-jantung.png" alt="Cek Jantung" className="w-full h-16 object-contain mb-4" />
               <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-rose-600">Cek Jantung</h3>
               <p className="text-muted-foreground text-sm leading-relaxed mb-auto">Pantau detak jantung real-time terhubung langsung dari HP Anda.</p>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
@@ -139,7 +138,7 @@ function Index() {
           {/* AI Symptom Triage */}
           <SpotlightCard to="/symptom-triage" glowColor="#fbbf24">
             <div className="flex flex-col h-full">
-              <img src="/images/ai-sympton-triage.png" alt="AI Symptom Triage" className="w-full h-16 object-cover mb-4" />
+              <img src="/images/ai-sympton-triage.png" alt="AI Symptom Triage" className="w-full h-16 object-contain mb-4" />
               <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-amber-600">AI Symptom Triage</h3>
               <p className="text-muted-foreground text-sm leading-relaxed mb-auto">Input gejala, AI klasifikasikan urgensi medis Anda.</p>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
@@ -159,11 +158,21 @@ function Index() {
                 <div className="inline-flex items-center gap-2 text-sm font-semibold text-violet-600 transition-colors group-hover:text-violet-500">Akses Mental Care <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></div>
               </div>
               <div className="w-full md:w-1/3">
-                <img src="/images/mental-heart.png" alt="Mental Health Care" className="w-full h-32 md:h-40 object-cover" />
+                <img src="/images/mental-heart.png" alt="Mental Health Care" className="w-full h-32 md:h-40 object-contain" />
               </div>
             </div>
           </SpotlightCard>
         </div>
+      </section>
+
+      {/* DOCTOR REGISTRATION SECTION */}
+      <section className="px-4 max-w-7xl mx-auto mt-24 relative">
+        <div className="relative z-10 mb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">BERGABUNGLAH BERSAMA KAMI</div>
+          <h2 className="font-display text-3xl font-bold sm:text-5xl text-foreground tracking-tight">Daftarkan Diri Menjadi <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Dokter Mitra</span></h2>
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">Bergabung dengan jaringan dokter profesional terpercaya dan bantu ribuan pasien mendapatkan perawatan medis terbaik.</p>
+        </div>
+        <HospitalCarousel />
       </section>
 
       {/* TRUST SECTION */}
@@ -182,31 +191,20 @@ function Index() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 p-4">
               {[
-                { name: "BioLife", icon: <Activity className="w-10 h-10 text-sky-500" /> },
-                { name: "MedCore", icon: <Heart className="w-10 h-10 text-sky-600" /> },
-                { name: "ApexHealth", icon: <Shield className="w-10 h-10 text-emerald-500" /> },
-                { name: "VitalLab", icon: <Stethoscope className="w-10 h-10 text-purple-400" /> },
-                { name: "GlobalSafe", icon: <Shield className="w-10 h-10 text-sky-400" /> },
-                { name: "BioGen", icon: <Brain className="w-10 h-10 text-sky-500" /> }
+                { name: "RS1", icon: "/images/rs1.png" },
+                { name: "RS2", icon: "/images/rs2.png" },
+                { name: "RS3", icon: "/images/rs3.png" },
+                { name: "RS4", icon: "/images/rs4.png" },
+                { name: "RS5", icon: "/images/rs5.png" },
+                { name: "RS6", icon: "/images/rs6.png" }
               ].map(partner => (
-                <div key={partner.name} className="group/logo flex flex-col items-center justify-center grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer">
-                  <div className="relative mb-2">{partner.icon}<div className="absolute -inset-4 bg-sky-300/15 blur-xl opacity-0 group-hover/logo:opacity-100 transition-opacity pointer-events-none" /></div>
-                  <span className="text-[10px] uppercase tracking-widest text-foreground/40 group-hover/logo:text-foreground/80 transition-colors font-bold">{partner.name}</span>
+                <div key={partner.name} className="group/logo flex items-center justify-center opacity-70 hover:opacity-100 transition-all duration-500 cursor-pointer">
+                  <img src={partner.icon} alt={partner.name} className="w-32 h-28 object-contain" />
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </section>
-
-      {/* HOSPITALS SECTION */}
-      <section className="px-4 max-w-7xl mx-auto mt-24 relative">
-        <div className="relative z-10 mb-12 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">SEMBUHIN GRID</div>
-          <h2 className="font-display text-3xl font-bold sm:text-5xl text-foreground tracking-tight">Cari Fasilitas <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Medis Terdekat</span></h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">Temukan rumah sakit dengan fasilitas teknologi robotik dan AI tercanggih di sekitar Anda untuk penanganan cepat dan presisi.</p>
-        </div>
-        <HospitalCarousel />
       </section>
 
       {/* DOCTOR SECTION */}

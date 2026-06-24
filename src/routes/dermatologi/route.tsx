@@ -501,7 +501,6 @@ function DermatologiPage() {
           {[
             { key: 'upload', label: 'Scan Baru', icon: Camera },
             { key: 'history', label: 'Riwayat Scan', icon: Clock },
-            { key: 'conditions', label: 'Kondisi Kulit', icon: Search },
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -549,44 +548,29 @@ function DermatologiPage() {
                       </button>
                     </div>
                     
-                    {/* Opsi Upload & Demo */}
-                    <div className="space-y-4">
-                      {/* Upload Foto */}
-                      <div className="text-center space-y-4 p-5 rounded-2xl bg-slate-50 border border-slate-200">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-600 mx-auto">
-                          <ImageIcon className="h-8 w-8" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-800">Upload Foto Kulit</h4>
-                          <p className="text-xs text-slate-500 mt-1">Upload foto area kulit dari galeri Anda.</p>
-                        </div>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleImageUpload}
-                        />
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="flex items-center justify-center gap-2 rounded-xl border-2 border-sky-200 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-700 hover:bg-sky-100 transition-all w-full max-w-xs mx-auto"
-                        >
-                          <ImageIcon className="h-4 w-4" />
-                          Pilih Foto
-                        </button>
+                    {/* Opsi Upload Foto */}
+                    <div className="text-center space-y-4 p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-600 mx-auto">
+                        <ImageIcon className="h-8 w-8" />
                       </div>
-                      
-                      {/* Demo Tanpa Kamera */}
-                      <div className="text-center space-y-2">
-                        <button
-                          onClick={() => startAnalysis(undefined)}
-                          className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all w-full max-w-xs mx-auto"
-                        >
-                          <Zap className="h-4 w-4" />
-                          Coba Demo Tanpa Kamera
-                        </button>
-                        <p className="text-[11px] text-slate-400">Lihat bagaimana AI bekerja tanpa foto asli.</p>
+                      <div>
+                        <h4 className="font-bold text-slate-800">Upload Foto Kulit</h4>
+                        <p className="text-xs text-slate-500 mt-1">Upload foto area kulit dari galeri Anda.</p>
                       </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center justify-center gap-2 rounded-xl border-2 border-sky-200 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-700 hover:bg-sky-100 transition-all w-full max-w-xs mx-auto"
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                        Pilih Foto
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1036,44 +1020,7 @@ function DermatologiPage() {
           </motion.div>
         )}
 
-        {/* ═══════════════════ CONDITIONS ═══════════════════ */}
-        {viewMode === 'conditions' && (
-          <motion.div key="conditions" variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
-              <Search className="h-4 w-4 text-slate-400" />
-              <input
-                value={searchCondition}
-                onChange={(e) => setSearchCondition(e.target.value)}
-                placeholder="Cari kondisi kulit..."
-                className="flex-1 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
-              />
-            </div>
 
-            <div className="grid sm:grid-cols-2 gap-3">
-              {filteredConditions.map((cond) => {
-                const Icon = cond.icon
-                return (
-                  <div key={cond.id} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl transition-all">
-                    <div className="flex items-start gap-3">
-                      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border', SEVERITY_CONFIG[cond.severity].bgColor)}>
-                        <Icon className={cn('h-5 w-5', SEVERITY_CONFIG[cond.severity].color)} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="text-sm font-bold text-slate-800">{cond.name}</h3>
-                          {cond.common && (
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700">Umum</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-500 leading-relaxed">{cond.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </motion.div>
-        )}
       </div>
     </div>
   )

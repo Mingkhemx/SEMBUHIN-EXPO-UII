@@ -539,7 +539,7 @@ Pertanyaan pasien: ${text.trim()}`
                                 {[1, 2, 3, 4, 5].map(rating => (
                                   <Star
                                     key={rating}
-                                    className={`h-3 w-3 ${rating <= msg.rating ? "text-amber-400 fill-amber-400" : "text-gray-300"}`}
+                                    className={`h-3 w-3 ${rating <= (msg.rating ?? 0) ? "text-amber-400 fill-amber-400" : "text-gray-300"}`}
                                   />
                                 ))}
                               </div>

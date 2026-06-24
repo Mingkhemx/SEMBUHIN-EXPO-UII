@@ -64,20 +64,6 @@ const CATEGORIES = [
 
 const VIDEOS: VideoItem[] = [
   {
-    id: '1',
-    title: 'Cara Kerja Jantung: Animasi 3D Lengkap',
-    desc: 'Pelajari bagaimana jantung memompa darah ke seluruh tubuh melalui animasi 3D yang mudah dipahami. Termasuk penjelasan tentang katup jantung, sirkulasi darah, dan faktor risiko penyakit kardiovaskular.',
-    category: 'jantung',
-    categoryColor: 'bg-red-100 text-red-700',
-    duration: '12:34',
-    views: 45200,
-    youtubeId: 'X8f4BkoSjRg',
-    thumbnailEmoji: '❤️',
-    author: 'Dr. Ahmad Fauzi, Sp.JP',
-    publishedDate: '5 Feb 2026',
-    featured: true,
-  },
-  {
     id: '2',
     title: 'Panduan Diet Mediterania untuk Pemula',
     desc: 'Diet Mediterania terbukti menurunkan risiko penyakit jantung 30%. Video ini menjelaskan langkah demi langkah memulai diet sehat ini.',
@@ -85,7 +71,7 @@ const VIDEOS: VideoItem[] = [
     categoryColor: 'bg-emerald-100 text-emerald-700',
     duration: '8:45',
     views: 23100,
-    youtubeId: 'bZ4K3LEb7hM',
+    youtubeId: 'fR3NxCR9z2U',
     thumbnailEmoji: '🥗',
     author: 'Ns. Siti Rahma, S.Gz',
     publishedDate: '2 Feb 2026',
@@ -98,7 +84,7 @@ const VIDEOS: VideoItem[] = [
     categoryColor: 'bg-violet-100 text-violet-700',
     duration: '6:20',
     views: 67800,
-    youtubeId: 'gz4aZ4QFnRQ',
+    youtubeId: '1vx8iUvfyCY',
     thumbnailEmoji: '🧘',
     author: 'Dr. Maya Putri, M.Psi',
     publishedDate: '28 Jan 2026',
@@ -111,49 +97,10 @@ const VIDEOS: VideoItem[] = [
     categoryColor: 'bg-amber-100 text-amber-700',
     duration: '15:00',
     views: 89400,
-    youtubeId: 'UItWltVZZmE',
+    youtubeId: 'ml6cT4AZdqI',
     thumbnailEmoji: '💪',
     author: 'Coach Rendy, S.Or',
     publishedDate: '25 Jan 2026',
-  },
-  {
-    id: '5',
-    title: 'P3K: Penanganan Luka Bakar yang Benar',
-    desc: 'Langkah-langkah pertolongan pertama pada luka bakar ringan hingga sedang. Hindari kesalahan umum yang bisa memperparah luka.',
-    category: 'first-aid',
-    categoryColor: 'bg-rose-100 text-rose-700',
-    duration: '5:15',
-    views: 34500,
-    youtubeId: 'BBq2gMGOjRg',
-    thumbnailEmoji: '🩹',
-    author: 'Dr. Hendra Wijaya',
-    publishedDate: '20 Jan 2026',
-  },
-  {
-    id: '6',
-    title: 'Mengapa Tidur Sangat Penting untuk Kesehatan?',
-    desc: 'Penjelasan ilmiah tentang apa yang terjadi pada tubuh saat tidur dan mengapa kurang tidur berbahaya bagi kesehatan jangka panjang.',
-    category: 'pencegahan',
-    categoryColor: 'bg-indigo-100 text-indigo-700',
-    duration: '10:22',
-    views: 56700,
-    youtubeId: 'D-Ja_VmC3lQ',
-    thumbnailEmoji: '😴',
-    author: 'Dr. Lisa Permata, Sp.KJ',
-    publishedDate: '18 Jan 2026',
-  },
-  {
-    id: '7',
-    title: 'CPR untuk Orang Awam: Selamatkan Nyawa',
-    desc: 'Tutorial resusitasi jantung paru (CPR) yang bisa dilakukan siapa saja. Setiap menit sangat berarti!',
-    category: 'first-aid',
-    categoryColor: 'bg-rose-100 text-rose-700',
-    duration: '8:10',
-    views: 112000,
-    youtubeId: 'IlBMoHkb5How',
-    thumbnailEmoji: '🫀',
-    author: 'Tim PMR Indonesia',
-    publishedDate: '15 Jan 2026',
   },
   {
     id: '8',
@@ -168,11 +115,68 @@ const VIDEOS: VideoItem[] = [
     author: 'Instruktur Sari',
     publishedDate: '12 Jan 2026',
   },
+  {
+    id: '10',
+    title: 'Mengenal Gejala Diabetes dan Cara Mencegahnya',
+    desc: 'Diabetes adalah silent killer. Kenali gejala awalnya dan bagaimana pola makan serta gaya hidup bisa mencegahnya.',
+    category: 'nutrisi',
+    categoryColor: 'bg-emerald-100 text-emerald-700',
+    duration: '14:20',
+    views: 52100,
+    youtubeId: 'X9ivR4y03DE',
+    thumbnailEmoji: '🍏',
+    author: 'Dr. Linda Wahyuni',
+    publishedDate: '8 Jan 2026',
+  },
+  {
+    id: '11',
+    title: 'Relaksasi Mendalam: Menghilangkan Stres dan Cemas',
+    desc: 'Sesi meditasi terbimbing untuk membantu Anda melepaskan ketegangan, menenangkan pikiran, dan mencapai relaksasi total setelah hari yang panjang.',
+    category: 'mental',
+    categoryColor: 'bg-violet-100 text-violet-700',
+    duration: '10:00',
+    views: 125000,
+    youtubeId: 'i5g5k6WBlm8',
+    thumbnailEmoji: '�',
+    author: 'Psikolog Anita Permadi',
+    publishedDate: '5 Jan 2026',
+  },
 ]
 
 const fadeIn: Variants = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+}
+
+/* ─── Helper Components ──────────────────────────────────────────── */
+function VideoThumbnail({ video, className }: { video: VideoItem, className?: string }) {
+  const [error, setError] = useState(false)
+
+  return (
+    <div className={cn('relative bg-slate-100 flex items-center justify-center overflow-hidden', className)}>
+      {!error ? (
+        <img
+          src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
+          alt={video.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 z-10"
+          onError={() => setError(true)}
+        />
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-200 z-10">
+          <span className="text-4xl mb-2">{video.thumbnailEmoji}</span>
+          <Video className="h-6 w-6 text-slate-400" />
+        </div>
+      )}
+      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all flex items-center justify-center z-20">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+          <Play className="h-5 w-5 text-blue-600 ml-0.5" />
+        </div>
+      </div>
+      <span className="absolute bottom-2 right-2 text-[10px] font-bold text-white bg-black/70 px-1.5 py-0.5 rounded z-30">
+        {video.duration}
+      </span>
+    </div>
+  )
 }
 
 /* ─── Component ──────────────────────────────────────────────────── */
@@ -188,9 +192,6 @@ function VideoEdukasiPage() {
     return matchCategory && matchSearch
   })
 
-  const featuredVideo = filteredVideos.find((v) => v.featured)
-  const regularVideos = filteredVideos.filter((v) => !v.featured)
-
   const toggleSave = (id: string) => {
     setSavedVideos((prev) => prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id])
   }
@@ -201,19 +202,36 @@ function VideoEdukasiPage() {
     <div className="relative z-10 min-h-screen">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
 
-        {/* ── Hero ──────────────────────────────────────────────── */}
-        <motion.header variants={fadeIn} initial="hidden" animate="visible" className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-100/80 border border-blue-200/60 px-4 py-1.5 mb-5">
-            <Video className="h-3.5 w-3.5 text-blue-600" />
-            <span className="text-xs font-semibold text-blue-700 tracking-wide uppercase">Video Edukasi</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
-            Belajar Lewat Video
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg">
-            Konten visual interaktif dari dokter dan ahli kesehatan. Belajar tentang pencegahan penyakit dan gaya hidup sehat.
-          </p>
-        </motion.header>
+        {/* ── Hero Card ──────────────────────────────────────────────── */}
+        {!selectedVideo && (
+          <motion.div
+            variants={fadeIn} initial="hidden" animate="visible"
+            className="rounded-3xl shadow-2xl shadow-blue-500/25 overflow-hidden relative min-h-[300px]"
+          >
+            {/* Background image from Unsplash (medical/video concept) */}
+            <img
+              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80"
+              alt="Video Edukasi"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-indigo-800/70 to-violet-700/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+            <div className="relative z-10 p-8 sm:p-12 max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-4 py-1.5 mb-5 backdrop-blur-sm">
+                <Video className="h-3.5 w-3.5 text-blue-200" />
+                <span className="text-xs font-semibold text-white/90 tracking-wide uppercase">Video Edukasi</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
+                Belajar Lewat Video
+              </h1>
+              <p className="mt-3 text-base sm:text-lg text-blue-100 leading-relaxed max-w-lg">
+                Konten visual interaktif dari dokter dan ahli kesehatan. Belajar tentang pencegahan penyakit dan gaya hidup sehat.
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* ═══════════════════ VIDEO PLAYER ═══════════════════ */}
         {selectedVideo ? (
@@ -285,13 +303,7 @@ function VideoEdukasiPage() {
               <div className="grid sm:grid-cols-3 gap-3">
                 {VIDEOS.filter((v) => v.category === selectedVideo.category && v.id !== selectedVideo.id).slice(0, 3).map((video) => (
                   <button key={video.id} onClick={() => { setSelectedVideo(video); window.scrollTo(0, 0) }} className="rounded-xl bg-white border border-white/60 shadow-sm hover:shadow-md transition-all text-left overflow-hidden group">
-                    <div className="h-24 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-3xl relative">
-                      {video.thumbnailEmoji}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
-                        <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
-                      </div>
-                      <span className="absolute bottom-1.5 right-1.5 text-[9px] font-bold text-white bg-black/60 px-1.5 py-0.5 rounded">{video.duration}</span>
-                    </div>
+                    <VideoThumbnail video={video} className="h-24 text-3xl" />
                     <div className="p-3">
                       <p className="text-xs font-bold text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-2">{video.title}</p>
                       <p className="text-[10px] text-slate-400 mt-1">{formatViews(video.views)} views</p>
@@ -339,42 +351,6 @@ function VideoEdukasiPage() {
               })}
             </div>
 
-            {/* Featured Video */}
-            {featuredVideo && (
-              <button
-                onClick={() => setSelectedVideo(featuredVideo)}
-                className="w-full rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-700 to-violet-800 text-white overflow-hidden shadow-lg shadow-blue-600/20 hover:shadow-xl transition-all text-left group"
-              >
-                <div className="flex flex-col sm:flex-row">
-                  {/* Thumbnail */}
-                  <div className="relative h-48 sm:h-auto sm:w-72 shrink-0 bg-black/20 flex items-center justify-center text-6xl">
-                    {featuredVideo.thumbnailEmoji}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm group-hover:scale-110 transition-transform">
-                        <Play className="h-7 w-7 text-white ml-1" />
-                      </div>
-                    </div>
-                    <span className="absolute bottom-3 right-3 text-xs font-bold text-white bg-black/60 px-2 py-1 rounded-md">{featuredVideo.duration}</span>
-                  </div>
-                  {/* Info */}
-                  <div className="p-6 flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 flex items-center gap-1">
-                        <Flame className="h-3 w-3" /> Video Pilihan
-                      </span>
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold leading-tight group-hover:underline">{featuredVideo.title}</h2>
-                    <p className="text-sm text-blue-100 mt-2 leading-relaxed line-clamp-2">{featuredVideo.desc}</p>
-                    <div className="flex items-center gap-4 mt-4 text-xs text-blue-200">
-                      <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {formatViews(featuredVideo.views)}</span>
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {featuredVideo.duration}</span>
-                      <span>{featuredVideo.author}</span>
-                    </div>
-                  </div>
-                </div>
-              </button>
-            )}
-
             {/* Video Grid */}
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -384,7 +360,7 @@ function VideoEdukasiPage() {
                 <span className="text-xs text-slate-400">{filteredVideos.length} video</span>
               </div>
 
-              {regularVideos.length === 0 && !featuredVideo && (
+              {filteredVideos.length === 0 && (
                 <div className="rounded-2xl bg-white border border-white/60 shadow-lg p-12 text-center">
                   <Video className="h-12 w-12 text-slate-300 mx-auto mb-3" />
                   <p className="text-sm font-medium text-slate-600">Tidak ada video ditemukan</p>
@@ -393,22 +369,13 @@ function VideoEdukasiPage() {
               )}
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {regularVideos.map((video) => (
+                {filteredVideos.map((video) => (
                   <button
                     key={video.id}
                     onClick={() => setSelectedVideo(video)}
                     className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 hover:shadow-xl hover:border-blue-200 transition-all text-left overflow-hidden group"
                   >
-                    {/* Thumbnail */}
-                    <div className="relative h-36 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-5xl border-b border-slate-100">
-                      {video.thumbnailEmoji}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all flex items-center justify-center">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Play className="h-5 w-5 text-blue-600 ml-0.5" />
-                        </div>
-                      </div>
-                      <span className="absolute bottom-2 right-2 text-[10px] font-bold text-white bg-black/60 px-1.5 py-0.5 rounded">{video.duration}</span>
-                    </div>
+                    <VideoThumbnail video={video} className="h-40 text-5xl border-b border-slate-100" />
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className={cn('text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full', video.categoryColor)}>

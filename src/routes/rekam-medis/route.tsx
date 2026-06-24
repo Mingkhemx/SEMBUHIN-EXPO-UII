@@ -173,19 +173,48 @@ function RekamMedisPage() {
     <div className="relative z-10 min-h-screen">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
 
-        {/* ── Hero ──────────────────────────────────────────────── */}
-        <motion.header variants={fadeIn} initial="hidden" animate="visible" className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-teal-100/80 border border-teal-200/60 px-4 py-1.5 mb-5">
-            <FolderOpen className="h-3.5 w-3.5 text-teal-600" />
-            <span className="text-xs font-semibold text-teal-700 tracking-wide uppercase">Rekam Medis Mandiri</span>
+        {/* ── Hero Card ─────────────────────────────────────── */}
+        <motion.div
+          variants={fadeIn} initial="hidden" animate="visible"
+          className="rounded-3xl shadow-2xl shadow-teal-500/25 overflow-hidden relative min-h-[360px]"
+        >
+          {/* Background image */}
+          <img
+            src="/images/riwayat.jpg"
+            alt="Riwayat Kesehatan"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-900/90 via-emerald-800/70 to-sky-700/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+          <div className="relative z-10 p-8 sm:p-12 max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-4 py-1.5 mb-5 backdrop-blur-sm">
+              <FolderOpen className="h-3.5 w-3.5 text-teal-200" />
+              <span className="text-xs font-semibold text-white/90 tracking-wide uppercase">Rekam Medis Mandiri</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
+              Riwayat Kesehatan Anda
+            </h1>
+            <p className="mt-3 text-base sm:text-lg text-teal-100 leading-relaxed max-w-lg">
+              Semua riwayat konsultasi, hasil lab, dan resep tersimpan aman. Ekspor PDF kapan saja untuk kebutuhan Anda.
+            </p>
+
+            {/* Quick stats */}
+            <div className="flex items-center gap-8 mt-6">
+              {[
+                [totalRecords.toString(), 'Total Rekam'],
+                [totalKonsultasi.toString(), 'Konsultasi'],
+                [totalLab.toString(), 'Hasil Lab']
+              ].map(([v, l]) => (
+                <div key={l}>
+                  <div className="text-2xl font-bold text-white">{v}</div>
+                  <div className="text-[10px] text-teal-200 uppercase tracking-widest">{l}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
-            Riwayat Kesehatan Anda
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg">
-            Semua riwayat konsultasi, hasil lab, dan resep tersimpan aman. Ekspor PDF kapan saja untuk kebutuhan Anda.
-          </p>
-        </motion.header>
+        </motion.div>
 
         {/* ── Summary Cards ─────────────────────────────────────── */}
         <motion.div variants={fadeIn} initial="hidden" animate="visible" transition={{ delay: 0.1 }} className="grid grid-cols-2 sm:grid-cols-4 gap-3">

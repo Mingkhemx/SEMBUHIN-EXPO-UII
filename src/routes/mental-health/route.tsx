@@ -31,8 +31,13 @@ import {
   Circle,
   Send,
   Bot,
+  ChevronLeft,
+  Save,
+  Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 
 export const Route = createFileRoute('/mental-health')({
   head: () => ({
@@ -49,35 +54,34 @@ type ScreeningType = 'phq9' | 'gad7' | null
 type Severity = 'minimal' | 'mild' | 'moderate' | 'mod-severe' | 'severe'
 type MoodRating = 1 | 2 | 3 | 4 | 5 | null
 type ViewMode = 'landing' | 'screening' | 'result' | 'cbt-detail' | 'video-call'
-
 /* ─── Questions ──────────────────────────────────────────────────── */
 const PHQ9_QUESTIONS = [
-  'Little interest or pleasure in doing things',
-  'Feeling down, depressed, or hopeless',
-  'Trouble falling or staying asleep, or sleeping too much',
-  'Feeling tired or having little energy',
-  'Poor appetite or overeating',
-  'Feeling bad about yourself — or that you are a failure',
-  'Trouble concentrating on things',
-  'Moving or speaking slowly, or being fidgety/restless',
-  'Thoughts that you would be better off dead or of hurting yourself',
+  'Kurang minat atau kesenangan dalam melakukan sesuatu',
+  'Merasa sedih, tertekan, atau tidak ada harapan',
+  'Sulit tidur, sering terbangun, atau tidur terlalu banyak',
+  'Merasa lelah atau kurang berenergi',
+  'Nafsu makan berkurang atau makan berlebihan',
+  'Merasa buruk tentang diri sendiri — atau merasa gagal',
+  'Sulit berkonsentrasi pada sesuatu',
+  'Bergerak atau berbicara sangat lambat, atau sebaliknya gelisah',
+  'Pikiran bahwa lebih baik mati atau ingin menyakiti diri sendiri',
 ]
 
 const GAD7_QUESTIONS = [
-  'Feeling nervous, anxious, or on edge',
-  'Not being able to stop or control worrying',
-  'Worrying too much about different things',
-  'Trouble relaxing',
-  'Being so restless that it is hard to sit still',
-  'Becoming easily annoyed or irritable',
-  'Feeling afraid as if something awful might happen',
+  'Merasa gugup, cemas, atau tegang',
+  'Tidak bisa berhenti atau mengendalikan kekhawatiran',
+  'Terlalu banyak khawatir tentang berbagai hal',
+  'Sulit untuk rileks',
+  'Gelisah hingga sulit untuk diam',
+  'Mudah tersinggung atau jengkel',
+  'Merasa takut seolah-olah sesuatu yang buruk akan terjadi',
 ]
 
 const ANSWER_OPTIONS = [
-  { value: 0, label: 'Tidak pernah' },
-  { value: 1, label: 'Beberapa hari' },
-  { value: 2, label: 'Lebih dari separuh waktu' },
-  { value: 3, label: 'Hampir setiap hari' },
+  { value: 0, label: 'Tidak pernah', emoji: '😌', color: 'emerald' },
+  { value: 1, label: 'Beberapa hari', emoji: '🙂', color: 'sky' },
+  { value: 2, label: 'Lebih dari separuh waktu', emoji: '😟', color: 'amber' },
+  { value: 3, label: 'Hampir setiap hari', emoji: '😰', color: 'rose' },
 ]
 
 const SEVERITY_CONFIG: Record<Severity, { color: string; bgColor: string; label: string; description: string }> = {
@@ -273,10 +277,14 @@ const fadeIn: Variants = {
 
 /* ─── Component ──────────────────────────────────────────────────── */
 function MentalHealthPage() {
+  const { user } = useAuth()
   const [viewMode, setViewMode] = useState<ViewMode>('landing')
   const [activeScreening, setActiveScreening] = useState<ScreeningType>(null)
   const [phq9Answers, setPhq9Answers] = useState<Record<number, number>>({})
   const [gad7Answers, setGad7Answers] = useState<Record<number, number>>({})
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [savingScreening, setSavingScreening] = useState(false)
+  const [savedScreening, setSavedScreening] = useState(false)
   const [activeCBT, setActiveCBT] = useState<CBTModule | null>(null)
   const [activeExercise, setActiveExercise] = useState<CBTExercise | null>(null)
   const [exerciseStep, setExerciseStep] = useState(0)
@@ -284,6 +292,7 @@ function MentalHealthPage() {
   const [breathCount, setBreathCount] = useState(0)
   const [breathTarget, setBreathTarget] = useState(4)
   const [breathing, setBreathing] = useState<'in' | 'hold' | 'out' | null>(null)
+  const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({})
   const breathInterval = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Video Call state
@@ -310,6 +319,8 @@ function MentalHealthPage() {
     setActiveScreening(type)
     setPhq9Answers({})
     setGad7Answers({})
+    setCurrentQuestion(0)
+    setSavedScreening(false)
     setViewMode('screening')
   }
 
@@ -320,6 +331,8 @@ function MentalHealthPage() {
     setActiveExercise(null)
     setPhq9Answers({})
     setGad7Answers({})
+    setCurrentQuestion(0)
+    setSavedScreening(false)
     setJournalText('')
     setExerciseStep(0)
     setBreathCount(0)
@@ -329,6 +342,42 @@ function MentalHealthPage() {
     setVcScriptIndex(0)
     setVcStarted(false)
   }
+
+  // Save screening result to Supabase
+  const saveScreeningResult = async () => {
+    if (!user || savedScreening) return
+    setSavingScreening(true)
+    try {
+      const { error } = await supabase
+        .from('mental_health_screenings')
+        .insert({
+          user_id: user.id,
+          screening_type: activeScreening,
+          answers: answers,
+          total_score: totalScore,
+          severity: severity,
+        })
+      
+      if (error) {
+        throw error
+      }
+      
+      setSavedScreening(true)
+    } catch (err: any) {
+      console.error('Gagal simpan screening:', err)
+      alert(`Gagal menyimpan: ${err?.message || 'Pastikan tabel mental_health_screenings sudah dibuat di Supabase.'}`)
+    } finally {
+      setSavingScreening(false)
+    }
+  }
+
+  // Auto-save when reaching the result view
+  useEffect(() => {
+    if (viewMode === 'result' && user && !savedScreening && !savingScreening) {
+      saveScreeningResult();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, user]);
 
   // Breathing exercise timer
   const startBreathing = () => {
@@ -406,34 +455,59 @@ function MentalHealthPage() {
 
   return (
     <div className="relative z-10 min-h-screen">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-6">
 
-        {/* ── Hero ──────────────────────────────────────────────── */}
-        <motion.header variants={fadeIn} initial="hidden" animate="visible" className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-violet-100/80 border border-violet-200/60 px-4 py-1.5 mb-5">
-            <SmilePlus className="h-3.5 w-3.5 text-violet-600" />
-            <span className="text-xs font-semibold text-violet-700 tracking-wide uppercase">Mental Health Care</span>
+        {/* ── Hero Card ─────────────────────────────────────── */}
+        <motion.div
+          variants={fadeIn} initial="hidden" animate="visible"
+          className="rounded-3xl shadow-2xl shadow-violet-500/25 overflow-hidden relative min-h-[360px]"
+        >
+          {/* Background image */}
+          <img
+            src="/images/konsultasi.jpg"
+            alt="Mental Health"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          {/* Gradient overlay — gelap di kiri agar teks terbaca */}
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-900/85 via-purple-800/60 to-indigo-700/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+          <div className="relative z-10 p-8 sm:p-12 max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-4 py-1.5 mb-5 backdrop-blur-sm">
+              <SmilePlus className="h-3.5 w-3.5 text-violet-200" />
+              <span className="text-xs font-semibold text-white/90 tracking-wide uppercase">Mental Health Care</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
+              Jaga Kesehatan<br className="hidden sm:block" /> Mental Anda
+            </h1>
+            <p className="mt-3 text-base sm:text-lg text-violet-100 leading-relaxed max-w-lg">
+              Screening klinis, sesi CBT interaktif, dan konsultasi video call dengan AI therapist.
+            </p>
+
+            {/* Quick stats */}
+            <div className="flex items-center gap-8 mt-6">
+              {[['4', 'Modul CBT'], ['2', 'Screening'], ['24/7', 'Tersedia']].map(([v, l]) => (
+                <div key={l}>
+                  <div className="text-2xl font-bold text-white">{v}</div>
+                  <div className="text-[10px] text-violet-200 uppercase tracking-widest">{l}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
-            Jaga Kesehatan<br className="hidden sm:block" /> Mental Anda
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg">
-            Screening klinis, sesi CBT interaktif, dan konsultasi video call dengan AI therapist.
-          </p>
-        </motion.header>
+        </motion.div>
 
         {/* ═══════════════════ LANDING ═══════════════════ */}
         {viewMode === 'landing' && (
-          <motion.div key="landing" variants={fadeIn} initial="hidden" animate="visible" transition={{ delay: 0.1 }} className="space-y-8">
+          <motion.div key="landing" variants={fadeIn} initial="hidden" animate="visible" transition={{ delay: 0.1 }} className="space-y-5">
 
             {/* 1. Screening */}
-            <section>
-              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-slate-400" />
+            <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/60 p-6">
+              <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-violet-400" />
                 Screening Kesehatan Mental
               </h2>
               <div className="grid sm:grid-cols-2 gap-4">
-                <button onClick={() => startScreening('phq9')} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-6 text-left hover:shadow-xl hover:border-violet-200 transition-all group">
+                <button onClick={() => startScreening('phq9')} className="rounded-2xl bg-white border border-slate-100 shadow-sm p-6 text-left hover:shadow-md hover:border-violet-200 transition-all group">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 border border-violet-100">
                       <Brain className="h-5 w-5 text-violet-600" />
@@ -446,7 +520,7 @@ function MentalHealthPage() {
                   <p className="text-sm text-slate-500 leading-relaxed mb-4">Deteksi gejala depresi dalam 2 minggu terakhir.</p>
                   <div className="flex items-center gap-2 text-sm font-semibold text-violet-600 group-hover:text-violet-700">Mulai <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></div>
                 </button>
-                <button onClick={() => startScreening('gad7')} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-6 text-left hover:shadow-xl hover:border-violet-200 transition-all group">
+                <button onClick={() => startScreening('gad7')} className="rounded-2xl bg-white border border-slate-100 shadow-sm p-6 text-left hover:shadow-md hover:border-violet-200 transition-all group">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 border border-violet-100">
                       <Heart className="h-5 w-5 text-violet-600" />
@@ -460,19 +534,19 @@ function MentalHealthPage() {
                   <div className="flex items-center gap-2 text-sm font-semibold text-violet-600 group-hover:text-violet-700">Mulai <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></div>
                 </button>
               </div>
-            </section>
+            </div>
 
             {/* 2. CBT Interactive */}
-            <section>
-              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-slate-400" />
+            <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/60 p-6">
+              <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-violet-400" />
                 Sesi CBT Interaktif
               </h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 {CBT_MODULES.map((mod) => {
                   const Icon = mod.icon
                   return (
-                    <button key={mod.id} onClick={() => { setActiveCBT(mod); setViewMode('cbt-detail') }} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl hover:border-violet-200 transition-all text-left group">
+                    <button key={mod.id} onClick={() => { setActiveCBT(mod); setViewMode('cbt-detail') }} className="rounded-2xl bg-white border border-slate-100 shadow-sm p-5 hover:shadow-md hover:border-violet-200 transition-all text-left group">
                       <div className="flex items-center gap-3 mb-2">
                         <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg border', mod.bgColor)}>
                           <Icon className={cn('h-4 w-4', mod.color)} />
@@ -488,10 +562,10 @@ function MentalHealthPage() {
                   )
                 })}
               </div>
-            </section>
+            </div>
 
             {/* 3. Video Call AI */}
-            <section>
+            <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/60 p-2">
               <button onClick={startVideoCall} className="w-full rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white p-6 sm:p-8 shadow-lg shadow-violet-600/20 hover:shadow-xl transition-all text-left group">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 border border-white/20 group-hover:scale-105 transition-transform">
@@ -508,10 +582,10 @@ function MentalHealthPage() {
                   </div>
                 </div>
               </button>
-            </section>
+            </div>
 
             {/* Psychologist CTA */}
-            <div className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/60 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 border border-violet-100">
                 <Users className="h-5 w-5 text-violet-600" />
               </div>
@@ -528,46 +602,181 @@ function MentalHealthPage() {
 
         {/* ═══════════════════ SCREENING ═══════════════════ */}
         {viewMode === 'screening' && (
-          <motion.div key="screening" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-slate-800">{activeScreening === 'phq9' ? 'PHQ-9: Screening Depresi' : 'GAD-7: Screening Kecemasan'}</h2>
-                <p className="text-sm text-slate-500 mt-1">Dalam 2 minggu terakhir, seberapa sering Anda terganggu oleh masalah berikut?</p>
-              </div>
-              <button onClick={goToLanding} className="text-xs font-medium text-slate-400 hover:text-slate-600">Batal</button>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-slate-500">Progress</span>
-                <span className="text-xs font-bold text-violet-600">{Object.keys(answers).length}/{questions.length}</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                <motion.div animate={{ width: `${(Object.keys(answers).length / questions.length) * 100}%` }} transition={{ duration: 0.3 }} className="h-full rounded-full bg-violet-500" />
-              </div>
-            </div>
-            <div className="space-y-3">
-              {questions.map((q, i) => (
-                <div key={i} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5">
-                  <p className="text-sm font-medium text-slate-800 mb-4"><span className="text-violet-500 font-bold mr-2">{i + 1}.</span>{q}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {ANSWER_OPTIONS.map((opt) => {
-                      const selected = answers[i] === opt.value
-                      return (
-                        <button key={opt.value} onClick={() => setAnswers((prev) => ({ ...prev, [i]: opt.value }))} className={cn('flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium border transition-all duration-200', selected ? 'bg-violet-50 border-violet-300 text-violet-700 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-violet-200 hover:bg-white')}>
-                          <div className={cn('h-4 w-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-all', selected ? 'border-violet-500 bg-violet-500' : 'border-slate-300')}>
-                            {selected && <CheckCircle2 className="h-3 w-3 text-white" />}
-                          </div>
-                          {opt.label}
-                        </button>
-                      )
-                    })}
+          <motion.div key="screening" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            {/* Header card */}
+            <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/60 p-6 mb-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-xl',
+                    activeScreening === 'phq9' ? 'bg-violet-50 border border-violet-100' : 'bg-rose-50 border border-rose-100'
+                  )}>
+                    {activeScreening === 'phq9'
+                      ? <Brain className="h-5 w-5 text-violet-600" />
+                      : <Heart className="h-5 w-5 text-rose-500" />}
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-800">
+                      {activeScreening === 'phq9' ? 'PHQ-9: Screening Depresi' : 'GAD-7: Screening Kecemasan'}
+                    </h2>
+                    <p className="text-xs text-slate-500">Dalam 2 minggu terakhir</p>
                   </div>
                 </div>
-              ))}
+                <button onClick={goToLanding} className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors">
+                  Batal
+                </button>
+              </div>
+
+              {/* Progress bar */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Pertanyaan <span className="font-bold text-violet-600">{currentQuestion + 1}</span> dari {questions.length}</span>
+                  <span className="text-xs font-bold text-slate-600">{Math.round(((currentQuestion) / questions.length) * 100)}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <motion.div
+                    animate={{ width: `${(currentQuestion / questions.length) * 100}%` }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    className={cn('h-full rounded-full', activeScreening === 'phq9' ? 'bg-gradient-to-r from-violet-500 to-purple-500' : 'bg-gradient-to-r from-rose-400 to-pink-500')}
+                  />
+                </div>
+                {/* Step dots */}
+                <div className="flex gap-1 pt-1">
+                  {questions.map((_, i) => (
+                    <div key={i} className={cn(
+                      'h-1.5 flex-1 rounded-full transition-all duration-300',
+                      i < currentQuestion ? (activeScreening === 'phq9' ? 'bg-violet-500' : 'bg-rose-400') :
+                      i === currentQuestion ? (activeScreening === 'phq9' ? 'bg-violet-300' : 'bg-rose-300') :
+                      'bg-slate-100'
+                    )} />
+                  ))}
+                </div>
+              </div>
             </div>
-            <button onClick={() => { if (allAnswered) setViewMode('result') }} disabled={!allAnswered} className={cn('w-full flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold transition-all', 'bg-violet-600 text-white hover:bg-violet-700 shadow-md shadow-violet-600/20', 'disabled:opacity-40 disabled:cursor-not-allowed')}>
-              <Sparkles className="h-4 w-4" /> Lihat Hasil
-            </button>
+
+            {/* Question card — animasi slide */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentQuestion}
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="rounded-3xl bg-white/90 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/60 overflow-hidden"
+              >
+                {/* Question header */}
+                <div className={cn(
+                  'px-8 pt-8 pb-6',
+                  activeScreening === 'phq9'
+                    ? 'bg-gradient-to-br from-violet-50 to-purple-50'
+                    : 'bg-gradient-to-br from-rose-50 to-pink-50'
+                )}>
+                  <div className={cn(
+                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide mb-4',
+                    activeScreening === 'phq9' ? 'bg-violet-100 text-violet-600' : 'bg-rose-100 text-rose-600'
+                  )}>
+                    {activeScreening === 'phq9' ? <Brain className="h-3 w-3" /> : <Heart className="h-3 w-3" />}
+                    Pertanyaan {currentQuestion + 1}
+                  </div>
+                  <p className="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">
+                    {questions[currentQuestion]}
+                  </p>
+                </div>
+
+                {/* Answer options */}
+                <div className="p-6 space-y-3">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+                    Seberapa sering Anda mengalami ini?
+                  </p>
+                  {ANSWER_OPTIONS.map((opt) => {
+                    const selected = answers[currentQuestion] === opt.value
+                    const colorMap = {
+                      emerald: { selected: 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-emerald-100', hover: 'hover:border-emerald-300 hover:bg-emerald-50/50', dot: 'bg-emerald-500' },
+                      sky: { selected: 'bg-sky-50 border-sky-400 text-sky-800 shadow-sky-100', hover: 'hover:border-sky-300 hover:bg-sky-50/50', dot: 'bg-sky-500' },
+                      amber: { selected: 'bg-amber-50 border-amber-400 text-amber-800 shadow-amber-100', hover: 'hover:border-amber-300 hover:bg-amber-50/50', dot: 'bg-amber-500' },
+                      rose: { selected: 'bg-rose-50 border-rose-400 text-rose-800 shadow-rose-100', hover: 'hover:border-rose-300 hover:bg-rose-50/50', dot: 'bg-rose-500' },
+                    }
+                    const c = colorMap[opt.color as keyof typeof colorMap]
+                    return (
+                      <motion.button
+                        key={opt.value}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          setAnswers((prev) => ({ ...prev, [currentQuestion]: opt.value }))
+                          // Auto-advance setelah 350ms
+                          setTimeout(() => {
+                            if (currentQuestion < questions.length - 1) {
+                              setCurrentQuestion((q) => q + 1)
+                            } else {
+                              setViewMode('result')
+                            }
+                          }, 350)
+                        }}
+                        className={cn(
+                          'w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 text-left transition-all duration-200 shadow-sm',
+                          selected
+                            ? `${c.selected} shadow-md`
+                            : `bg-white border-slate-200 text-slate-700 ${c.hover}`
+                        )}
+                      >
+                        <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
+                        <div className="flex-1">
+                          <span className="text-sm font-semibold">{opt.label}</span>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            {[0, 1, 2, 3].map((dot) => (
+                              <div key={dot} className={cn(
+                                'h-1.5 w-5 rounded-full transition-all',
+                                dot <= opt.value ? c.dot : 'bg-slate-200'
+                              )} />
+                            ))}
+                          </div>
+                        </div>
+                        <div className={cn(
+                          'h-6 w-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all',
+                          selected ? `border-current ${c.dot}` : 'border-slate-300'
+                        )}>
+                          {selected && <CheckCircle2 className="h-4 w-4 text-white" />}
+                        </div>
+                      </motion.button>
+                    )
+                  })}
+                </div>
+
+                {/* Navigation */}
+                <div className="px-6 pb-6 flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => setCurrentQuestion((q) => Math.max(0, q - 1))}
+                    disabled={currentQuestion === 0}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft className="h-4 w-4" /> Sebelumnya
+                  </button>
+
+                  {answers[currentQuestion] !== undefined && currentQuestion < questions.length - 1 && (
+                    <button
+                      onClick={() => setCurrentQuestion((q) => q + 1)}
+                      className={cn(
+                        'flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-all shadow-md',
+                        activeScreening === 'phq9'
+                          ? 'bg-violet-600 hover:bg-violet-700 shadow-violet-200'
+                          : 'bg-rose-500 hover:bg-rose-600 shadow-rose-200'
+                      )}
+                    >
+                      Berikutnya <ChevronRight className="h-4 w-4" />
+                    </button>
+                  )}
+
+                  {answers[currentQuestion] !== undefined && currentQuestion === questions.length - 1 && (
+                    <button
+                      onClick={() => setViewMode('result')}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-all shadow-md shadow-emerald-200"
+                    >
+                      <Sparkles className="h-4 w-4" /> Lihat Hasil
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         )}
 
@@ -622,6 +831,25 @@ function MentalHealthPage() {
                 )}
               </div>
             </div>
+            {/* Save to profile status */}
+            <div className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5">
+              {savedScreening ? (
+                <div className="flex items-center gap-3 text-emerald-600">
+                  <CheckCircle2 className="h-5 w-5 shrink-0" />
+                  <p className="text-sm font-semibold">Hasil screening telah otomatis disimpan ke profil Anda.</p>
+                </div>
+              ) : savingScreening ? (
+                <div className="flex items-center gap-3 text-violet-600">
+                  <Loader2 className="h-5 w-5 shrink-0 animate-spin" />
+                  <p className="text-sm font-semibold">Menyimpan hasil ke profil secara otomatis...</p>
+                </div>
+              ) : !user ? (
+                <div className="flex items-center gap-3 text-rose-500">
+                  <Info className="h-5 w-5 shrink-0" />
+                  <p className="text-sm font-semibold">Anda belum login, hasil tidak disimpan ke profil.</p>
+                </div>
+              ) : null}
+            </div>
             <div className="flex gap-3">
               <button onClick={goToLanding} className="flex-1 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm">Kembali ke Menu</button>
               {(severity === 'moderate' || severity === 'mod-severe' || severity === 'severe') && (
@@ -653,18 +881,28 @@ function MentalHealthPage() {
                   <button onClick={() => { setActiveCBT(null); setViewMode('landing') }} className="text-xs font-medium text-slate-400 hover:text-slate-600">Kembali</button>
                 </div>
                 <div className="space-y-3">
-                  {activeCBT.exercises.map((ex, i) => (
+                  {activeCBT.exercises.map((ex, i) => {
+                    const isCompleted = completedExercises[ex.id]
+                    return (
                     <button key={ex.id} onClick={() => { setActiveExercise(ex); setExerciseStep(0); setJournalText(''); setBreathCount(0); setBreathing(null) }} className="w-full rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl hover:border-violet-200 transition-all text-left group">
                       <div className="flex items-start gap-4">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-700 text-sm font-bold">{i + 1}</div>
+                        <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold', isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-violet-100 text-violet-700')}>
+                          {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : i + 1}
+                        </div>
                         <div className="flex-1">
-                          <h3 className="text-sm font-bold text-slate-800 group-hover:text-violet-700">{ex.title}</h3>
+                          <h3 className={cn('text-sm font-bold', isCompleted ? 'text-slate-800' : 'text-slate-800 group-hover:text-violet-700')}>{ex.title}</h3>
                           <p className="text-xs text-slate-500 mt-1">{ex.instruction}</p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-slate-300 mt-1 group-hover:text-violet-500" />
+                        {isCompleted ? (
+                          <div className="mt-1 flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md uppercase tracking-wider">
+                            Selesai
+                          </div>
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-slate-300 mt-1 group-hover:text-violet-500" />
+                        )}
                       </div>
                     </button>
-                  ))}
+                  )})}
                 </div>
               </>
             ) : (
@@ -737,7 +975,7 @@ function MentalHealthPage() {
                         <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
                         <p className="text-lg font-bold text-slate-800">{breathTarget} Siklus Selesai!</p>
                         <p className="text-sm text-slate-500">Bagaimana perasaan Anda sekarang?</p>
-                        <button onClick={() => { setActiveExercise(null); setExerciseStep(0); setBreathing(null) }} className="rounded-xl bg-violet-600 text-white px-6 py-3 text-sm font-bold hover:bg-violet-700">Selesai</button>
+                        <button onClick={() => { if (activeExercise) setCompletedExercises(prev => ({...prev, [activeExercise.id]: true})); setActiveExercise(null); setExerciseStep(0); setBreathing(null) }} className="rounded-xl bg-violet-600 text-white px-6 py-3 text-sm font-bold hover:bg-violet-700">Selesai</button>
                       </div>
                     )}
                   </div>
@@ -763,7 +1001,7 @@ function MentalHealthPage() {
                       {exerciseStep < (activeExercise.steps?.length || 0) - 1 ? (
                         <button onClick={() => setExerciseStep((s) => s + 1)} className="flex-1 rounded-xl bg-violet-600 text-white px-5 py-3 text-sm font-bold hover:bg-violet-700">Selanjutnya</button>
                       ) : (
-                        <button onClick={() => { setActiveExercise(null); setExerciseStep(0) }} className="flex-1 rounded-xl bg-emerald-600 text-white px-5 py-3 text-sm font-bold hover:bg-emerald-700">
+                        <button onClick={() => { if (activeExercise) setCompletedExercises(prev => ({...prev, [activeExercise.id]: true})); setActiveExercise(null); setExerciseStep(0) }} className="flex-1 rounded-xl bg-emerald-600 text-white px-5 py-3 text-sm font-bold hover:bg-emerald-700">
                           <CheckCircle2 className="h-4 w-4 inline mr-1" /> Selesai
                         </button>
                       )}
@@ -776,7 +1014,7 @@ function MentalHealthPage() {
                   <div className="rounded-2xl bg-white border border-white/60 shadow-lg p-6">
                     <textarea value={journalText} onChange={(e) => setJournalText(e.target.value)} placeholder="Tulis di sini..." rows={6} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 resize-none" />
                     <div className="mt-4 flex gap-3">
-                      <button onClick={() => { setActiveExercise(null); setJournalText('') }} className="flex-1 rounded-xl bg-violet-600 text-white px-5 py-3 text-sm font-bold hover:bg-violet-700">
+                      <button onClick={() => { if (activeExercise) setCompletedExercises(prev => ({...prev, [activeExercise.id]: true})); setActiveExercise(null); setJournalText('') }} className="flex-1 rounded-xl bg-violet-600 text-white px-5 py-3 text-sm font-bold hover:bg-violet-700">
                         <CheckCircle2 className="h-4 w-4 inline mr-1" /> Simpan & Selesai
                       </button>
                     </div>
@@ -801,7 +1039,7 @@ function MentalHealthPage() {
                         <textarea rows={2} placeholder="Pikiran yang lebih adil dan rasional..." className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 resize-none" />
                       </div>
                     </div>
-                    <button onClick={() => { setActiveExercise(null) }} className="mt-4 w-full rounded-xl bg-violet-600 text-white px-5 py-3 text-sm font-bold hover:bg-violet-700">
+                    <button onClick={() => { if (activeExercise) setCompletedExercises(prev => ({...prev, [activeExercise.id]: true})); setActiveExercise(null) }} className="mt-4 w-full rounded-xl bg-violet-600 text-white px-5 py-3 text-sm font-bold hover:bg-violet-700">
                       <CheckCircle2 className="h-4 w-4 inline mr-1" /> Simpan & Selesai
                     </button>
                   </div>
@@ -824,7 +1062,7 @@ function MentalHealthPage() {
                       <div className="mt-6 text-center space-y-3">
                         <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
                         <p className="font-bold text-slate-800">Grounding selesai!</p>
-                        <button onClick={() => { setActiveExercise(null); setExerciseStep(0) }} className="rounded-xl bg-violet-600 text-white px-6 py-3 text-sm font-bold hover:bg-violet-700">Kembali</button>
+                        <button onClick={() => { if (activeExercise) setCompletedExercises(prev => ({...prev, [activeExercise.id]: true})); setActiveExercise(null); setExerciseStep(0) }} className="rounded-xl bg-violet-600 text-white px-6 py-3 text-sm font-bold hover:bg-violet-700">Kembali</button>
                       </div>
                     )}
                   </div>

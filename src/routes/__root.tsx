@@ -1,8 +1,8 @@
 import { Outlet, Link, createRootRoute, useLocation } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AuroraBackground } from "@/components/AuroraBackground";
-import { FloatingHealthIcons } from "@/components/FloatingHealthIcons";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 function NotFoundComponent() {
@@ -32,9 +32,17 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/auth';
+  const isAuthPage = location.pathname === "/auth";
+  const isDoctorPage = location.pathname.startsWith("/doctor");
+  const isAdminPage = location.pathname.startsWith("/admin");
+  const isDaftarDokterPage = location.pathname.startsWith("/daftar-dokter");
 
-  if (isAuthPage) {
+  // Scroll ke atas setiap kali route berubah
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location.pathname]);
+
+  if (isAuthPage || isDoctorPage || isAdminPage) {
     return (
       <AuthProvider>
         <main>
@@ -47,12 +55,11 @@ function RootComponent() {
   return (
     <AuthProvider>
       <AuroraBackground />
-      <FloatingHealthIcons />
       <Header />
-      <main className="mx-auto max-w-6xl px-4 pt-24">
+      <main className={`${isDaftarDokterPage ? 'px-0 pt-10 pb-10' : 'mx-auto max-w-6xl px-4 pt-24'}`}>
         <Outlet />
       </main>
-      <Footer />
+      {!isDaftarDokterPage && <Footer />}
     </AuthProvider>
   );
 }

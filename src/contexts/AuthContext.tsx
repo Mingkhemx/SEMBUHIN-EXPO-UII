@@ -7,9 +7,11 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   isPremium: boolean
+  isDoctor: boolean
   membershipLoading: boolean
   signOut: () => Promise<void>
   upgradeToPremium: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -19,12 +21,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [isPremium, setIsPremium] = useState(false)
+  const [isDoctor, setIsDoctor] = useState(false)
   const [membershipLoading, setMembershipLoading] = useState(false)
 
   const fetchMembership = useCallback(async (userId: string) => {
     if (!userId) return
     setMembershipLoading(true)
     try {
+      // Check premium membership
       const { data, error } = await supabase
         .from('memberships')
         .select('*')
@@ -42,6 +46,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsPremium(false)
     } finally {
       setMembershipLoading(false)
+    }
+
+    // Check doctor role from user metadata or doctors table
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      const role = authUser?.user_metadata?.role
+      
+      if (role === 'doctor') {
+        setIsDoctor(true)
+      } else {
+        // Fallback: check doctors table directly
+        const { data: doctorRecord } = await supabase
+          .from('doctors')
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle()
+        setIsDoctor(!!doctorRecord)
+      }
+    } catch {
+      setIsDoctor(false)
     }
   }, [])
 
@@ -88,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check active session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        // USER_UPDATED terjadi saat updateUser() dipanggil (misal ganti avatar)
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
@@ -120,10 +145,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut()
     setIsPremium(false)
+    setIsDoctor(false)
+  }
+
+  // Paksa refresh user dari Supabase — dipanggil setelah updateUser()
+  const refreshUser = async () => {
+    const { data: { user: freshUser } } = await supabase.auth.getUser()
+    setUser(freshUser)
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isPremium, membershipLoading, signOut, upgradeToPremium }}>
+    <AuthContext.Provider value={{ user, session, loading, isPremium, isDoctor, membershipLoading, signOut, upgradeToPremium, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

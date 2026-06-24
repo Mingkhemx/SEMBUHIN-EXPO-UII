@@ -11,11 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VideoEdukasiRouteRouteImport } from './routes/video-edukasi/route'
 import { Route as TwinRouteRouteImport } from './routes/twin/route'
-import { Route as TipsSehatRouteRouteImport } from './routes/tips-sehat/route'
 import { Route as SymptomTriageRouteRouteImport } from './routes/symptom-triage/route'
 import { Route as ResepRouteRouteImport } from './routes/resep/route'
 import { Route as RekamMedisRouteRouteImport } from './routes/rekam-medis/route'
 import { Route as ProfilRouteRouteImport } from './routes/profil/route'
+import { Route as PaymentRouteRouteImport } from './routes/payment/route'
 import { Route as MoodCheckRouteRouteImport } from './routes/mood-check/route'
 import { Route as MentalHealthRouteRouteImport } from './routes/mental-health/route'
 import { Route as MembershipRouteRouteImport } from './routes/membership/route'
@@ -23,13 +23,30 @@ import { Route as MarketplaceRouteRouteImport } from './routes/marketplace/route
 import { Route as KonsulRouteRouteImport } from './routes/konsul/route'
 import { Route as KomunitasPasienRouteRouteImport } from './routes/komunitas-pasien/route'
 import { Route as DokterRouteRouteImport } from './routes/dokter/route'
+import { Route as DoctorRouteRouteImport } from './routes/doctor/route'
 import { Route as DermatologiRouteRouteImport } from './routes/dermatologi/route'
+import { Route as DaftarDokterRouteRouteImport } from './routes/daftar-dokter/route'
 import { Route as ChatRouteRouteImport } from './routes/chat/route'
 import { Route as CekJantungRouteRouteImport } from './routes/cek-jantung/route'
+import { Route as BookingRouteRouteImport } from './routes/booking/route'
 import { Route as BerandaRouteRouteImport } from './routes/beranda/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as ArtikelRouteRouteImport } from './routes/artikel/route'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as DoctorSettingsRouteRouteImport } from './routes/doctor/settings/route'
+import { Route as DoctorPrescriptionsRouteRouteImport } from './routes/doctor/prescriptions/route'
+import { Route as DoctorPatientsRouteRouteImport } from './routes/doctor/patients/route'
+import { Route as DoctorConsultationsRouteRouteImport } from './routes/doctor/consultations/route'
+import { Route as DoctorChatRouteRouteImport } from './routes/doctor/chat/route'
+import { Route as DoctorAnalyticsRouteRouteImport } from './routes/doctor/analytics/route'
+import { Route as AdminUsersRouteRouteImport } from './routes/admin/users/route'
+import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/route'
+import { Route as AdminMarketplaceRouteRouteImport } from './routes/admin/marketplace/route'
+import { Route as AdminLiveChatRouteRouteImport } from './routes/admin/live-chat/route'
+import { Route as AdminDoctorsRouteRouteImport } from './routes/admin/doctors/route'
 
 const VideoEdukasiRouteRoute = VideoEdukasiRouteRouteImport.update({
   id: '/video-edukasi',
@@ -39,11 +56,6 @@ const VideoEdukasiRouteRoute = VideoEdukasiRouteRouteImport.update({
 const TwinRouteRoute = TwinRouteRouteImport.update({
   id: '/twin',
   path: '/twin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TipsSehatRouteRoute = TipsSehatRouteRouteImport.update({
-  id: '/tips-sehat',
-  path: '/tips-sehat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SymptomTriageRouteRoute = SymptomTriageRouteRouteImport.update({
@@ -64,6 +76,11 @@ const RekamMedisRouteRoute = RekamMedisRouteRouteImport.update({
 const ProfilRouteRoute = ProfilRouteRouteImport.update({
   id: '/profil',
   path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentRouteRoute = PaymentRouteRouteImport.update({
+  id: '/payment',
+  path: '/payment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoodCheckRouteRoute = MoodCheckRouteRouteImport.update({
@@ -101,9 +118,19 @@ const DokterRouteRoute = DokterRouteRouteImport.update({
   path: '/dokter',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DoctorRouteRoute = DoctorRouteRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DermatologiRouteRoute = DermatologiRouteRouteImport.update({
   id: '/dermatologi',
   path: '/dermatologi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DaftarDokterRouteRoute = DaftarDokterRouteRouteImport.update({
+  id: '/daftar-dokter',
+  path: '/daftar-dokter',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRouteRoute = ChatRouteRouteImport.update({
@@ -114,6 +141,11 @@ const ChatRouteRoute = ChatRouteRouteImport.update({
 const CekJantungRouteRoute = CekJantungRouteRouteImport.update({
   id: '/cek-jantung',
   path: '/cek-jantung',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingRouteRoute = BookingRouteRouteImport.update({
+  id: '/booking',
+  path: '/booking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BerandaRouteRoute = BerandaRouteRouteImport.update({
@@ -131,20 +163,96 @@ const ArtikelRouteRoute = ArtikelRouteRouteImport.update({
   path: '/artikel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DoctorIndexRoute = DoctorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const DoctorSettingsRouteRoute = DoctorSettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
+const DoctorPrescriptionsRouteRoute =
+  DoctorPrescriptionsRouteRouteImport.update({
+    id: '/prescriptions',
+    path: '/prescriptions',
+    getParentRoute: () => DoctorRouteRoute,
+  } as any)
+const DoctorPatientsRouteRoute = DoctorPatientsRouteRouteImport.update({
+  id: '/patients',
+  path: '/patients',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
+const DoctorConsultationsRouteRoute =
+  DoctorConsultationsRouteRouteImport.update({
+    id: '/consultations',
+    path: '/consultations',
+    getParentRoute: () => DoctorRouteRoute,
+  } as any)
+const DoctorChatRouteRoute = DoctorChatRouteRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
+const DoctorAnalyticsRouteRoute = DoctorAnalyticsRouteRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => DoctorRouteRoute,
+} as any)
+const AdminUsersRouteRoute = AdminUsersRouteRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSettingsRouteRoute = AdminSettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminMarketplaceRouteRoute = AdminMarketplaceRouteRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLiveChatRouteRoute = AdminLiveChatRouteRouteImport.update({
+  id: '/live-chat',
+  path: '/live-chat',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminDoctorsRouteRoute = AdminDoctorsRouteRouteImport.update({
+  id: '/doctors',
+  path: '/doctors',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/artikel': typeof ArtikelRouteRoute
   '/auth': typeof AuthRouteRoute
   '/beranda': typeof BerandaRouteRoute
+  '/booking': typeof BookingRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
   '/chat': typeof ChatRouteRoute
+  '/daftar-dokter': typeof DaftarDokterRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
+  '/doctor': typeof DoctorRouteRouteWithChildren
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
@@ -152,21 +260,36 @@ export interface FileRoutesByFullPath {
   '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
   '/mood-check': typeof MoodCheckRouteRoute
+  '/payment': typeof PaymentRouteRoute
   '/profil': typeof ProfilRouteRoute
   '/rekam-medis': typeof RekamMedisRouteRoute
   '/resep': typeof ResepRouteRoute
   '/symptom-triage': typeof SymptomTriageRouteRoute
-  '/tips-sehat': typeof TipsSehatRouteRoute
   '/twin': typeof TwinRouteRoute
   '/video-edukasi': typeof VideoEdukasiRouteRoute
+  '/admin/doctors': typeof AdminDoctorsRouteRoute
+  '/admin/live-chat': typeof AdminLiveChatRouteRoute
+  '/admin/marketplace': typeof AdminMarketplaceRouteRoute
+  '/admin/settings': typeof AdminSettingsRouteRoute
+  '/admin/users': typeof AdminUsersRouteRoute
+  '/doctor/analytics': typeof DoctorAnalyticsRouteRoute
+  '/doctor/chat': typeof DoctorChatRouteRoute
+  '/doctor/consultations': typeof DoctorConsultationsRouteRoute
+  '/doctor/patients': typeof DoctorPatientsRouteRoute
+  '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
+  '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/': typeof AdminIndexRoute
+  '/doctor/': typeof DoctorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/artikel': typeof ArtikelRouteRoute
   '/auth': typeof AuthRouteRoute
   '/beranda': typeof BerandaRouteRoute
+  '/booking': typeof BookingRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
   '/chat': typeof ChatRouteRoute
+  '/daftar-dokter': typeof DaftarDokterRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
@@ -175,23 +298,40 @@ export interface FileRoutesByTo {
   '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
   '/mood-check': typeof MoodCheckRouteRoute
+  '/payment': typeof PaymentRouteRoute
   '/profil': typeof ProfilRouteRoute
   '/rekam-medis': typeof RekamMedisRouteRoute
   '/resep': typeof ResepRouteRoute
   '/symptom-triage': typeof SymptomTriageRouteRoute
-  '/tips-sehat': typeof TipsSehatRouteRoute
   '/twin': typeof TwinRouteRoute
   '/video-edukasi': typeof VideoEdukasiRouteRoute
+  '/admin/doctors': typeof AdminDoctorsRouteRoute
+  '/admin/live-chat': typeof AdminLiveChatRouteRoute
+  '/admin/marketplace': typeof AdminMarketplaceRouteRoute
+  '/admin/settings': typeof AdminSettingsRouteRoute
+  '/admin/users': typeof AdminUsersRouteRoute
+  '/doctor/analytics': typeof DoctorAnalyticsRouteRoute
+  '/doctor/chat': typeof DoctorChatRouteRoute
+  '/doctor/consultations': typeof DoctorConsultationsRouteRoute
+  '/doctor/patients': typeof DoctorPatientsRouteRoute
+  '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
+  '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin': typeof AdminIndexRoute
+  '/doctor': typeof DoctorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/artikel': typeof ArtikelRouteRoute
   '/auth': typeof AuthRouteRoute
   '/beranda': typeof BerandaRouteRoute
+  '/booking': typeof BookingRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
   '/chat': typeof ChatRouteRoute
+  '/daftar-dokter': typeof DaftarDokterRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
+  '/doctor': typeof DoctorRouteRouteWithChildren
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
@@ -199,24 +339,41 @@ export interface FileRoutesById {
   '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
   '/mood-check': typeof MoodCheckRouteRoute
+  '/payment': typeof PaymentRouteRoute
   '/profil': typeof ProfilRouteRoute
   '/rekam-medis': typeof RekamMedisRouteRoute
   '/resep': typeof ResepRouteRoute
   '/symptom-triage': typeof SymptomTriageRouteRoute
-  '/tips-sehat': typeof TipsSehatRouteRoute
   '/twin': typeof TwinRouteRoute
   '/video-edukasi': typeof VideoEdukasiRouteRoute
+  '/admin/doctors': typeof AdminDoctorsRouteRoute
+  '/admin/live-chat': typeof AdminLiveChatRouteRoute
+  '/admin/marketplace': typeof AdminMarketplaceRouteRoute
+  '/admin/settings': typeof AdminSettingsRouteRoute
+  '/admin/users': typeof AdminUsersRouteRoute
+  '/doctor/analytics': typeof DoctorAnalyticsRouteRoute
+  '/doctor/chat': typeof DoctorChatRouteRoute
+  '/doctor/consultations': typeof DoctorConsultationsRouteRoute
+  '/doctor/patients': typeof DoctorPatientsRouteRoute
+  '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
+  '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/': typeof AdminIndexRoute
+  '/doctor/': typeof DoctorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/artikel'
     | '/auth'
     | '/beranda'
+    | '/booking'
     | '/cek-jantung'
     | '/chat'
+    | '/daftar-dokter'
     | '/dermatologi'
+    | '/doctor'
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
@@ -224,21 +381,36 @@ export interface FileRouteTypes {
     | '/membership'
     | '/mental-health'
     | '/mood-check'
+    | '/payment'
     | '/profil'
     | '/rekam-medis'
     | '/resep'
     | '/symptom-triage'
-    | '/tips-sehat'
     | '/twin'
     | '/video-edukasi'
+    | '/admin/doctors'
+    | '/admin/live-chat'
+    | '/admin/marketplace'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/doctor/analytics'
+    | '/doctor/chat'
+    | '/doctor/consultations'
+    | '/doctor/patients'
+    | '/doctor/prescriptions'
+    | '/doctor/settings'
+    | '/admin/'
+    | '/doctor/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/artikel'
     | '/auth'
     | '/beranda'
+    | '/booking'
     | '/cek-jantung'
     | '/chat'
+    | '/daftar-dokter'
     | '/dermatologi'
     | '/dokter'
     | '/komunitas-pasien'
@@ -247,22 +419,39 @@ export interface FileRouteTypes {
     | '/membership'
     | '/mental-health'
     | '/mood-check'
+    | '/payment'
     | '/profil'
     | '/rekam-medis'
     | '/resep'
     | '/symptom-triage'
-    | '/tips-sehat'
     | '/twin'
     | '/video-edukasi'
+    | '/admin/doctors'
+    | '/admin/live-chat'
+    | '/admin/marketplace'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/doctor/analytics'
+    | '/doctor/chat'
+    | '/doctor/consultations'
+    | '/doctor/patients'
+    | '/doctor/prescriptions'
+    | '/doctor/settings'
+    | '/admin'
+    | '/doctor'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/artikel'
     | '/auth'
     | '/beranda'
+    | '/booking'
     | '/cek-jantung'
     | '/chat'
+    | '/daftar-dokter'
     | '/dermatologi'
+    | '/doctor'
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
@@ -270,23 +459,40 @@ export interface FileRouteTypes {
     | '/membership'
     | '/mental-health'
     | '/mood-check'
+    | '/payment'
     | '/profil'
     | '/rekam-medis'
     | '/resep'
     | '/symptom-triage'
-    | '/tips-sehat'
     | '/twin'
     | '/video-edukasi'
+    | '/admin/doctors'
+    | '/admin/live-chat'
+    | '/admin/marketplace'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/doctor/analytics'
+    | '/doctor/chat'
+    | '/doctor/consultations'
+    | '/doctor/patients'
+    | '/doctor/prescriptions'
+    | '/doctor/settings'
+    | '/admin/'
+    | '/doctor/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ArtikelRouteRoute: typeof ArtikelRouteRoute
   AuthRouteRoute: typeof AuthRouteRoute
   BerandaRouteRoute: typeof BerandaRouteRoute
+  BookingRouteRoute: typeof BookingRouteRoute
   CekJantungRouteRoute: typeof CekJantungRouteRoute
   ChatRouteRoute: typeof ChatRouteRoute
+  DaftarDokterRouteRoute: typeof DaftarDokterRouteRoute
   DermatologiRouteRoute: typeof DermatologiRouteRoute
+  DoctorRouteRoute: typeof DoctorRouteRouteWithChildren
   DokterRouteRoute: typeof DokterRouteRoute
   KomunitasPasienRouteRoute: typeof KomunitasPasienRouteRoute
   KonsulRouteRoute: typeof KonsulRouteRoute
@@ -294,11 +500,11 @@ export interface RootRouteChildren {
   MembershipRouteRoute: typeof MembershipRouteRoute
   MentalHealthRouteRoute: typeof MentalHealthRouteRoute
   MoodCheckRouteRoute: typeof MoodCheckRouteRoute
+  PaymentRouteRoute: typeof PaymentRouteRoute
   ProfilRouteRoute: typeof ProfilRouteRoute
   RekamMedisRouteRoute: typeof RekamMedisRouteRoute
   ResepRouteRoute: typeof ResepRouteRoute
   SymptomTriageRouteRoute: typeof SymptomTriageRouteRoute
-  TipsSehatRouteRoute: typeof TipsSehatRouteRoute
   TwinRouteRoute: typeof TwinRouteRoute
   VideoEdukasiRouteRoute: typeof VideoEdukasiRouteRoute
 }
@@ -317,13 +523,6 @@ declare module '@tanstack/react-router' {
       path: '/twin'
       fullPath: '/twin'
       preLoaderRoute: typeof TwinRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tips-sehat': {
-      id: '/tips-sehat'
-      path: '/tips-sehat'
-      fullPath: '/tips-sehat'
-      preLoaderRoute: typeof TipsSehatRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/symptom-triage': {
@@ -352,6 +551,13 @@ declare module '@tanstack/react-router' {
       path: '/profil'
       fullPath: '/profil'
       preLoaderRoute: typeof ProfilRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment': {
+      id: '/payment'
+      path: '/payment'
+      fullPath: '/payment'
+      preLoaderRoute: typeof PaymentRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mood-check': {
@@ -403,11 +609,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DokterRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/doctor': {
+      id: '/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof DoctorRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dermatologi': {
       id: '/dermatologi'
       path: '/dermatologi'
       fullPath: '/dermatologi'
       preLoaderRoute: typeof DermatologiRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/daftar-dokter': {
+      id: '/daftar-dokter'
+      path: '/daftar-dokter'
+      fullPath: '/daftar-dokter'
+      preLoaderRoute: typeof DaftarDokterRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -422,6 +642,13 @@ declare module '@tanstack/react-router' {
       path: '/cek-jantung'
       fullPath: '/cek-jantung'
       preLoaderRoute: typeof CekJantungRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/booking': {
+      id: '/booking'
+      path: '/booking'
+      fullPath: '/booking'
+      preLoaderRoute: typeof BookingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/beranda': {
@@ -445,6 +672,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtikelRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -452,17 +686,158 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/doctor/': {
+      id: '/doctor/'
+      path: '/'
+      fullPath: '/doctor/'
+      preLoaderRoute: typeof DoctorIndexRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/doctor/settings': {
+      id: '/doctor/settings'
+      path: '/settings'
+      fullPath: '/doctor/settings'
+      preLoaderRoute: typeof DoctorSettingsRouteRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/doctor/prescriptions': {
+      id: '/doctor/prescriptions'
+      path: '/prescriptions'
+      fullPath: '/doctor/prescriptions'
+      preLoaderRoute: typeof DoctorPrescriptionsRouteRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/doctor/patients': {
+      id: '/doctor/patients'
+      path: '/patients'
+      fullPath: '/doctor/patients'
+      preLoaderRoute: typeof DoctorPatientsRouteRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/doctor/consultations': {
+      id: '/doctor/consultations'
+      path: '/consultations'
+      fullPath: '/doctor/consultations'
+      preLoaderRoute: typeof DoctorConsultationsRouteRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/doctor/chat': {
+      id: '/doctor/chat'
+      path: '/chat'
+      fullPath: '/doctor/chat'
+      preLoaderRoute: typeof DoctorChatRouteRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/doctor/analytics': {
+      id: '/doctor/analytics'
+      path: '/analytics'
+      fullPath: '/doctor/analytics'
+      preLoaderRoute: typeof DoctorAnalyticsRouteRouteImport
+      parentRoute: typeof DoctorRouteRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/marketplace': {
+      id: '/admin/marketplace'
+      path: '/marketplace'
+      fullPath: '/admin/marketplace'
+      preLoaderRoute: typeof AdminMarketplaceRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/live-chat': {
+      id: '/admin/live-chat'
+      path: '/live-chat'
+      fullPath: '/admin/live-chat'
+      preLoaderRoute: typeof AdminLiveChatRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/doctors': {
+      id: '/admin/doctors'
+      path: '/doctors'
+      fullPath: '/admin/doctors'
+      preLoaderRoute: typeof AdminDoctorsRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminDoctorsRouteRoute: typeof AdminDoctorsRouteRoute
+  AdminLiveChatRouteRoute: typeof AdminLiveChatRouteRoute
+  AdminMarketplaceRouteRoute: typeof AdminMarketplaceRouteRoute
+  AdminSettingsRouteRoute: typeof AdminSettingsRouteRoute
+  AdminUsersRouteRoute: typeof AdminUsersRouteRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminDoctorsRouteRoute: AdminDoctorsRouteRoute,
+  AdminLiveChatRouteRoute: AdminLiveChatRouteRoute,
+  AdminMarketplaceRouteRoute: AdminMarketplaceRouteRoute,
+  AdminSettingsRouteRoute: AdminSettingsRouteRoute,
+  AdminUsersRouteRoute: AdminUsersRouteRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
+interface DoctorRouteRouteChildren {
+  DoctorAnalyticsRouteRoute: typeof DoctorAnalyticsRouteRoute
+  DoctorChatRouteRoute: typeof DoctorChatRouteRoute
+  DoctorConsultationsRouteRoute: typeof DoctorConsultationsRouteRoute
+  DoctorPatientsRouteRoute: typeof DoctorPatientsRouteRoute
+  DoctorPrescriptionsRouteRoute: typeof DoctorPrescriptionsRouteRoute
+  DoctorSettingsRouteRoute: typeof DoctorSettingsRouteRoute
+  DoctorIndexRoute: typeof DoctorIndexRoute
+}
+
+const DoctorRouteRouteChildren: DoctorRouteRouteChildren = {
+  DoctorAnalyticsRouteRoute: DoctorAnalyticsRouteRoute,
+  DoctorChatRouteRoute: DoctorChatRouteRoute,
+  DoctorConsultationsRouteRoute: DoctorConsultationsRouteRoute,
+  DoctorPatientsRouteRoute: DoctorPatientsRouteRoute,
+  DoctorPrescriptionsRouteRoute: DoctorPrescriptionsRouteRoute,
+  DoctorSettingsRouteRoute: DoctorSettingsRouteRoute,
+  DoctorIndexRoute: DoctorIndexRoute,
+}
+
+const DoctorRouteRouteWithChildren = DoctorRouteRoute._addFileChildren(
+  DoctorRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   ArtikelRouteRoute: ArtikelRouteRoute,
   AuthRouteRoute: AuthRouteRoute,
   BerandaRouteRoute: BerandaRouteRoute,
+  BookingRouteRoute: BookingRouteRoute,
   CekJantungRouteRoute: CekJantungRouteRoute,
   ChatRouteRoute: ChatRouteRoute,
+  DaftarDokterRouteRoute: DaftarDokterRouteRoute,
   DermatologiRouteRoute: DermatologiRouteRoute,
+  DoctorRouteRoute: DoctorRouteRouteWithChildren,
   DokterRouteRoute: DokterRouteRoute,
   KomunitasPasienRouteRoute: KomunitasPasienRouteRoute,
   KonsulRouteRoute: KonsulRouteRoute,
@@ -470,11 +845,11 @@ const rootRouteChildren: RootRouteChildren = {
   MembershipRouteRoute: MembershipRouteRoute,
   MentalHealthRouteRoute: MentalHealthRouteRoute,
   MoodCheckRouteRoute: MoodCheckRouteRoute,
+  PaymentRouteRoute: PaymentRouteRoute,
   ProfilRouteRoute: ProfilRouteRoute,
   RekamMedisRouteRoute: RekamMedisRouteRoute,
   ResepRouteRoute: ResepRouteRoute,
   SymptomTriageRouteRoute: SymptomTriageRouteRoute,
-  TipsSehatRouteRoute: TipsSehatRouteRoute,
   TwinRouteRoute: TwinRouteRoute,
   VideoEdukasiRouteRoute: VideoEdukasiRouteRoute,
 }

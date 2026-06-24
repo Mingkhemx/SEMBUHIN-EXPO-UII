@@ -440,7 +440,7 @@ Pertanyaan pasien: ${t}`
                         {[1, 2, 3, 4, 5].map(rating => (
                           <Star
                             key={rating}
-                            className={`h-3.5 w-3.5 ${rating <= m.rating ? "text-amber-400 fill-amber-400" : "text-gray-300"}`}
+                            className={`h-3.5 w-3.5 ${rating <= (m.rating ?? 0) ? "text-amber-400 fill-amber-400" : "text-gray-300"}`}
                           />
                         ))}
                       </div>

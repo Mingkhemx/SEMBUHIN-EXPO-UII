@@ -1,100 +1,149 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ArrowRight, ChevronRight, Star, MapPin, Clock, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@tanstack/react-router";
+import { supabase } from "@/lib/supabase";
+import { Avatar } from "@/components/Avatar";
 
-const doctors = [
-  {
-    id: "01",
-    name: "Dr. Sarah Wijaya",
-    spec: "Bedah Kardiovaskular",
-    hospital: "RS Jantung Harapan Kita",
-    experience: "12 Tahun",
-    rating: 4.9,
-    reviews: 318,
-    available: "Senin – Jumat",
-    badge: "Spesialis Bulan Ini",
-    img: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=800",
-    accent: "from-sky-500 to-cyan-400",
-    accentLight: "bg-sky-50 text-sky-600 border-sky-200",
-    desc: "Pakar kardiologi dengan pengalaman klinis internasional selama 12+ tahun. Ahli dalam prosedur jantung kompleks dan intervensi non-invasif.",
-  },
-  {
-    id: "02",
-    name: "Dr. Budi Santoso",
-    spec: "Neurologi",
-    hospital: "RSUPN Dr. Cipto Jakarta",
-    experience: "9 Tahun",
-    rating: 4.8,
-    reviews: 204,
-    available: "Selasa – Sabtu",
-    badge: "Top Rated",
-    img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=800",
-    accent: "from-violet-500 to-purple-400",
-    accentLight: "bg-violet-50 text-violet-600 border-violet-200",
-    desc: "Spesialis saraf berpengalaman dalam penanganan stroke, epilepsi, dan gangguan neurodegeneratif dengan pendekatan berbasis riset terkini.",
-  },
-  {
-    id: "03",
-    name: "Dr. Elena Putri",
-    spec: "Psikologi Klinis",
-    hospital: "Klinik Kesehatan Mental Sehat",
-    experience: "7 Tahun",
-    rating: 4.9,
-    reviews: 276,
-    available: "Setiap Hari",
-    badge: "Most Booked",
-    img: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=800",
-    accent: "from-rose-400 to-pink-400",
-    accentLight: "bg-rose-50 text-rose-500 border-rose-200",
-    desc: "Psikolog klinis yang berfokus pada terapi CBT, manajemen stres, dan kesehatan mental holistik untuk pasien dari segala usia.",
-  },
-  {
-    id: "04",
-    name: "Dr. Thomas Muller",
-    spec: "Onkologi",
-    hospital: "RS Kanker Dharmais",
-    experience: "15 Tahun",
-    rating: 4.7,
-    reviews: 189,
-    available: "Senin – Kamis",
-    badge: "Senior Expert",
-    img: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=800",
-    accent: "from-emerald-500 to-teal-400",
-    accentLight: "bg-emerald-50 text-emerald-600 border-emerald-200",
-    desc: "Konsultan onkologi senior dengan keahlian khusus dalam terapi target dan imunoterapi kanker stadium lanjut.",
-  },
-  {
-    id: "05",
-    name: "Dr. Ayu Lestari",
-    spec: "Dermatologi",
-    hospital: "Klinik Kulit Premier",
-    experience: "8 Tahun",
-    rating: 4.9,
-    reviews: 412,
-    available: "Rabu – Minggu",
-    badge: "Highly Rated",
-    img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=800",
-    accent: "from-amber-400 to-orange-400",
-    accentLight: "bg-amber-50 text-amber-600 border-amber-200",
-    desc: "Dermatologis berpengalaman dalam perawatan kulit medis dan estetika, spesialisasi acne, hiperpigmentasi, dan anti-aging.",
-  },
+// Palet aksen
+const ACCENTS = [
+  { accent: "from-sky-500 to-cyan-400", light: "bg-sky-50 text-sky-600 border-sky-200" },
+  { accent: "from-violet-500 to-purple-400", light: "bg-violet-50 text-violet-600 border-violet-200" },
+  { accent: "from-rose-400 to-pink-400", light: "bg-rose-50 text-rose-500 border-rose-200" },
+  { accent: "from-emerald-500 to-teal-400", light: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+  { accent: "from-amber-400 to-orange-400", light: "bg-amber-50 text-amber-600 border-amber-200" },
 ];
 
+type Doctor = {
+  id: string;
+  name: string;
+  spec: string;
+  hospital: string;
+  experience: string;
+  rating: number;
+  reviews: number;
+  available: string;
+  badge: string;
+  img: string;
+  accent: string;
+  accentLight: string;
+  desc: string;
+};
+
+function mapDbDoctor(row: any, index: number): Doctor {
+  const palette = ACCENTS[index % ACCENTS.length];
+  const expYears = Number(row.experience_years) || 0;
+  return {
+    id: String(row.id),
+    name: row.name || "Dokter",
+    spec: row.specialty || "Spesialis",
+    hospital: row.hospital || "Rumah Sakit",
+    experience: expYears ? `${expYears} Tahun` : "-",
+    rating: Number(row.rating) || 0,
+    reviews: Number(row.total_patients) || 0,
+    available: row.available || "Senin – Jumat",
+    badge: row.badge || "Terverifikasi",
+    img: row.avatar_url || "",
+    accent: palette.accent,
+    accentLight: palette.light,
+    desc: row.description || `Dokter spesialis ${row.specialty || "medis"} dengan pengalaman ${expYears} tahun.`,
+  };
+}
+
 export function DoctorSection() {
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const doctorRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const active = doctors[activeIdx];
+
+  // Fetch dokter dari DB
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data } = await supabase
+        .from("doctors")
+        .select("*")
+        .eq("is_active", true)
+        .order("rating", { ascending: false })
+        .limit(5);
+      if (!mounted) return;
+      if (data && data.length > 0) {
+        setDoctors(data.map((row, i) => mapDbDoctor(row, i)));
+      }
+      setLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  // Check if section is visible in viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
+  // Auto-scroll only if visible, not paused, and has data
+  useEffect(() => {
+    if (isPaused || !isInView || doctors.length === 0) return;
+    const interval = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % doctors.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isPaused, isInView, doctors.length]);
+
+  // Sync timeline scroll
+  useEffect(() => {
+    const activeDoctor = doctorRefs.current[activeIdx];
+    if (activeDoctor && timelineRef.current) {
+      const container = timelineRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const doctorRect = activeDoctor.getBoundingClientRect();
+      const scrollLeft = container.scrollLeft + doctorRect.left - containerRect.left - (containerRect.width / 2) + (doctorRect.width / 2);
+
+      container.scrollTo({
+        left: scrollLeft,
+        behavior: "smooth"
+      });
+    }
+  }, [activeIdx]);
 
   const scrollTimeline = (dir: "left" | "right") => {
     if (!timelineRef.current) return;
     timelineRef.current.scrollBy({ left: dir === "left" ? -200 : 200, behavior: "smooth" });
   };
 
+  // Jika loading atau tidak ada data, tampilkan minimal skeleton
+  if (loading) return null;
+
+  if (doctors.length === 0) return null;
+
   return (
-    <section className="relative mt-20 mb-40 overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative mt-20 mb-40 overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Ambient background glow */}
       <div className="absolute -top-40 left-1/3 w-[600px] h-[400px] rounded-full bg-sky-200/20 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[400px] rounded-full bg-violet-200/15 blur-[90px] pointer-events-none" />
@@ -168,6 +217,7 @@ export function DoctorSection() {
             <div key={doc.id} className="flex items-center shrink-0">
               {/* Node */}
               <button
+                ref={(el: HTMLButtonElement | null) => { doctorRefs.current[idx] = el; }}
                 onClick={() => setActiveIdx(idx)}
                 className="relative flex flex-col items-center group"
               >
@@ -186,10 +236,11 @@ export function DoctorSection() {
                       : "border-sky-200/50 grayscale opacity-60 hover:opacity-90 hover:grayscale-0 hover:scale-105"
                   }`}
                 >
-                  <img
+                  <Avatar
                     src={doc.img}
-                    alt={doc.name}
-                    className="w-full h-full object-cover"
+                    name={doc.name}
+                    className="!w-full !h-full"
+                    textClassName="text-lg"
                   />
                   {activeIdx === idx && (
                     <div className="absolute inset-0 ring-2 ring-sky-400/50 rounded-full" />
@@ -204,7 +255,7 @@ export function DoctorSection() {
                       : "bg-sky-100 text-sky-400 group-hover:bg-sky-200"
                   }`}
                 >
-                  {doc.id}
+                  {idx + 1}
                 </div>
 
                 {/* Name below dot */}
@@ -213,7 +264,7 @@ export function DoctorSection() {
                     activeIdx === idx ? "text-sky-600" : "text-muted-foreground"
                   }`}
                 >
-                  {doc.name.replace("Dr. ", "")}
+                  {doc.name.replace(/^(dr\.?|drs\.?)\s*/i, "")}
                 </div>
               </button>
 
@@ -240,10 +291,12 @@ export function DoctorSection() {
             <div className="flex flex-col lg:flex-row">
               {/* Left — Photo */}
               <div className="relative lg:w-[380px] shrink-0 h-64 lg:h-auto min-h-[300px] overflow-hidden">
-                <img
+                <Avatar
                   src={active.img}
-                  alt={active.name}
-                  className="absolute inset-0 w-full h-full object-cover object-top"
+                  name={active.name}
+                  rounded=""
+                  className="absolute inset-0 w-full h-full"
+                  textClassName="text-7xl"
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-white/10" />
