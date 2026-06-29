@@ -20,6 +20,8 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+secrets/
+*.json
 
 # Wrangler / Cloudflare
 .wrangler/

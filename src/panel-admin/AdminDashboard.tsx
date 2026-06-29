@@ -2,7 +2,12 @@
  * AdminDashboard — Overview & key metrics for the Admin Panel.
  */
 
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   Stethoscope,
@@ -13,8 +18,45 @@ import {
   UserPlus,
   Activity,
   Eye,
+  RefreshCcw,
 } from "lucide-react";
 import { AdminLayout, AdminStatCard, StatusBadge } from "@/panel-admin/AdminLayout";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface DashboardStats {
+  totalUsers: number;
+  totalDoctors: number;
+  pendingRequests: number;
+  activeChats: number;
+  userChange: string;
+  doctorChange: string;
+}
+
+interface DoctorRequest {
+  id: string;
+  full_name: string;
+  specialty: string;
+  created_at: string;
+  status: string;
+}
+
+interface RecentUser {
+  id: string;
+  full_name: string;
+  email: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+interface SystemActivity {
+  id: string;
+  type: 'success' | 'info' | 'error' | 'warning';
+  label: string;
+  time: string;
+  icon: any;
+  color: string;
+}
 
 // ─── Animation helpers ────────────────────────────────────────────────────────
 
@@ -100,40 +142,226 @@ function SectionCard({
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function AdminDashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    totalDoctors: 0,
+    pendingRequests: 0,
+    activeChats: 0,
+    userChange: "0%",
+    doctorChange: "0%",
+  });
+  const [doctorRequests, setDoctorRequests] = useState<DoctorRequest[]>([]);
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [activities, setActivities] = useState<SystemActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLive, setIsLive] = useState(false);
+
+  // 1. Fetch Initial Data
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch stats count
+      const [usersCount, doctorsCount, pendingDocs, activeConsultations] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('doctors').select('*', { count: 'exact', head: true }), // Count all active doctors
+        supabase.from('doctor_registrations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('consultations').select('*', { count: 'exact', head: true }).eq('payment_status', 'paid')
+      ]);
+
+      setStats({
+        totalUsers: usersCount.count || 0,
+        totalDoctors: doctorsCount.count || 0,
+        pendingRequests: pendingDocs.count || 0,
+        activeChats: activeConsultations.count || 0,
+        userChange: "+2.5%",
+        doctorChange: "+1.2%",
+      });
+
+      // Fetch Recent Doctor Requests (from doctor_registrations table)
+      const { data: docs } = await supabase
+        .from('doctor_registrations')
+        .select('id, name, specialty, created_at, status')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (docs) {
+        // Map to match the interface if necessary
+        setDoctorRequests(docs.map(d => ({
+          id: d.id,
+          full_name: d.name,
+          specialty: d.specialty,
+          created_at: d.created_at,
+          status: d.status
+        })));
+      }
+
+      // Fetch Recent Users
+      const { data: users } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, created_at, is_active')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (users) setRecentUsers(users);
+
+      // Initial Activities (Mocking from data)
+      const initialActivities: SystemActivity[] = [
+        { id: '1', type: 'info', label: 'Dashboard Admin dimuat', time: 'Baru saja', icon: Activity, color: 'text-sky-400' }
+      ];
+      setActivities(initialActivities);
+
+    } catch (err) {
+      console.error("Error fetching dashboard:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 2. Setup Realtime Subscriptions
+  useEffect(() => {
+    fetchDashboardData();
+
+    // Subscribe to Doctors (Requests)
+    const doctorChannel = supabase
+      .channel('admin-doctors-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'doctors' }, (payload) => {
+        console.log('Realtime Doctor Change:', payload);
+        setIsLive(true);
+        setTimeout(() => setIsLive(false), 2000);
+        
+        // Refresh requests and stats
+        fetchDashboardData();
+        
+            // Add activity
+            if (payload.eventType === 'INSERT') {
+              const newDoc = payload.new as DoctorRequest;
+              setActivities(prev => [{
+                id: Math.random().toString(),
+                type: 'warning' as const,
+                label: `Pendaftaran baru: ${newDoc.full_name}`,
+                time: 'Baru saja',
+                icon: UserPlus,
+                color: 'text-amber-400'
+              }, ...prev].slice(0, 10));
+            }
+          })
+          .subscribe();
+    
+        // Subscribe to Profiles (Users)
+        const profileChannel = supabase
+          .channel('admin-profiles-realtime')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+            console.log('Realtime Profile Change:', payload);
+            setIsLive(true);
+            setTimeout(() => setIsLive(false), 2000);
+            
+            fetchDashboardData();
+    
+            if (payload.eventType === 'INSERT') {
+              const newUser = payload.new as RecentUser;
+              setActivities(prev => [{
+                id: Math.random().toString(),
+                type: 'success' as const,
+                label: `User baru bergabung: ${newUser.full_name}`,
+                time: 'Baru saja',
+                icon: UserPlus,
+                color: 'text-sky-400'
+              }, ...prev].slice(0, 10));
+            }
+          })
+          .subscribe();
+
+    // Subscribe to Doctor Registrations (Requests)
+    const registrationChannel = supabase
+      .channel('admin-registrations-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'doctor_registrations' }, (payload) => {
+        console.log('Realtime Registration Change:', payload);
+        setIsLive(true);
+        setTimeout(() => setIsLive(false), 2000);
+        fetchDashboardData();
+        
+        if (payload.eventType === 'INSERT') {
+          const newReg = payload.new as any;
+          setActivities(prev => [{
+            id: Math.random().toString(),
+            type: 'warning' as const,
+            label: `Pendaftaran baru: ${newReg.name}`,
+            time: 'Baru saja',
+            icon: UserPlus,
+            color: 'text-amber-400'
+          }, ...prev].slice(0, 10));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(doctorChannel);
+      supabase.removeChannel(profileChannel);
+      supabase.removeChannel(registrationChannel);
+    };
+  }, []);
+
   return (
-    <AdminLayout title="Dashboard" subtitle="Ringkasan aktivitas & statistik sistem Sembuhin">
+    <AdminLayout 
+      title="Dashboard" 
+      subtitle="Ringkasan aktivitas & statistik sistem Sembuhin"
+      rightElement={
+        <div className="flex items-center gap-2">
+          <AnimatePresence>
+            {isLive && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+              >
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Live Update</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button 
+            onClick={() => fetchDashboardData()}
+            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all active:scale-95"
+          >
+            <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+          </button>
+        </div>
+      }
+    >
       <div className="space-y-6">
         {/* ── Stats row ───────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[
             {
               label: "Total Users",
-              value: "12,847",
-              change: "8.2%",
+              value: stats.totalUsers.toLocaleString(),
+              change: stats.userChange,
               positive: true,
               icon: <Users className="h-5 w-5" />,
               color: "bg-sky-500/10 text-sky-400",
             },
             {
               label: "Total Dokter",
-              value: "248",
-              change: "3.1%",
+              value: stats.totalDoctors.toLocaleString(),
+              change: stats.doctorChange,
               positive: true,
               icon: <Stethoscope className="h-5 w-5" />,
               color: "bg-violet-500/10 text-violet-400",
             },
             {
               label: "Permintaan Pending",
-              value: "3",
-              change: "3 baru",
+              value: stats.pendingRequests.toString(),
+              change: stats.pendingRequests > 0 ? `${stats.pendingRequests} baru` : "Bersih",
               positive: false,
               icon: <Clock className="h-5 w-5" />,
               color: "bg-amber-500/10 text-amber-400",
             },
             {
               label: "Chat Aktif",
-              value: "89",
-              change: "15%",
+              value: stats.activeChats.toString(),
+              change: "Realtime",
               positive: true,
               icon: <MessageSquare className="h-5 w-5" />,
               color: "bg-emerald-500/10 text-emerald-400",
@@ -164,7 +392,7 @@ export function AdminDashboard() {
                       <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Tanggal Daftar
                       </th>
-                      <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="text-center px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -173,33 +401,43 @@ export function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {DOCTOR_REQUESTS.map((doc, i) => (
-                      <tr
-                        key={i}
-                        className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                      >
-                        <td className="px-5 py-3.5 text-slate-900 font-medium">{doc.name}</td>
-                        <td className="px-5 py-3.5 text-slate-600">{doc.specialty}</td>
-                        <td className="px-5 py-3.5 text-slate-600">{doc.date}</td>
-                        <td className="px-5 py-3.5">
-                          <StatusBadge status={doc.status} />
-                        </td>
-                        <td className="px-5 py-3.5">
-                          {doc.status === "pending" ? (
-                            <div className="flex items-center gap-2">
-                              <button className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold hover:bg-emerald-100 transition-colors">
-                                Approve
-                              </button>
-                              <button className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-colors">
-                                Reject
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 text-xs">—</span>
-                          )}
+                    {doctorRequests.length > 0 ? (
+                      doctorRequests.map((doc, i) => (
+                        <tr
+                          key={doc.id}
+                          className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                        >
+                          <td className="px-5 py-3.5 text-slate-900 font-medium">{doc.full_name}</td>
+                          <td className="px-5 py-3.5 text-slate-600">{doc.specialty}</td>
+                          <td className="px-5 py-3.5 text-slate-600">
+                            {format(new Date(doc.created_at), "dd MMM yyyy", { locale: idLocale })}
+                          </td>
+                          <td className="px-5 py-3.5 text-center">
+                            <StatusBadge status={doc.status} />
+                          </td>
+                          <td className="px-5 py-3.5">
+                            {doc.status === "pending" ? (
+                              <div className="flex items-center gap-2">
+                                <button className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold hover:bg-emerald-100 transition-colors">
+                                  Approve
+                                </button>
+                                <button className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-colors">
+                                  Reject
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 text-xs">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-5 py-10 text-center text-slate-400">
+                          {isLoading ? "Memuat data..." : "Tidak ada permintaan terbaru"}
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -220,7 +458,7 @@ export function AdminDashboard() {
                       <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Bergabung
                       </th>
-                      <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="text-center px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -229,25 +467,35 @@ export function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {RECENT_USERS.map((user, i) => (
-                      <tr
-                        key={i}
-                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-                      >
-                        <td className="px-5 py-3.5 text-slate-900 font-medium">{user.name}</td>
-                        <td className="px-5 py-3.5 text-slate-600">{user.email}</td>
-                        <td className="px-5 py-3.5 text-slate-600">{user.joined}</td>
-                        <td className="px-5 py-3.5">
-                          <StatusBadge status={user.status} />
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold hover:bg-sky-100 transition-colors">
-                            <Eye className="h-3.5 w-3.5" />
-                            View
-                          </button>
+                    {recentUsers.length > 0 ? (
+                      recentUsers.map((u, i) => (
+                        <tr
+                          key={u.id}
+                          className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+                        >
+                          <td className="px-5 py-3.5 text-slate-900 font-medium">{u.full_name}</td>
+                          <td className="px-5 py-3.5 text-slate-600">{u.email}</td>
+                          <td className="px-5 py-3.5 text-slate-600">
+                            {format(new Date(u.created_at), "dd MMM yyyy", { locale: idLocale })}
+                          </td>
+                          <td className="px-5 py-3.5 text-center">
+                            <StatusBadge status={u.is_active ? "active" : "inactive"} />
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold hover:bg-sky-100 transition-colors">
+                              <Eye className="h-3.5 w-3.5" />
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-5 py-10 text-center text-slate-400">
+                          {isLoading ? "Memuat data..." : "Belum ada user terdaftar"}
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -258,10 +506,12 @@ export function AdminDashboard() {
           <div>
             <SectionCard title="Aktivitas Sistem" delay={0.2}>
               <ul className="divide-y divide-slate-100">
-                {ACTIVITY_TIMELINE.map((item, i) => (
+                {activities.map((item, i) => (
                   <motion.li
-                    key={i}
-                    {...fadeUp(0.25 + i * 0.06)}
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     className="flex items-start gap-3 px-5 py-4"
                   >
                     <div className="mt-0.5 flex-shrink-0">

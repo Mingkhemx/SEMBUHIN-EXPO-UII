@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
+import { DoctorShell } from "@/panel-doctor/DoctorLayout";
 
 /**
  * Parent layout route for all /doctor/* pages.
@@ -33,5 +34,5 @@ export const Route = createFileRoute("/doctor")({
       });
     }
   },
-  component: () => <Outlet />,
+  component: DoctorShell,
 });

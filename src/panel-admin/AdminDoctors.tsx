@@ -5,9 +5,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Check, X, Eye, UserX, Search, UserCheck, Loader2, RefreshCw, AlertCircle, ZoomIn, ZoomOut, RotateCw, Download, CheckCircle, XCircle, AlertTriangle, UserPlus, Mail, Phone, MapPin, Star, Calendar, Award, Users } from "lucide-react";
+import { FileText, Check, X, Eye, UserX, Search, UserCheck, Loader2, RefreshCw, AlertCircle, ZoomIn, ZoomOut, RotateCw, Download, CheckCircle, XCircle, AlertTriangle, UserPlus, Mail, Phone, MapPin, Star, Calendar, Award, Users, Clock, ShieldCheck } from "lucide-react";
 import { AdminLayout, StatusBadge } from "@/panel-admin/AdminLayout";
 import { supabase } from "@/lib/supabase";
+import { Avatar } from "@/components/Avatar";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,6 +47,11 @@ type ActiveDoctor = {
   joined_at: string;
   total_patients: number;
   rating: number;
+  avatar_url?: string | null;
+  phone?: string;
+  license_number?: string;
+  description?: string;
+  available?: string;
 };
 
 // ─── Document Viewer Overlay ──────────────────────────────────────────────────
@@ -485,7 +491,7 @@ function ConfirmModal({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function AdminDoctors() {
-  const [activeTab, setActiveTab] = useState<Tab>("pending");
+  const [activeTab, setActiveTab] = useState<Tab>("all");
 
   // Data state
   const [pendingList, setPendingList] = useState<DoctorRegistration[]>([]);
@@ -1017,7 +1023,7 @@ export function AdminDoctors() {
                               key={h}
                               className={[
                                 "text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3",
-                                h === "Aksi" ? "text-right" : "text-left",
+                                h === "Aksi" ? "text-right" : h === "Status" ? "text-center" : "text-left",
                               ].join(" ")}
                             >
                               {h}
@@ -1034,9 +1040,13 @@ export function AdminDoctors() {
                         >
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-sky-100 to-indigo-100 border border-slate-200 flex items-center justify-center text-sky-600 text-sm font-bold flex-shrink-0">
-                                {doc.name.split(" ").slice(-1)[0]?.[0] ?? "D"}
-                              </div>
+                              <Avatar
+                                src={doc.avatar_url}
+                                name={doc.name}
+                                className="h-10 w-10 border border-slate-200"
+                                textClassName="text-sm"
+                                rounded="rounded-xl"
+                              />
                               <div>
                                 <span className="text-sm font-semibold text-slate-900 block">
                                   {doc.name}
@@ -1049,7 +1059,7 @@ export function AdminDoctors() {
                           <td className="px-5 py-3.5 text-sm text-slate-600 max-w-[160px] truncate">
                             {doc.hospital ?? "-"}
                           </td>
-                          <td className="px-5 py-3.5">
+                          <td className="px-5 py-3.5 text-center">
                             <StatusBadge status={doc.is_active ? "active" : "inactive"} />
                           </td>
                           <td className="px-5 py-3.5 text-sm text-slate-600">
@@ -1127,9 +1137,13 @@ export function AdminDoctors() {
                       className="bg-white border border-rose-200 rounded-2xl overflow-hidden"
                     >
                       <div className="p-5 flex items-start gap-4">
-                        <div className="h-14 w-14 rounded-xl bg-rose-50 flex items-center justify-center text-rose-400 text-xl font-bold flex-shrink-0 ring-2 ring-rose-200">
-                          {reg.name.split(" ").slice(-1)[0]?.[0] ?? "D"}
-                        </div>
+                        <Avatar
+                          src={null}
+                          name={reg.name}
+                          className="h-14 w-14 border-2 border-rose-100 ring-2 ring-rose-50"
+                          textClassName="text-xl"
+                          rounded="rounded-xl"
+                        />
                         <div className="flex-1 min-w-0">
                           <h3 className="text-slate-900 font-bold text-sm truncate">{reg.name}</h3>
                           <p className="text-rose-600 text-xs font-medium mt-0.5">{reg.specialty}</p>
@@ -1222,119 +1236,150 @@ function DoctorDetailModal({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+        className="bg-white rounded-[32px] shadow-2xl max-w-2xl w-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-6 text-white relative">
+        {/* Header / Cover */}
+        <div className="relative h-40 bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+            className="absolute top-6 right-6 p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-all z-10"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl font-bold">
-              {doctor.name.split(" ").slice(-1)[0]?.[0] ?? "D"}
-            </div>
-            <div>
-              <h2 className="text-lg font-bold">{doctor.name}</h2>
-              <p className="text-sky-100 text-sm">{doctor.specialty}</p>
-              <div className="mt-1">
-                <StatusBadge status={doctor.is_active ? "active" : "inactive"} />
-              </div>
+          
+          {/* Status Badge Over Cover */}
+          <div className="absolute top-6 left-6">
+            <StatusBadge status={doctor.is_active ? "active" : "inactive"} />
+          </div>
+
+          {/* Profile Picture */}
+          <div className="absolute -bottom-16 left-8">
+            <div className="p-1.5 bg-white rounded-[32px] shadow-xl">
+              <Avatar
+                src={doctor.avatar_url}
+                name={doctor.name}
+                className="h-32 w-32 border-4 border-white"
+                textClassName="text-4xl"
+                rounded="rounded-[24px]"
+              />
             </div>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center">
-                <Mail className="h-3.5 w-3.5 text-sky-600" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Email</p>
-                <p className="text-xs font-medium text-slate-700 truncate max-w-[160px]">{doctor.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center">
-                <MapPin className="h-3.5 w-3.5 text-violet-600" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">RS / Klinik</p>
-                <p className="text-xs font-medium text-slate-700 truncate max-w-[160px]">{doctor.hospital ?? "-"}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center">
-                <Star className="h-3.5 w-3.5 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Rating</p>
-                <p className="text-xs font-medium text-slate-700">{doctor.rating} / 5.0</p>
+        {/* Content */}
+        <div className="pt-20 pb-8 px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+                {doctor.name}
+                <ShieldCheck className="h-6 w-6 text-sky-500" />
+              </h2>
+              <p className="text-sky-600 font-semibold flex items-center gap-1.5 mt-1">
+                <Award className="h-4 w-4" />
+                {doctor.specialty}
+              </p>
+              <div className="flex items-center gap-3 mt-3">
+                <div className="flex items-center gap-1 text-amber-500">
+                  <Star className="h-4 w-4 fill-current" />
+                  <span className="text-sm font-bold">{doctor.rating}</span>
+                </div>
+                <div className="w-1 h-1 rounded-full bg-slate-300" />
+                <div className="flex items-center gap-1 text-slate-500">
+                  <Users className="h-4 w-4" />
+                  <span className="text-sm font-medium">{doctor.total_patients} Pasien</span>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                <Users className="h-3.5 w-3.5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Pasien</p>
-                <p className="text-xs font-medium text-slate-700">{doctor.total_patients.toLocaleString("id-ID")}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center">
-                <Calendar className="h-3.5 w-3.5 text-rose-600" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Bergabung</p>
-                <p className="text-xs font-medium text-slate-700">
-                  {new Date(doctor.joined_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
-                <Award className="h-3.5 w-3.5 text-slate-600" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">ID</p>
-                <p className="text-xs font-medium text-slate-500 font-mono truncate max-w-[120px]">{doctor.id.slice(0, 8)}...</p>
-              </div>
+            
+            <div className="flex gap-2">
+              {doctor.is_active ? (
+                <button
+                  onClick={onDeactivate}
+                  disabled={actionLoading}
+                  className="px-6 py-2.5 rounded-2xl text-sm font-bold bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 transition-all disabled:opacity-60 inline-flex items-center gap-2"
+                >
+                  {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserX className="h-4 w-4" />}
+                  Nonaktifkan
+                </button>
+              ) : (
+                <button
+                  onClick={onActivate}
+                  disabled={actionLoading}
+                  className="px-6 py-2.5 rounded-2xl text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all disabled:opacity-60 inline-flex items-center gap-2"
+                >
+                  {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                  Aktifkan
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-4 border-t border-slate-100">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors"
-            >
-              Tutup
-            </button>
-            {doctor.is_active ? (
-              <button
-                onClick={onDeactivate}
-                disabled={actionLoading}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-rose-500 text-white hover:bg-rose-600 transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-1.5"
-              >
-                {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserX className="h-4 w-4" />}
-                Nonaktifkan
-              </button>
-            ) : (
-              <button
-                onClick={onActivate}
-                disabled={actionLoading}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-1.5"
-              >
-                {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-                Aktifkan Kembali
-              </button>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Bio Section */}
+            <div className="space-y-4">
+              <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100">
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Bio Singkat</h4>
+                <p className="text-sm text-slate-600 leading-relaxed italic">
+                  "{doctor.description || `Dokter spesialis ${doctor.specialty} yang berkomitmen memberikan pelayanan terbaik bagi pasien Sembuhin.`}"
+                </p>
+              </div>
+              
+              <div className="p-5 rounded-3xl bg-sky-50/50 border border-sky-100/50">
+                <h4 className="text-[11px] font-bold text-sky-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <Clock className="h-3.5 w-3.5" />
+                  Jadwal Praktik
+                </h4>
+                <p className="text-sm font-semibold text-slate-700">
+                  {doctor.available || "Senin – Jumat (08:00 - 17:00)"}
+                </p>
+              </div>
+            </div>
+
+            {/* Info Grid */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+                  <Mail className="h-4 w-4 text-sky-600" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Email</p>
+                  <p className="text-sm font-medium text-slate-700">{doctor.email}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+                  <MapPin className="h-4 w-4 text-violet-600" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">RS / Klinik</p>
+                  <p className="text-sm font-medium text-slate-700">{doctor.hospital || "-"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">No. STR / Lisensi</p>
+                  <p className="text-sm font-mono font-medium text-slate-700">{doctor.license_number || "—"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+                  <Calendar className="h-4 w-4 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Bergabung Sejak</p>
+                  <p className="text-sm font-medium text-slate-700">
+                    {new Date(doctor.joined_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>

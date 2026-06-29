@@ -8,6 +8,7 @@ import { DoctorSection } from "./-DoctorSection";
 import { BlogSection } from "./-BlogSection";
 import { TestimonialSection } from "./-TestimonialSection";
 import { LiveChat } from "@/components/LiveChat";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/beranda")({
   head: () => ({
@@ -22,9 +23,10 @@ export const Route = createFileRoute("/beranda")({
 });
 
 function Index() {
+  const { t } = useLanguage();
   const [contentIndex, setContentIndex] = useState(0);
   
-  const rotationContent = [
+  const rotationContent = t("home.hero_rotation") as any[] || [
     { topTitle: "Pendamping Setia", bottomTitle: "Fisik & Mental Anda", desc: "Platform ekosistem kesehatan holistik berskala penuh untuk mendampingi setiap keluhan fisik maupun mental Anda secara personal." },
     { topTitle: "Akses Tanpa Antre:", bottomTitle: "Konsultasi Dokter Live", desc: "Bertanya langsung ke asisten AI cerdas kami atau mulai sesi darurat dengan Dokter spesialis secara live 24/7." },
     { topTitle: "Navigasi Medis:", bottomTitle: "Cari RS Otomatis", desc: "Sistem geolokasi pintar kami akan merespons dan menemukan rumah sakit serta klinik terdekat dari lokasi Anda dalam hitungan detik." }
@@ -80,15 +82,15 @@ function Index() {
 
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5 w-full">
             <Link to="/twin" className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white px-10 py-4.5 text-sm font-bold shadow-lg shadow-sky-500/25 transition-all hover:scale-105 hover:shadow-sky-500/35 active:scale-95">
-              Mulai Transformasi <ArrowRight className="h-4 w-4" />
+              {t("home.start_btn")} <ArrowRight className="h-4 w-4" />
             </Link>
             <Link to="/konsul" className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-2xl glass-strong hover:bg-white/80 text-foreground border border-sky-200/50 px-10 py-4.5 text-sm font-bold backdrop-blur-md transition-all hover:scale-105 hover:border-sky-300/60 active:scale-95">
-              Konsultasi AI
+              {t("home.ai_btn")}
             </Link>
           </div>
 
           <div className="mt-20 flex flex-wrap items-center justify-center gap-12 border-t border-border pt-10">
-            {[["24/7", "AI Expert Care"], ["1 Jam", "Express Pharmacy"], ["100%", "Secure Digital Records"]].map(([v, l]) => (
+            {[[t("home.stats.ai_care"), "24/7"], [t("home.stats.pharmacy"), "1 Jam"], [t("home.stats.records"), "100%"]].map(([l, v]) => (
               <div key={l} className="text-center">
                 <div className="text-2xl font-bold text-foreground font-display mb-1">{v}</div>
                 <div className="text-[10px] uppercase tracking-[0.2em] text-sky-500/60 font-bold">{l}</div>
@@ -101,9 +103,9 @@ function Index() {
       {/* FEATURE BENTO GRID */}
       <section className="px-4 max-w-7xl mx-auto relative">
         <div className="relative z-10 mb-16 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">Ekosistem Kesehatan Smart</div>
-          <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight">Empat Pilar <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Sembuhin</span></h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">Semua kebutuhan kesehatan kamu terintegrasi dalam satu portal holografik bertenaga AI dengan desain futuristik.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">{t("home.pilar_badge")}</div>
+          <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight">{t("home.pilar_title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Sembuhin</span></h2>
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">{t("home.pilar_desc")}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(300px,auto)]">
@@ -112,9 +114,9 @@ function Index() {
             <div className="absolute -right-20 -bottom-20 w-96 h-96 bg-sky-300/8 blur-[100px] rounded-full group-hover:bg-sky-300/12 transition-all duration-700 pointer-events-none" />
             <div className="flex flex-col md:flex-row items-center justify-between w-full h-full gap-6">
               <div className="flex-1">
-                <h3 className="font-display text-3xl font-bold text-foreground mb-3 transition-colors group-hover:text-sky-600">Konsultasi Dokter</h3>
-                <p className="text-muted-foreground max-w-lg text-lg leading-relaxed">Temukan & buat janji dengan dokter spesialis terpercaya secara langsung dari aplikasi.</p>
-                <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-sky-600 transition-colors group-hover:text-sky-500">Akses Konsultasi <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></div>
+                <h3 className="font-display text-3xl font-bold text-foreground mb-3 transition-colors group-hover:text-sky-600">{t("home.cards.consultation")}</h3>
+                <p className="text-muted-foreground max-w-lg text-lg leading-relaxed">{t("home.cards.consultation_desc")}</p>
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-sky-600 transition-colors group-hover:text-sky-500">{t("home.cards.consultation_btn")} <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></div>
               </div>
               <div className="w-full md:w-1/3">
                 <img src="/images/konsul-dokter.png" alt="Konsultasi Dokter" className="w-full h-32 md:h-40 object-contain" />
@@ -126,8 +128,8 @@ function Index() {
           <SpotlightCard to="/cek-jantung" glowColor="#f87171">
             <div className="flex flex-col h-full">
               <img src="/images/cek-jantung.png" alt="Cek Jantung" className="w-full h-16 object-contain mb-4" />
-              <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-rose-600">Cek Jantung</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-auto">Pantau detak jantung real-time terhubung langsung dari HP Anda.</p>
+              <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-rose-600">{t("home.cards.heart")}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-auto">{t("home.cards.heart_desc")}</p>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
                 <span className="text-xs font-semibold uppercase tracking-wider text-rose-500/70 group-hover:text-rose-600 transition-colors">Heart Care</span>
                 <ArrowRight className="h-4 w-4 text-rose-500 transition-transform duration-300 group-hover:translate-x-1" />
@@ -139,8 +141,8 @@ function Index() {
           <SpotlightCard to="/symptom-triage" glowColor="#fbbf24">
             <div className="flex flex-col h-full">
               <img src="/images/ai-sympton-triage.png" alt="AI Symptom Triage" className="w-full h-16 object-contain mb-4" />
-              <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-amber-600">AI Symptom Triage</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-auto">Input gejala, AI klasifikasikan urgensi medis Anda.</p>
+              <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-amber-600">{t("home.cards.triage")}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-auto">{t("home.cards.triage_desc")}</p>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
                 <span className="text-xs font-semibold uppercase tracking-wider text-amber-500/70 group-hover:text-amber-600 transition-colors">Symptom Check</span>
                 <ArrowRight className="h-4 w-4 text-amber-500 transition-transform duration-300 group-hover:translate-x-1" />
@@ -153,9 +155,9 @@ function Index() {
             <div className="absolute left-0 bottom-0 w-64 h-64 bg-violet-300/8 blur-[80px] rounded-full group-hover:bg-violet-300/12 transition-all duration-700 pointer-events-none" />
             <div className="flex flex-col md:flex-row-reverse items-center justify-between w-full h-full gap-6">
               <div className="flex-1">
-                <h3 className="font-display text-3xl font-bold text-foreground mb-3 transition-colors group-hover:text-violet-600">Mental Health Care</h3>
-                <p className="text-muted-foreground text-lg leading-relaxed mb-6 max-w-lg">Screening PHQ-9 & GAD-7 + modul CBT berbasis AI terhubung ke psikolog profesional.</p>
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-violet-600 transition-colors group-hover:text-violet-500">Akses Mental Care <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></div>
+                <h3 className="font-display text-3xl font-bold text-foreground mb-3 transition-colors group-hover:text-violet-600">{t("home.cards.mental")}</h3>
+                <p className="text-muted-foreground text-lg leading-relaxed mb-6 max-w-lg">{t("home.cards.mental_desc")}</p>
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-violet-600 transition-colors group-hover:text-violet-500">{t("home.cards.mental_btn")} <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></div>
               </div>
               <div className="w-full md:w-1/3">
                 <img src="/images/mental-heart.png" alt="Mental Health Care" className="w-full h-32 md:h-40 object-contain" />
@@ -168,9 +170,9 @@ function Index() {
       {/* DOCTOR REGISTRATION SECTION */}
       <section className="px-4 max-w-7xl mx-auto mt-24 relative">
         <div className="relative z-10 mb-12 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">BERGABUNGLAH BERSAMA KAMI</div>
-          <h2 className="font-display text-3xl font-bold sm:text-5xl text-foreground tracking-tight">Daftarkan Diri Menjadi <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Dokter Mitra</span></h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">Bergabung dengan jaringan dokter profesional terpercaya dan bantu ribuan pasien mendapatkan perawatan medis terbaik.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">{t("home.doctor_badge")}</div>
+          <h2 className="font-display text-3xl font-bold sm:text-5xl text-foreground tracking-tight">{t("home.doctor_title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">{t("home.doctor_title_accent")}</span></h2>
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">{t("home.doctor_desc")}</p>
         </div>
         <HospitalCarousel />
       </section>
@@ -185,9 +187,9 @@ function Index() {
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="max-w-md">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-[10px] font-bold uppercase tracking-widest mb-6">Verified Partners</div>
-              <h2 className="font-display text-4xl font-bold text-foreground mb-4 tracking-tight">Dipercayai oleh Jaringan <span className="text-sky-600">Medis Terkemuka</span></h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">Kami bekerja sama dengan rumah sakit dan laboratorium terbaik untuk memastikan akurasi diagnosis Anda.</p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-[10px] font-bold uppercase tracking-widest mb-6">{t("home.partner_badge")}</div>
+              <h2 className="font-display text-4xl font-bold text-foreground mb-4 tracking-tight">{t("home.partner_title")} <span className="text-sky-600">{t("home.partner_title_accent")}</span></h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">{t("home.partner_desc")}</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 p-4">
               {[

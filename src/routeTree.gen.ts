@@ -20,6 +20,7 @@ import { Route as MoodCheckRouteRouteImport } from './routes/mood-check/route'
 import { Route as MentalHealthRouteRouteImport } from './routes/mental-health/route'
 import { Route as MembershipRouteRouteImport } from './routes/membership/route'
 import { Route as MarketplaceRouteRouteImport } from './routes/marketplace/route'
+import { Route as MaintenanceRouteRouteImport } from './routes/maintenance/route'
 import { Route as KonsulRouteRouteImport } from './routes/konsul/route'
 import { Route as KomunitasPasienRouteRouteImport } from './routes/komunitas-pasien/route'
 import { Route as DokterRouteRouteImport } from './routes/dokter/route'
@@ -30,12 +31,14 @@ import { Route as ChatRouteRouteImport } from './routes/chat/route'
 import { Route as CekJantungRouteRouteImport } from './routes/cek-jantung/route'
 import { Route as BookingRouteRouteImport } from './routes/booking/route'
 import { Route as BerandaRouteRouteImport } from './routes/beranda/route'
+import { Route as BannedRouteRouteImport } from './routes/banned/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as ArtikelRouteRouteImport } from './routes/artikel/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as DoctorSettingsRouteRouteImport } from './routes/doctor/settings/route'
 import { Route as DoctorPrescriptionsRouteRouteImport } from './routes/doctor/prescriptions/route'
 import { Route as DoctorPatientsRouteRouteImport } from './routes/doctor/patients/route'
@@ -103,6 +106,11 @@ const MarketplaceRouteRoute = MarketplaceRouteRouteImport.update({
   path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MaintenanceRouteRoute = MaintenanceRouteRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KonsulRouteRoute = KonsulRouteRouteImport.update({
   id: '/konsul',
   path: '/konsul',
@@ -153,6 +161,11 @@ const BerandaRouteRoute = BerandaRouteRouteImport.update({
   path: '/beranda',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BannedRouteRoute = BannedRouteRouteImport.update({
+  id: '/banned',
+  path: '/banned',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -181,6 +194,11 @@ const DoctorIndexRoute = DoctorIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const DoctorSettingsRouteRoute = DoctorSettingsRouteRouteImport.update({
@@ -246,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/artikel': typeof ArtikelRouteRoute
   '/auth': typeof AuthRouteRoute
+  '/banned': typeof BannedRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/booking': typeof BookingRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
@@ -256,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
+  '/maintenance': typeof MaintenanceRouteRoute
   '/marketplace': typeof MarketplaceRouteRoute
   '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
@@ -278,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/doctor/': typeof DoctorIndexRoute
 }
@@ -285,6 +306,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/artikel': typeof ArtikelRouteRoute
   '/auth': typeof AuthRouteRoute
+  '/banned': typeof BannedRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/booking': typeof BookingRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
@@ -294,6 +316,7 @@ export interface FileRoutesByTo {
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
+  '/maintenance': typeof MaintenanceRouteRoute
   '/marketplace': typeof MarketplaceRouteRoute
   '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
@@ -316,6 +339,7 @@ export interface FileRoutesByTo {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
   '/doctor': typeof DoctorIndexRoute
 }
@@ -325,6 +349,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/artikel': typeof ArtikelRouteRoute
   '/auth': typeof AuthRouteRoute
+  '/banned': typeof BannedRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/booking': typeof BookingRouteRoute
   '/cek-jantung': typeof CekJantungRouteRoute
@@ -335,6 +360,7 @@ export interface FileRoutesById {
   '/dokter': typeof DokterRouteRoute
   '/komunitas-pasien': typeof KomunitasPasienRouteRoute
   '/konsul': typeof KonsulRouteRoute
+  '/maintenance': typeof MaintenanceRouteRoute
   '/marketplace': typeof MarketplaceRouteRoute
   '/membership': typeof MembershipRouteRoute
   '/mental-health': typeof MentalHealthRouteRoute
@@ -357,6 +383,7 @@ export interface FileRoutesById {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/doctor/': typeof DoctorIndexRoute
 }
@@ -367,6 +394,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/artikel'
     | '/auth'
+    | '/banned'
     | '/beranda'
     | '/booking'
     | '/cek-jantung'
@@ -377,6 +405,7 @@ export interface FileRouteTypes {
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
+    | '/maintenance'
     | '/marketplace'
     | '/membership'
     | '/mental-health'
@@ -399,6 +428,7 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/login'
     | '/admin/'
     | '/doctor/'
   fileRoutesByTo: FileRoutesByTo
@@ -406,6 +436,7 @@ export interface FileRouteTypes {
     | '/'
     | '/artikel'
     | '/auth'
+    | '/banned'
     | '/beranda'
     | '/booking'
     | '/cek-jantung'
@@ -415,6 +446,7 @@ export interface FileRouteTypes {
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
+    | '/maintenance'
     | '/marketplace'
     | '/membership'
     | '/mental-health'
@@ -437,6 +469,7 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/login'
     | '/admin'
     | '/doctor'
   id:
@@ -445,6 +478,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/artikel'
     | '/auth'
+    | '/banned'
     | '/beranda'
     | '/booking'
     | '/cek-jantung'
@@ -455,6 +489,7 @@ export interface FileRouteTypes {
     | '/dokter'
     | '/komunitas-pasien'
     | '/konsul'
+    | '/maintenance'
     | '/marketplace'
     | '/membership'
     | '/mental-health'
@@ -477,6 +512,7 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/login'
     | '/admin/'
     | '/doctor/'
   fileRoutesById: FileRoutesById
@@ -486,6 +522,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ArtikelRouteRoute: typeof ArtikelRouteRoute
   AuthRouteRoute: typeof AuthRouteRoute
+  BannedRouteRoute: typeof BannedRouteRoute
   BerandaRouteRoute: typeof BerandaRouteRoute
   BookingRouteRoute: typeof BookingRouteRoute
   CekJantungRouteRoute: typeof CekJantungRouteRoute
@@ -496,6 +533,7 @@ export interface RootRouteChildren {
   DokterRouteRoute: typeof DokterRouteRoute
   KomunitasPasienRouteRoute: typeof KomunitasPasienRouteRoute
   KonsulRouteRoute: typeof KonsulRouteRoute
+  MaintenanceRouteRoute: typeof MaintenanceRouteRoute
   MarketplaceRouteRoute: typeof MarketplaceRouteRoute
   MembershipRouteRoute: typeof MembershipRouteRoute
   MentalHealthRouteRoute: typeof MentalHealthRouteRoute
@@ -588,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/maintenance': {
+      id: '/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof MaintenanceRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/konsul': {
       id: '/konsul'
       path: '/konsul'
@@ -658,6 +703,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BerandaRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/banned': {
+      id: '/banned'
+      path: '/banned'
+      fullPath: '/banned'
+      preLoaderRoute: typeof BannedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -698,6 +750,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/doctor/settings': {
@@ -786,6 +845,7 @@ interface AdminRouteRouteChildren {
   AdminMarketplaceRouteRoute: typeof AdminMarketplaceRouteRoute
   AdminSettingsRouteRoute: typeof AdminSettingsRouteRoute
   AdminUsersRouteRoute: typeof AdminUsersRouteRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -795,6 +855,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminMarketplaceRouteRoute: AdminMarketplaceRouteRoute,
   AdminSettingsRouteRoute: AdminSettingsRouteRoute,
   AdminUsersRouteRoute: AdminUsersRouteRoute,
+  AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -831,6 +892,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   ArtikelRouteRoute: ArtikelRouteRoute,
   AuthRouteRoute: AuthRouteRoute,
+  BannedRouteRoute: BannedRouteRoute,
   BerandaRouteRoute: BerandaRouteRoute,
   BookingRouteRoute: BookingRouteRoute,
   CekJantungRouteRoute: CekJantungRouteRoute,
@@ -841,6 +903,7 @@ const rootRouteChildren: RootRouteChildren = {
   DokterRouteRoute: DokterRouteRoute,
   KomunitasPasienRouteRoute: KomunitasPasienRouteRoute,
   KonsulRouteRoute: KonsulRouteRoute,
+  MaintenanceRouteRoute: MaintenanceRouteRoute,
   MarketplaceRouteRoute: MarketplaceRouteRoute,
   MembershipRouteRoute: MembershipRouteRoute,
   MentalHealthRouteRoute: MentalHealthRouteRoute,

@@ -1,14 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  Mic, Send, Star, Sparkles, Zap, Crown,
-  ChevronDown,
+  Mic, MicOff, Send, Star, Sparkles, Zap, Crown,
+  ChevronDown, Phone, PhoneOff,
 } from "lucide-react";
 import { VoiceWave } from "@/components/VoiceWave";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
+import { useConversation } from "@elevenlabs/react";
 
 
 /* ─── Model Config ─────────────────────────────────────────── */
@@ -86,39 +87,165 @@ export const Route = createFileRoute("/konsul")({
 
 type Msg = { id: string; role: "user" | "doc"; text: string; rating?: number };
 
+// ─── ElevenLabs Voice Component ──────────────────────────────
+function VoiceMode() {
+  const AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
+  const { user } = useAuth();
+
+  const conversation = useConversation({
+    onConnect: () => console.log("ElevenLabs connected"),
+    onDisconnect: () => console.log("ElevenLabs disconnected"),
+    onMessage: (msg) => console.log("Message:", msg),
+    onError: (err) => console.error("ElevenLabs error:", err),
+  });
+
+  const isConnected = conversation.status === "connected";
+  const isSpeaking = conversation.isSpeaking;
+
+  const startCall = useCallback(async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      await conversation.startSession({ agentId: AGENT_ID });
+    } catch (err) {
+      console.error("Failed to start session:", err);
+    }
+  }, [conversation, AGENT_ID]);
+
+  const endCall = useCallback(async () => {
+    await conversation.endSession();
+  }, [conversation]);
+
+  return (
+    <motion.div
+      key="voice"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12 }}
+      className="glass-strong rounded-3xl overflow-hidden"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/40">
+        <div className="flex items-center gap-3">
+          <img src="/gif_logo/icon.png" alt="Sembuhin AI" className="h-10 w-10 object-contain" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-[15px]">Dr. Sembuhin AI</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase">
+                Voice Live
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs">
+              {isConnected ? (
+                <>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-emerald-600">{isSpeaking ? "Sedang berbicara..." : "Mendengarkan..."}</span>
+                </>
+              ) : (
+                <>
+                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                  <span className="text-slate-500">Siap untuk percakapan</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        {isConnected && (
+          <span className="text-xs font-mono text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+            LIVE
+          </span>
+        )}
+      </div>
+
+      {/* Visualizer */}
+      <div className="flex flex-col items-center justify-center py-12 px-6 gap-8">
+        <div className="relative w-64 h-64">
+          <VoiceWave active={isConnected && !isSpeaking} className="h-full w-full" />
+          {/* AI speaking pulse */}
+          {isSpeaking && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-32 w-32 rounded-full bg-violet-500/20 animate-ping" />
+              <div className="absolute h-24 w-24 rounded-full bg-violet-500/30 animate-pulse" />
+              <img src="/gif_logo/icon.png" alt="" className="absolute h-14 w-14 object-contain" />
+            </div>
+          )}
+        </div>
+
+        {/* Status text */}
+        <div className="text-center">
+          <h3 className="text-2xl font-bold text-slate-900">
+            {!isConnected && "Tekan untuk mulai percakapan"}
+            {isConnected && isSpeaking && "Dr. Sembuhin sedang berbicara..."}
+            {isConnected && !isSpeaking && "Silakan bicara..."}
+          </h3>
+          <p className="text-slate-500 mt-2 text-sm">
+            {!isConnected && "Percakapan suara real-time dengan AI dokter kesehatan"}
+            {isConnected && "Bicara natural — AI akan langsung merespons"}
+          </p>
+        </div>
+
+        {/* Call Button */}
+        {!isConnected ? (
+          <button
+            onClick={startCall}
+            className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-lg shadow-xl shadow-violet-500/30 hover:shadow-violet-500/50 hover:scale-105 transition-all"
+          >
+            <Phone className="h-5 w-5" />
+            Mulai Percakapan
+          </button>
+        ) : (
+          <button
+            onClick={endCall}
+            className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-rose-500 text-white font-bold text-lg shadow-xl shadow-rose-500/30 hover:bg-rose-600 hover:scale-105 transition-all"
+          >
+            <PhoneOff className="h-5 w-5" />
+            Akhiri Percakapan
+          </button>
+        )}
+
+        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+          <span>⚡ Powered by</span>
+          <span className="font-semibold text-slate-600">ElevenLabs Conversational AI</span>
+          <span>•</span>
+          <span>Real-time streaming</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function Konsul() {
   const [mode, setMode] = useState<"chat" | "voice">("chat");
   const [messages, setMessages] = useState<Msg[]>([
     { id: Date.now().toString(), role: "doc", text: "Halo! Saya **Dr. Sembuhin AI**, asisten kesehatan virtual berbasis kecerdasan buatan. Saya bukan dokter manusia, tapi saya siap membantu menjawab pertanyaan kesehatan Anda dengan informasi terpercaya! Apa yang ingin Anda tanyakan hari ini?" },
   ]);
   const [input, setInput] = useState("");
-  const [listening, setListening] = useState(false);
   const [chatCount, setChatCount] = useState(0);
   const [selectedModel, setSelectedModel] = useState<ModelConfig>(MODELS[0]);
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [currentTypingText, setCurrentTypingText] = useState("");
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const modelPickerRef = useRef<HTMLDivElement>(null);
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const chatLimit = selectedModel.limit; // 0 = unlimited
+  const chatLimit = selectedModel.limit;
 
   // Handle rating
   const handleRating = async (msgId: string, rating: number) => {
     setMessages(prev => prev.map(msg => msg.id === msgId ? { ...msg, rating } : msg));
-    // Save to Supabase if needed
-    // await supabase.from('chat_ratings').insert({ message_id: msgId, user_id: user?.id, rating });
   };
 
-  // Load chat count from Supabase
   useEffect(() => {
     if (user) {
-      loadChatCount();
+      const today = new Date().toISOString().split('T')[0];
+      supabase.from('chat_history').select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', `${today}T00:00:00.000Z`)
+        .then(({ count }) => setChatCount(count || 0));
     }
   }, [user]);
 
-  // Close model picker on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (modelPickerRef.current && !modelPickerRef.current.contains(e.target as Node)) {
@@ -129,20 +256,6 @@ function Konsul() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const loadChatCount = async () => {
-    // Get today's date
-    const today = new Date().toISOString().split('T')[0];
-    const { data, error } = await supabase
-      .from('chat_history')
-      .select('id')
-      .eq('user_id', user?.id)
-      .gte('created_at', `${today}T00:00:00.000Z`);
-
-    if (!error && data) {
-      setChatCount(data.length);
-    }
-  };
-
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
@@ -150,152 +263,47 @@ function Konsul() {
   const send = async (text?: string) => {
     const t = (text ?? input).trim();
     if (!t) return;
-
-    // Check if user is logged in
-    if (!user) {
-      navigate({ to: '/auth' });
-      return;
-    }
-
-    // Check chat limit (0 = unlimited)
+    if (!user) { navigate({ to: '/auth' }); return; }
     if (chatLimit > 0 && chatCount >= chatLimit) {
-      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: `Maaf, Anda telah mencapai batas **${chatLimit} chat/hari** untuk model **${selectedModel.name} (${selectedModel.badge})**.\n\nSilakan coba lagi besok atau upgrade ke model yang lebih tinggi untuk batas lebih banyak!` }]);
+      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: `Maaf, Anda telah mencapai batas **${chatLimit} chat/hari**.` }]);
       return;
     }
 
     setMessages((m) => [...m, { id: Date.now().toString(), role: "user", text: t }]);
     setInput("");
     setIsTyping(true);
-
-    // Save chat to Supabase
-    await supabase.from('chat_history').insert({
-      user_id: user.id,
-      message: t,
-      sender: 'user'
-    });
-
-    // Increment chat count
+    await supabase.from('chat_history').insert({ user_id: user.id, message: t, sender: 'user' });
     setChatCount(prev => prev + 1);
 
     try {
-      // Call Gemini API
-      console.log('All Env:', import.meta.env); // Debug
       const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-      console.log('API Key:', API_KEY ? 'loaded' : 'NOT loaded!'); // Debug
-      console.log('API Key Value:', API_KEY ? API_KEY.substring(0, 10) + '...' : 'N/A'); // Debug
       const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Kamu adalah Dr. Sembuhin, asisten kesehatan AI yang profesional dan ramah dari platform kesehatan Sembuhin.
-
-IDENTITAS MODEL:
-- Jika ditanya kamu model apa, gunakan apa, atau siapa pembuatmu, jawab: "Saya adalah Sembuhin 1.1 tahap awal, asisten kesehatan AI yang dikembangkan oleh tim Sembuhin."
-- JANGAN pernah mengaku sebagai GPT, Claude, Gemini, atau model AI lain.
-- JANGAN pernah menyebutkan teknologi di balik kamu.
-
-ATURAN TOPIK (SANGAT PENTING — WAJIB DIIKUTI):
-- Kamu HANYA menjawab pertanyaan yang berkaitan dengan kesehatan, medis, gejala penyakit, penanganan kesehatan, obat-obatan, pola hidup sehat, kesehatan mental, nutrisi, dan topik medis lainnya.
-- Jika user bertanya di luar topik kesehatan (misalnya: coding, pemrograman, matematika, politik, agama, hiburan, teknologi non-medis, atau pertanyaan ngelantur lainnya), TOLAK dengan sopan dan arahkan kembali ke topik kesehatan.
-- Contoh penolakan: "Maaf, saya hanya dapat membantu seputar kesehatan dan medis. Apakah ada keluhan kesehatan yang ingin Anda konsultasikan?"
-- JANGAN pernah menjawab pertanyaan non-kesehatan meskipun user memaksa.
-
-ATURAN FORMAT JAWABAN (WAJIB DIIKUTI):
-- Gunakan **markdown** untuk memformat jawaban.
-- Selalu gunakan **heading** (## atau ###) untuk judul bagian.
-- Gunakan **nomor** (1. 2. 3.) untuk daftar langkah atau tips.
-- Gunakan **bullet** (- item) untuk daftar tanpa urutan.
-- **Bold** istilah penting atau nama kondisi.
-- Beri **paragraf pembuka** singkat sebelum masuk ke detail.
-- Akhiri dengan **kesimpulan atau saran tindakan** singkat.
-- Jawab dalam **bahasa Indonesia** yang mudah dimengerti.
-- Jika pertanyaan butuh daftar, berikan minimal 3 poin terstruktur.
-- Selalu ingatkan untuk berkonsultasi langsung dengan dokter jika kondisi serius.
-
-Pertanyaan pasien: ${t}`
-                }
-              ]
-            }
-          ]
+          contents: [{ parts: [{ text: `Kamu adalah Dr. Sembuhin, asisten kesehatan AI profesional dari Sembuhin. HANYA jawab tentang kesehatan. Jawab Bahasa Indonesia dengan markdown. Pertanyaan: ${t}` }] }]
         })
       });
-
-      console.log('Response status:', response.status); // Debug
       const data = await response.json();
-      console.log('Response data:', data); // Debug
-      
-      if (!response.ok) {
-        console.error('Gemini API error response:', data);
-        throw new Error(data.error?.message || 'Failed to get response from Gemini');
-      }
-      
+      if (!response.ok) throw new Error(data.error?.message || 'Gemini error');
       const botText = data.candidates[0].content.parts[0].text;
 
-      // Animasi huruf demi huruf
       setCurrentTypingText("");
       let i = 0;
       const botId = Date.now().toString();
       const typingInterval = setInterval(() => {
-        if (i <= botText.length) {
-          setCurrentTypingText(botText.substring(0, i));
-          i++;
-        } else {
+        if (i <= botText.length) { setCurrentTypingText(botText.substring(0, i)); i++; }
+        else {
           clearInterval(typingInterval);
           setMessages((m) => [...m, { id: botId, role: "doc", text: botText }]);
-          setCurrentTypingText("");
-          setIsTyping(false);
+          setCurrentTypingText(""); setIsTyping(false);
         }
-      }, 30); // Kecepatan mengetik (ms per huruf)
-      
-      // Save bot response
-      await supabase.from('chat_history').insert({
-        user_id: user.id,
-        message: botText,
-        sender: 'doc'
-      });
-      
-    } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      
-      // Fallback responses jika API gagal
-      const fallbackResponses = [
-        "Terima kasih sudah menghubungi saya! Silakan ceritakan keluhan Anda secara detail.",
-        "Bagaimana saya bisa membantu hari ini? Apakah Anda ingin berbicara tentang gejala atau kesehatan Anda?",
-        "Untuk konsultasi lebih lanjut, Anda bisa melihat menu 'Pelayanan Kesehatan' di atas ya.",
-        "Saya siap membantu! Apa yang ingin Anda tanyakan tentang kesehatan?",
-      ];
-      const randomFallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-      
-      // Animasi fallback
-      setCurrentTypingText("");
-      let j = 0;
-      const botId = Date.now().toString();
-      const typingInterval = setInterval(() => {
-        if (j <= randomFallback.length) {
-          setCurrentTypingText(randomFallback.substring(0, j));
-          j++;
-        } else {
-          clearInterval(typingInterval);
-          setMessages((m) => [...m, { id: botId, role: "doc", text: randomFallback }]);
-          setCurrentTypingText("");
-          setIsTyping(false);
-        }
-      }, 30);
-      
-      // Save message
-      await supabase.from('chat_history').insert({
-        user_id: user.id,
-        message: randomFallback,
-        sender: 'doc'
-      });
+      }, 20);
+      await supabase.from('chat_history').insert({ user_id: user.id, message: botText, sender: 'doc' });
+    } catch {
+      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: "Maaf, terjadi kesalahan. Silakan coba lagi." }]);
+      setIsTyping(false);
     }
   };
 
@@ -625,29 +633,68 @@ Pertanyaan pasien: ${t}`
                 <VoiceWave active={listening} className="h-full w-full" />
               </div>
               <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-primary">
-                  Voice Mode
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">Voice Mode</span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Groq AI
+                  </span>
                 </div>
-                <h2 className="mt-2 font-display text-3xl font-bold">
-                  {listening ? "Mendengarkan kamu..." : "Tekan tombol untuk bicara"}
+                <h2 className="mt-1 font-display text-3xl font-bold">
+                  {listening
+                    ? "Mendengarkan..."
+                    : isTyping
+                      ? currentTypingText.startsWith("🎙") ? "Mentranskripsi..." : "Memproses jawaban..."
+                      : "Tekan tombol untuk bicara"}
                 </h2>
-                <p className="mt-3 text-muted-foreground">
-                  Bicara natural dengan Dr. Sembuhin. Visualisasi gelombang akan menari mengikuti suara kamu.
+                <p className="mt-3 text-muted-foreground text-sm">
+                  {listening
+                    ? "Bicara jelas dan tekan 'Hentikan' saat selesai."
+                    : isTyping
+                      ? currentTypingText || "Dr. Sembuhin sedang menyiapkan jawaban..."
+                      : "Bicara natural dengan Dr. Sembuhin AI. Suara ditranskripsi & dijawab secara real-time."}
                 </p>
+
+                {/* Riwayat pesan voice */}
+                {messages.length > 1 && (
+                  <div className="mt-4 space-y-2 max-h-40 overflow-y-auto">
+                    {messages.slice(-4).map((m) => (
+                      <div key={m.id} className={`text-xs rounded-xl px-3 py-2 ${
+                        m.role === "user"
+                          ? "bg-slate-800 text-white text-right ml-8"
+                          : "bg-white border border-slate-200 text-slate-700 mr-8"
+                      }`}>
+                        {m.text.length > 100 ? m.text.substring(0, 100) + "..." : m.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <button
-                  onClick={() => setListening((v) => !v)}
-                  className={`mt-6 inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-semibold shadow-glow transition-all ${
+                  onClick={() => listening ? stopRecording() : startRecording()}
+                  disabled={isTyping}
+                  className={`mt-6 inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 font-semibold shadow-glow transition-all text-sm ${
                     listening
-                      ? "bg-rose-500 text-foreground pulse-glow"
-                      : "bg-gradient-primary text-primary-foreground hover:scale-105"
+                      ? "bg-rose-500 text-white animate-pulse shadow-rose-300"
+                      : isTyping
+                        ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                        : "bg-gradient-primary text-primary-foreground hover:scale-105"
                   }`}
                 >
-                  <Mic className="h-5 w-5" />
-                  {listening ? "Hentikan" : "Mulai bicara"}
+                  {isTyping ? (
+                    <div className="h-4 w-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
+                  {listening ? "⏹ Hentikan & Kirim" : isTyping ? "Memproses..." : "🎙 Mulai Bicara"}
                 </button>
-                <p className="mt-4 text-xs text-muted-foreground">
-                  *Demo visualisasi. Voice AI nyata akan dihubungkan saat backend aktif.
-                </p>
+
+                <div className="mt-4 flex items-center gap-2 text-[11px] text-slate-400">
+                  <span>🔊 Powered by</span>
+                  <span className="font-semibold text-slate-600">Groq Whisper + Llama 3.3</span>
+                  <span>•</span>
+                  <span>TTS via Web Speech API</span>
+                </div>
               </div>
             </div>
           </motion.div>

@@ -2,7 +2,7 @@
  * AdminSettings — Pengaturan sistem platform Sembuhin
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Globe,
@@ -16,6 +16,7 @@ import {
   Download,
 } from "lucide-react";
 import { AdminLayout } from "@/panel-admin/AdminLayout";
+import { supabase } from "@/lib/supabase";
 
 // ─── Toggle switch component ──────────────────────────────────────────────────
 
@@ -148,12 +149,44 @@ export function AdminSettings() {
   // ── Save feedback ──────────────────────────────────────────────────────────
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
-  function handleSave() {
+  // Fetch initial settings from Supabase
+  useEffect(() => {
+    async function fetchSettings() {
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "maintenance_mode")
+        .maybeSingle();
+      
+      if (data?.value) {
+        setMaintenance(!!data.value.active);
+      }
+    }
+    fetchSettings();
+  }, []);
+
+  async function handleSave() {
     setSaveState("saving");
-    setTimeout(() => {
+    try {
+      // Save maintenance mode to Supabase
+      const { error } = await supabase
+        .from("settings")
+        .upsert({
+          key: "maintenance_mode",
+          value: { 
+            active: maintenance, 
+            message: "Website sedang dalam perbaikan. Kami akan segera kembali!" 
+          }
+        });
+
+      if (error) throw error;
+
       setSaveState("saved");
       setTimeout(() => setSaveState("idle"), 2200);
-    }, 1200);
+    } catch (err) {
+      console.error("Gagal menyimpan pengaturan:", err);
+      setSaveState("idle");
+    }
   }
 
   return (

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head><title>TTS Test</title></head>
+<body style="font-family:sans-serif; padding:40px; max-width:600px">
+  <h2>🔊 Web Speech API Test</h2>
+  <p>Klik tombol di bawah untuk test apakah browser bisa bicara:</p>
+  
+  <button onclick="testSpeak()" style="padding:12px 24px; font-size:16px; cursor:pointer; background:#4f46e5; color:white; border:none; border-radius:8px; margin:8px">
+    🎙 Test Bicara (Indonesia)
+  </button>
+  
+  <button onclick="testSpeakEN()" style="padding:12px 24px; font-size:16px; cursor:pointer; background:#0ea5e9; color:white; border:none; border-radius:8px; margin:8px">
+    🎙 Test Bicara (English)
+  </button>
+  
+  <button onclick="listVoices()" style="padding:12px 24px; font-size:16px; cursor:pointer; background:#10b981; color:white; border:none; border-radius:8px; margin:8px">
+    📋 Lihat Daftar Suara
+  </button>
+  
+  <div id="status" style="margin-top:20px; padding:12px; background:#f1f5f9; border-radius:8px; min-height:60px"></div>
+  <div id="voices" style="margin-top:12px; font-size:13px; color:#475569"></div>
+
+  <script>
+    const status = document.getElementById('status');
+    const voicesEl = document.getElementById('voices');
+
+    function testSpeak() {
+      if (!('speechSynthesis' in window)) {
+        status.textContent = '❌ Browser tidak support Web Speech API';
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance('Halo, saya Dr. Sembuhin AI. Saya siap membantu kesehatan Anda.');
+      utt.lang = 'id-ID';
+      utt.rate = 0.9;
+      utt.volume = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      const idVoice = voices.find(v => v.lang.startsWith('id'));
+      if (idVoice) { utt.voice = idVoice; status.textContent = '✅ Berbicara dengan suara: ' + idVoice.name; }
+      else { status.textContent = '⚠️ Tidak ada suara Indonesia, menggunakan default...'; }
+      utt.onstart = () => status.textContent += ' — MULAI BICARA...';
+      utt.onend = () => status.textContent += ' — SELESAI ✓';
+      utt.onerror = (e) => status.textContent = '❌ Error: ' + e.error;
+      window.speechSynthesis.speak(utt);
+    }
+
+    function testSpeakEN() {
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance('Hello, I am Dr Sembuhin AI, your health assistant.');
+      utt.lang = 'en-US';
+      utt.rate = 0.9;
+      utt.volume = 1.0;
+      utt.onstart = () => status.textContent = 'MULAI BICARA (English)...';
+      utt.onend = () => status.textContent += ' SELESAI ✓';
+      utt.onerror = (e) => status.textContent = '❌ Error: ' + e.error;
+      window.speechSynthesis.speak(utt);
+    }
+
+    function listVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        voicesEl.textContent = '⚠️ Belum ada suara ter-load. Tunggu sebentar atau klik lagi.';
+        window.speechSynthesis.onvoiceschanged = listVoices;
+        return;
+      }
+      voicesEl.innerHTML = '<b>Suara tersedia (' + voices.length + '):</b><br>' +
+        voices.map(v => v.lang + ' — ' + v.name + (v.localService ? ' [local]' : ' [remote]')).join('<br>');
+    }
+
+    // Auto load voices
+    window.speechSynthesis.onvoiceschanged = () => {
+      status.textContent = '✅ Voices loaded: ' + window.speechSynthesis.getVoices().length + ' suara tersedia';
+    };
+  </script>
+</body>
+</html>

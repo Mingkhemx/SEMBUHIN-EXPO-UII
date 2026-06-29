@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
+  const { t } = useLanguage();
+  
   return (
     <footer className="mx-auto mt-32 max-w-7xl px-4 pb-20">
       <div className="glass-strong rounded-[3rem] p-10 md:p-16 border border-sky-100/40 relative overflow-hidden">
@@ -19,7 +22,7 @@ export function Footer() {
               />
             </div>
             <p className="mt-6 text-muted-foreground max-w-md leading-relaxed">
-              Platform kesehatan terintegrasi pertama di dunia yang menggabungkan AI Diagnosis, Marketplace Farmasi, dan Digital Health Twin dalam satu ekosistem holografik.
+              {t("footer.desc")}
             </p>
             <div className="mt-8 flex items-center gap-5">
               {[
@@ -47,31 +50,31 @@ export function Footer() {
           </div>
           
           <div>
-            <h4 className="font-bold text-foreground mb-6 uppercase tracking-wider text-xs">Layanan</h4>
+            <h4 className="font-bold text-foreground mb-6 uppercase tracking-wider text-xs">{t("footer.services")}</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
-              <li><Link to="/marketplace" className="hover:text-sky-600 transition-colors">Apotek Digital</Link></li>
-              <li><Link to="/dokter" className="hover:text-sky-600 transition-colors">Dokter Spesialis</Link></li>
-              <li><Link to="/konsul" className="hover:text-sky-600 transition-colors">Konsultasi AI</Link></li>
-              <li><Link to="/twin" className="hover:text-sky-600 transition-colors">Health Twin 3D</Link></li>
-              <li><Link to="/resep" className="hover:text-sky-600 transition-colors">Resep Digital</Link></li>
+              <li><Link to="/marketplace" className="hover:text-sky-600 transition-colors">{t("footer.digital_pharmacy")}</Link></li>
+              <li><Link to="/dokter" className="hover:text-sky-600 transition-colors">{t("footer.specialists")}</Link></li>
+              <li><Link to="/konsul" className="hover:text-sky-600 transition-colors">{t("footer.ai_consultation")}</Link></li>
+              <li><Link to="/twin" className="hover:text-sky-600 transition-colors">{t("footer.health_twin")}</Link></li>
+              <li><Link to="/resep" className="hover:text-sky-600 transition-colors">{t("footer.digital_prescription")}</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-bold text-foreground mb-6 uppercase tracking-wider text-xs">Perusahaan</h4>
+            <h4 className="font-bold text-foreground mb-6 uppercase tracking-wider text-xs">{t("footer.company")}</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
-              <li>Tentang Kami</li>
-              <li>Karir</li>
-              <li>Kebijakan Privasi</li>
-              <li>Syarat & Ketentuan</li>
+              <li>{t("footer.about")}</li>
+              <li>{t("footer.careers")}</li>
+              <li>{t("footer.privacy")}</li>
+              <li>{t("footer.terms")}</li>
             </ul>
           </div>
         </div>
         
         <div className="mt-16 pt-10 border-t border-border flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Sembuhin International. Seluruh hak cipta dilindungi.</p>
+          <p>© {new Date().getFullYear()} {t("footer.copyright")}</p>
           <p className="px-4 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-            ⚠️ Disclaimer: Bukan pengganti saran medis profesional dari dokter berlisensi.
+            ⚠️ {t("footer.disclaimer")}
           </p>
         </div>
       </div>

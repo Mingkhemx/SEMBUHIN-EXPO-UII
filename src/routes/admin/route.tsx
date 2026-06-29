@@ -1,2 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-export const Route = createFileRoute("/admin")({ component: () => <Outlet /> });
+import { createFileRoute } from "@tanstack/react-router";
+import { AdminShell } from "@/panel-admin/AdminLayout";
+
+export const Route = createFileRoute("/admin")({ component: AdminShell });

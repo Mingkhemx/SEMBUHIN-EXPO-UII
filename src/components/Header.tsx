@@ -33,12 +33,13 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Header() {
   const matchRoute = useMatchRoute();
   const { user, signOut, isPremium, isDoctor } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState("id");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -53,7 +54,7 @@ export function Header() {
     { code: "ar", label: "العربية (Arabic)", flag: "🇸🇦", short: "AR" },
   ];
 
-  const currentLang = languages.find((l) => l.code === selectedLang) || languages[0];
+  const currentLang = languages.find((l) => l.code === language) || languages[0];
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -113,7 +114,7 @@ export function Header() {
                     isBerandaActive && "text-sky-600 bg-sky-100/80",
                   )}
                 >
-                  Beranda
+                  {t("nav.home")}
                   {isBerandaActive && (
                     <motion.div
                       layoutId="navbar-indicator"
@@ -132,7 +133,7 @@ export function Header() {
                     isPelayananActive && "text-sky-600 bg-sky-100/80",
                   )}
                 >
-                  Pelayanan Kesehatan
+                  {t("nav.health_services")}
                   {isPelayananActive && (
                     <motion.div
                       layoutId="navbar-indicator"
@@ -145,69 +146,67 @@ export function Header() {
                   <ul className="grid w-[500px] gap-2 p-5 md:w-[640px] md:grid-cols-2 lg:w-[720px] glass-strong rounded-3xl">
                     <ListItem
                       to="/dokter"
-                      title="Konsultasi Dokter"
+                      title={t("nav.consultation")}
                       icon={<Stethoscope className="h-4 w-4" />}
                       color="sky"
                     >
-                      Temukan & buat janji dengan dokter spesialis terpercaya.
+                      {language === "id" ? "Temukan & buat janji dengan dokter spesialis terpercaya." : "Find & book appointments with trusted specialists."}
                     </ListItem>
                     <ListItem
                       to="/cek-jantung"
-                      title="Cek Jantung"
+                      title={t("nav.heart_check")}
                       icon={<HeartPulse className="h-4 w-4" />}
                       color="rose"
                     >
-                      Pantau detak jantung real-time terhubung langsung dari HP Anda.
+                      {language === "id" ? "Pantau detak jantung real-time terhubung langsung dari HP Anda." : "Monitor real-time heart rate connected directly from your phone."}
                     </ListItem>
                     <ListItem
                       to="/symptom-triage"
-                      title="AI Symptom Triage"
+                      title={t("nav.symptom_triage")}
                       icon={<AlertTriangle className="h-4 w-4" />}
                       color="amber"
                     >
-                      Input gejala, AI klasifikasikan urgensi: darurat, perlu dokter, atau
-                      self-care.
+                      {language === "id" ? "Input gejala, AI klasifikasikan urgensi: darurat, perlu dokter, atau self-care." : "Input symptoms, AI classifies urgency: emergency, see a doctor, or self-care."}
                     </ListItem>
                     <ListItem
                       to="/mental-health"
-                      title="Mental Health Care"
+                      title={t("nav.mental_health")}
                       icon={<SmilePlus className="h-4 w-4" />}
                       color="violet"
                     >
-                      Screening PHQ-9 & GAD-7 + modul CBT berbasis AI terhubung ke psikolog.
+                      {language === "id" ? "Screening PHQ-9 & GAD-7 + modul CBT berbasis AI terhubung ke psikolog." : "PHQ-9 & GAD-7 screening + AI-based CBT modules connected to psychologists."}
                     </ListItem>
                     <ListItem
                       to="/komunitas-pasien"
-                      title="Komunitas Pasien"
+                      title={t("nav.community")}
                       icon={<Users className="h-4 w-4" />}
                       color="orange"
                     >
-                      Forum per kondisi medis, dimoderasi dokter, klaim medis divalidasi AI.
+                      {language === "id" ? "Forum per kondisi medis, dimoderasi dokter, klaim medis divalidasi AI." : "Forums per medical condition, moderated by doctors, AI-validated medical claims."}
                     </ListItem>
                     <ListItem
                       to="/rekam-medis"
-                      title="Rekam Medis Mandiri"
+                      title={t("nav.medical_records")}
                       icon={<FolderOpen className="h-4 w-4" />}
                       color="teal"
                     >
-                      Riwayat konsultasi, lab & resep tersimpan di akunmu, ekspor PDF kapan saja.
+                      {language === "id" ? "Riwayat konsultasi, lab & resep tersimpan di akunmu, ekspor PDF kapan saja." : "Consultation history, labs & prescriptions saved in your account, export PDF anytime."}
                     </ListItem>
                     <ListItem
                       to="/dermatologi"
-                      title="Dermatologi AI Scan"
+                      title={t("nav.dermatology")}
                       icon={<ScanLine className="h-4 w-4" />}
                       color="pink"
                     >
-                      Foto area kulit bermasalah, AI pre-screening awal sebelum ke dermatologis.
+                      {language === "id" ? "Foto area kulit bermasalah, AI pre-screening awal sebelum ke dermatologis." : "Photo problematic skin areas, AI initial pre-screening before seeing a dermatologist."}
                     </ListItem>
                     <ListItem
                       to="/mood-check"
-                      title="Mood Check"
+                      title={t("nav.mood_check")}
                       icon={<Smile className="h-4 w-4" />}
                       color="cyan"
                     >
-                      Cek mood via kamera. AI analisis ekspresi wajah untuk mengetahui kondisi
-                      emosional Anda.
+                      {language === "id" ? "Cek mood via kamera. AI analisis ekspresi wajah untuk mengetahui kondisi emosional Anda." : "Check mood via camera. AI analyzes facial expressions to know your emotional state."}
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -221,7 +220,7 @@ export function Header() {
                     isEdukasiActive && "text-sky-600 bg-sky-100/80",
                   )}
                 >
-                  Edukasi Kesehatan
+                  {t("nav.health_education")}
                   {isEdukasiActive && (
                     <motion.div
                       layoutId="navbar-indicator"
@@ -260,7 +259,7 @@ export function Header() {
                     isChatbotActive && "text-sky-600 bg-sky-100/80",
                   )}
                 >
-                  Chatbot AI
+                  {t("nav.chatbot_ai")}
                   {isChatbotActive && (
                     <motion.div
                       layoutId="navbar-indicator"
@@ -281,7 +280,7 @@ export function Header() {
                     isApotekinActive && "text-sky-600 bg-sky-100/80",
                   )}
                 >
-                  Apotekin
+                  {t("nav.pharmacy")}
                   {isApotekinActive && (
                     <motion.div
                       layoutId="navbar-indicator"
@@ -357,19 +356,19 @@ export function Header() {
               >
                 <div className="px-4 py-2 border-b border-slate-100 mb-1">
                   <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Pilih Bahasa
+                    {t("common.select_language")}
                   </p>
                 </div>
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => {
-                      setSelectedLang(lang.code);
+                      setLanguage(lang.code as any);
                       setLangOpen(false);
                     }}
                     className={cn(
                       "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors",
-                      selectedLang === lang.code
+                      language === lang.code
                         ? "bg-sky-50 text-sky-700"
                         : "text-slate-600 hover:bg-slate-50",
                     )}
@@ -377,7 +376,7 @@ export function Header() {
                     <div
                       className={cn(
                         "flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold border",
-                        selectedLang === lang.code
+                        language === lang.code
                           ? "bg-sky-600 text-white border-sky-600"
                           : "bg-slate-100 text-slate-500 border-slate-200",
                       )}
@@ -386,7 +385,7 @@ export function Header() {
                     </div>
                     <span className="text-base">{lang.flag}</span>
                     <span>{lang.label}</span>
-                    {selectedLang === lang.code && (
+                    {language === lang.code && (
                       <span className="ml-auto text-sky-500">
                         <svg
                           className="h-4 w-4"

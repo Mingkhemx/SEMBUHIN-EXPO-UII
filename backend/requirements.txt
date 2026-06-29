@@ -5,3 +5,7 @@ python-dotenv
 numpy
 opencv-python
 deepface
+groq
+google-cloud-texttospeech
+pydub
+requests
