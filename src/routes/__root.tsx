@@ -123,7 +123,7 @@ function RootComponent() {
   const isDoctorPage = location.pathname.startsWith("/doctor");
   const isAdminPage = location.pathname.startsWith("/admin");
   const isDaftarDokterPage = location.pathname.startsWith("/daftar-dokter");
-  const isFullWidthPage = location.pathname.startsWith("/rekam-medis") || location.pathname.startsWith("/membership");
+  const isFullWidthPage = location.pathname.startsWith("/rekam-medis") || location.pathname.startsWith("/membership") || location.pathname.startsWith("/chat");
 
   // Scroll ke atas setiap kali route berubah
   useEffect(() => {

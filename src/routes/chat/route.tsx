@@ -351,11 +351,11 @@ function ChatPage() {
   }
 
   return (
-    <div className="relative z-10 flex h-[calc(100vh-7.5rem)] overflow-hidden rounded-2xl border border-slate-200/80 shadow-2xl shadow-slate-200/40 bg-white -mx-4">
+    <div className="relative z-10 flex h-[calc(100vh-5rem)] overflow-hidden rounded-2xl border border-slate-200/80 shadow-xl bg-white mx-4 mt-6">
       {/* ── LEFT SIDEBAR ────────────────────────────────────────────── */}
       <div
         className={cn(
-          "flex flex-col w-full md:w-[320px] lg:w-[360px] flex-shrink-0 border-r border-slate-100",
+          "flex flex-col w-full md:w-[340px] lg:w-[400px] flex-shrink-0 border-r border-slate-100",
           mobileView === "chat" ? "hidden md:flex" : "flex",
         )}
       >
