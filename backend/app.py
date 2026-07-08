@@ -25,6 +25,11 @@ load_dotenv(override=True) # Juga load dari root jika ada
 app = Flask(__name__)
 CORS(app)  # Izinkan CORS untuk frontend
 
+# Health check
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'ok', 'service': 'Sembuhin Backend API'})
+
 # Initialize Supabase
 supabase_url = os.getenv('SUPABASE_URL')
 supabase_key = os.getenv('SUPABASE_SERVICE_KEY')
