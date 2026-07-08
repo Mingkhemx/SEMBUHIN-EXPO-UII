@@ -183,7 +183,7 @@ export function DoctorMedicalRecords() {
     try {
       const params = new URLSearchParams({ doctor_id: doctorId, per_page: "50" });
       if (searchPatient) params.set("search", searchPatient);
-      const res = await fetch(`http://127.0.0.1:5001/api/doctor/patients?${params}`);
+      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?${params}`);
       const data = await res.json();
       if (data.success) setPatients(data.data);
     } catch (e) { console.error(e); }
@@ -197,7 +197,7 @@ export function DoctorMedicalRecords() {
     setRecordsLoading(true);
     setRecordsError(null);
     try {
-      const res = await fetch(`http://127.0.0.1:5001/api/patient/medical-records?patient_id=${patientId}`);
+      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/patient/medical-records?patient_id=${patientId}`);
       const data = await res.json();
       if (data.success) {
         setRecords(data.data);

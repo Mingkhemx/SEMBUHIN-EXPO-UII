@@ -65,7 +65,7 @@ export function DoctorDashboard() {
 
     try {
       // 1. Fetch stats from backend
-      const statsRes = await fetch(`http://127.0.0.1:5001/api/doctor/dashboard-stats?doctor_id=${doctorId}`);
+      const statsRes = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/dashboard-stats?doctor_id=${doctorId}`);
       const statsData = await statsRes.json();
       
       if (statsData.success) {

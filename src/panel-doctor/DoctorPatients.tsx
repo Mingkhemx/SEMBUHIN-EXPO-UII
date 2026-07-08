@@ -155,7 +155,7 @@ export function DoctorPatients() {
         
         if (!doc) return;
 
-        const response = await fetch(`http://127.0.0.1:5001/api/doctor/stats?doctor_id=${doc.id}`);
+        const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/stats?doctor_id=${doc.id}`);
         const data = await response.json();
         if (data.success) {
           setStats({
@@ -196,7 +196,7 @@ export function DoctorPatients() {
           per_page: "10"
         });
         
-        const response = await fetch(`http://127.0.0.1:5001/api/doctor/patients?${params}`);
+        const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?${params}`);
         const data = await response.json();
         
         if (data.success) {

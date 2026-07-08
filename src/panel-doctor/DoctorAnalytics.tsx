@@ -91,7 +91,7 @@ export function DoctorAnalytics() {
       }
 
       // 2. Fetch from backend
-      const res = await fetch(`http://127.0.0.1:5001/api/doctor/analytics?doctor_id=${doc.id}`);
+      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/analytics?doctor_id=${doc.id}`);
       if (!res.ok) throw new Error("Gagal mengambil data analitik dari server");
       
       const data = await res.json();

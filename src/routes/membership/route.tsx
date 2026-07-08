@@ -143,7 +143,7 @@ function MembershipPage() {
     if (!user) { navigate({ to: "/auth" }); return; }
     setIsProcessing(true);
     try {
-      const res = await fetch("http://localhost:5001/api/payment/membership", {
+      const res = await fetch("https://sembuhin-expo-uii-production.up.railway.app/api/payment/membership", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

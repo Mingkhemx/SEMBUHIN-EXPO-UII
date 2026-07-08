@@ -245,7 +245,7 @@ function MedicalRecordsPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`http://127.0.0.1:5001/api/patient/medical-records?patient_id=${user.id}`);
+      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/patient/medical-records?patient_id=${user.id}`);
       const data = await res.json();
       if (data.success) {
         setRecords(data.data);

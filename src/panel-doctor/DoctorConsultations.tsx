@@ -84,7 +84,7 @@ export function DoctorConsultations() {
           status: filter
         });
         
-        const response = await fetch(`http://localhost:5001/api/doctor/consultations?${params}`);
+        const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/consultations?${params}`);
         const data = await response.json();
         
         if (data.success) {

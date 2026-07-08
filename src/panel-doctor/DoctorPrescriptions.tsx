@@ -178,7 +178,7 @@ export function DoctorPrescriptions() {
       setLoading(true);
       const { data: doc } = await supabase.from("doctors").select("id").eq("user_id", user.id).single();
       if (!doc) return;
-      const res = await fetch(`http://127.0.0.1:5001/api/doctor/prescriptions?doctor_id=${doc.id}`);
+      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/prescriptions?doctor_id=${doc.id}`);
       const data = await res.json();
       if (data.success) setPrescriptions(data.data);
     } catch (err) {
@@ -193,7 +193,7 @@ export function DoctorPrescriptions() {
     try {
       const { data: doc } = await supabase.from("doctors").select("id").eq("user_id", user.id).single();
       if (!doc) return;
-      const res = await fetch(`http://127.0.0.1:5001/api/doctor/patients?doctor_id=${doc.id}`);
+      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?doctor_id=${doc.id}`);
       const data = await res.json();
       if (data.success) {
         setPatients(data.data.map((p: any) => ({ id: p.id, full_name: p.full_name || p.email })));
@@ -218,7 +218,7 @@ export function DoctorPrescriptions() {
       setIsSubmitting(true);
       const { data: doc } = await supabase.from("doctors").select("id").eq("user_id", user?.id).single();
       if (!doc) return;
-      const res = await fetch("http://127.0.0.1:5001/api/doctor/prescriptions", {
+      const res = await fetch("https://sembuhin-expo-uii-production.up.railway.app/api/doctor/prescriptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

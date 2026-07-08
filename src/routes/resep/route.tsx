@@ -70,7 +70,7 @@ function ResepPage() {
         // Fetch specific prescription from backend
         // Note: For now we reuse the doctor prescriptions endpoint or create a new one
         // But let's assume we have a way to get a single prescription
-        const res = await fetch(`http://127.0.0.1:5001/api/doctor/prescriptions/single?id=${id}`);
+        const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/prescriptions/single?id=${id}`);
         const result = await res.json();
         if (result.success) {
           setData(result.data);
