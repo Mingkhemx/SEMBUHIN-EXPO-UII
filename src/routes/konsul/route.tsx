@@ -279,18 +279,29 @@ function Konsul() {
     setChatCount(prev => prev + 1);
 
     try {
-      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-      const response = await fetch(API_URL, {
+      const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'Sembuhin AI',
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `Kamu adalah Dr. Sembuhin, asisten kesehatan AI profesional dari Sembuhin. HANYA jawab tentang kesehatan. Jawab Bahasa Indonesia dengan markdown. Pertanyaan: ${messageText}` }] }]
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            {
+              role: 'system',
+              content: 'Kamu adalah Dr. Sembuhin, asisten kesehatan AI profesional dari Sembuhin. HANYA jawab tentang kesehatan. Jawab dalam Bahasa Indonesia dengan format markdown yang rapi.'
+            },
+            { role: 'user', content: messageText }
+          ]
         })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || 'Gemini error');
-      const botText = data.candidates[0].content.parts[0].text;
+      if (!response.ok) throw new Error(data.error?.message || 'OpenRouter error');
+      const botText = data.choices[0].message.content;
 
       setCurrentTypingText("");
       let i = 0;
