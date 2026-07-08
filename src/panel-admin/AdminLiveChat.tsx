@@ -32,6 +32,7 @@ interface ChatSession {
   patient_id: string;
   patient_name: string;
   patient_phone: string;
+  patient_avatar?: string | null;
   consultation_status: SessionStatus;
   created_at: string;
   lastMessage?: ChatMessage | null;
@@ -96,6 +97,30 @@ export function AdminLiveChat() {
 
       if (consultError) throw consultError;
 
+      // Extract unique patient IDs to fetch avatars
+      const patientIds = [...new Set(consultations.map(c => c.patient_id))].filter(Boolean);
+      let avatarsMap: Record<string, string> = {};
+      
+      if (patientIds.length > 0) {
+        // Since we store auth metadata directly in auth.users, and it's not accessible from public client without a view,
+        // Let's use the simplest approach for now: fetch profiles if we have a public profiles table,
+        // Otherwise, we just fall back to the initial avatar until the backend view is ready.
+        try {
+          const { data: users } = await supabase
+            .from("profiles") // Or whatever table stores public user data
+            .select("id, avatar_url")
+            .in("id", patientIds);
+            
+          if (users) {
+            users.forEach((u: any) => {
+              if (u.avatar_url) avatarsMap[u.id] = u.avatar_url;
+            });
+          }
+        } catch (e) {
+          // Ignore error if table doesn't exist yet
+        }
+      }
+
       // Fetch last messages and unread counts for all sessions
       const { data: allMessages, error: msgError } = await supabase
         .from("consultation_messages")
@@ -115,6 +140,7 @@ export function AdminLiveChat() {
         
         return {
           ...c,
+          patient_avatar: avatarsMap[c.patient_id] || null,
           lastMessage: msgs.length > 0 ? msgs[msgs.length - 1] : null,
           unreadCount: msgs.filter(m => m.sender_type !== "admin" && !m.read_at).length
         };
@@ -337,9 +363,17 @@ export function AdminLiveChat() {
                   <div className="flex items-start gap-3">
                     {/* Avatar with status dot */}
                     <div className="relative flex-shrink-0">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-sky-700 shadow-sm">
-                        {session.patient_name[0]}
-                      </div>
+                      {session.patient_avatar ? (
+                        <img 
+                          src={session.patient_avatar} 
+                          alt={session.patient_name}
+                          className="h-10 w-10 rounded-xl object-cover shadow-sm border border-slate-200"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-sky-700 shadow-sm">
+                          {session.patient_name[0].toUpperCase()}
+                        </div>
+                      )}
                       <span
                         className={[
                           "absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white shadow-sm",
@@ -387,9 +421,17 @@ export function AdminLiveChat() {
               <div className="px-5 py-4 bg-white border-b border-slate-200 flex items-center justify-between gap-3 shadow-sm shadow-slate-100/50 z-10">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative flex-shrink-0">
-                    <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 flex items-center justify-center text-lg font-bold text-sky-700 shadow-sm">
-                      {selected.patient_name[0]}
-                    </div>
+                    {selected.patient_avatar ? (
+                      <img 
+                        src={selected.patient_avatar} 
+                        alt={selected.patient_name}
+                        className="h-11 w-11 rounded-2xl object-cover shadow-sm border border-slate-200"
+                      />
+                    ) : (
+                      <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 flex items-center justify-center text-lg font-bold text-sky-700 shadow-sm">
+                        {selected.patient_name[0].toUpperCase()}
+                      </div>
+                    )}
                     <span
                       className={[
                         "absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full border-2 border-white shadow-sm",
@@ -440,8 +482,21 @@ export function AdminLiveChat() {
                       key={msg.id}
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      className={cn("flex w-full", isAdmin ? "justify-end" : "justify-start")}
+                      className={cn("flex w-full gap-3", isAdmin ? "justify-end" : "justify-start")}
                     >
+                      {!isAdmin && (
+                        selected.patient_avatar ? (
+                          <img 
+                            src={selected.patient_avatar} 
+                            alt={selected.patient_name}
+                            className="h-8 w-8 rounded-full object-cover shadow-sm border border-slate-200 flex-shrink-0 mt-1"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-sky-700 shadow-sm flex-shrink-0 mt-1">
+                            {selected.patient_name[0].toUpperCase()}
+                          </div>
+                        )
+                      )}
                       <div className={cn(
                         "flex flex-col max-w-[70%]",
                         isAdmin ? "items-end" : "items-start"
@@ -483,6 +538,11 @@ export function AdminLiveChat() {
                           {isAdmin ? "Anda (Admin)" : selected.patient_name}
                         </span>
                       </div>
+                      {isAdmin && (
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 flex items-center justify-center text-xs font-bold text-violet-700 shadow-sm flex-shrink-0 mt-1">
+                          A
+                        </div>
+                      )}
                     </motion.div>
                   );
                 })}

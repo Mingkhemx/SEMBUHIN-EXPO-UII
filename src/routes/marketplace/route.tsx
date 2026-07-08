@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/marketplace")({
   head: () => ({
@@ -41,6 +42,7 @@ const CATEGORIES = ["Semua", "Obat", "Vitamin", "Suplemen", "Alat Kesehatan", "K
 
 function Marketplace() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("Semua");
   const [sortBy, setSortBy] = useState("Terpopuler");
@@ -218,27 +220,27 @@ function Marketplace() {
           <div className="max-w-2xl space-y-6">
             <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest border border-primary/20 text-primary w-fit">
               <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              Direktori Apotekin
+              {t('marketplace.hero_badge')}
             </div>
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-black leading-tight text-slate-900 tracking-tighter">
-              Apotek <span className="text-primary">Digital</span> <br />
+              {t('marketplace.hero_title')} <span className="text-primary">{t('marketplace.hero_subtitle')}</span> <br />
               Sembuhin
             </h1>
             <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-lg font-medium">
-              Solusi kesehatan terlengkap. Obat resmi BPOM, vitamin, dan alat kesehatan diantar dalam <span className="text-primary font-bold">60 menit</span>.
+              {t('marketplace.hero_desc')}
             </p>
             <div className="flex flex-wrap gap-8 pt-8 border-t border-slate-200">
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl md:text-3xl font-black text-slate-900">1.000+</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Produk Aktif</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('marketplace.active_products')}</p>
               </div>
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl md:text-3xl font-black text-slate-900">4.9</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rating</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('marketplace.rating')}</p>
               </div>
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl md:text-3xl font-black text-slate-900">24/7</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Siaga</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('marketplace.standby')}</p>
               </div>
             </div>
           </div>

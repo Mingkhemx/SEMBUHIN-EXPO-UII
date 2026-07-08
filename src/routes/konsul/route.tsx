@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { useConversation } from "@elevenlabs/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 
 /* ─── Model Config ─────────────────────────────────────────── */
@@ -89,6 +90,7 @@ type Msg = { id: string; role: "user" | "doc"; text: string; rating?: number };
 
 // ─── ElevenLabs Voice Component ──────────────────────────────
 function VoiceMode() {
+  const { t } = useLanguage();
   const AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
   const { user } = useAuth();
 
@@ -131,19 +133,19 @@ function VoiceMode() {
             <div className="flex items-center gap-2">
               <span className="font-semibold text-[15px]">Dr. Sembuhin AI</span>
               <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase">
-                Voice Live
+                {t("konsul.voice_live")}
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-xs">
               {isConnected ? (
                 <>
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-emerald-600">{isSpeaking ? "Sedang berbicara..." : "Mendengarkan..."}</span>
+                  <span className="text-emerald-600">{isSpeaking ? t("konsul.speaking") : t("konsul.listening")}</span>
                 </>
               ) : (
                 <>
                   <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                  <span className="text-slate-500">Siap untuk percakapan</span>
+                  <span className="text-slate-500">{t("konsul.ready")}</span>
                 </>
               )}
             </div>
@@ -173,13 +175,13 @@ function VoiceMode() {
         {/* Status text */}
         <div className="text-center">
           <h3 className="text-2xl font-bold text-slate-900">
-            {!isConnected && "Tekan untuk mulai percakapan"}
-            {isConnected && isSpeaking && "Dr. Sembuhin sedang berbicara..."}
-            {isConnected && !isSpeaking && "Silakan bicara..."}
+            {!isConnected && t("konsul.press_start")}
+            {isConnected && isSpeaking && t("konsul.ai_speaking")}
+            {isConnected && !isSpeaking && t("konsul.please_speak")}
           </h3>
           <p className="text-slate-500 mt-2 text-sm">
-            {!isConnected && "Percakapan suara real-time dengan AI dokter kesehatan"}
-            {isConnected && "Bicara natural — AI akan langsung merespons"}
+            {!isConnected && t("konsul.voice_desc")}
+            {isConnected && t("konsul.natural_speech")}
           </p>
         </div>
 
@@ -190,7 +192,7 @@ function VoiceMode() {
             className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-lg shadow-xl shadow-violet-500/30 hover:shadow-violet-500/50 hover:scale-105 transition-all"
           >
             <Phone className="h-5 w-5" />
-            Mulai Percakapan
+            {t("konsul.start_call")}
           </button>
         ) : (
           <button
@@ -198,15 +200,15 @@ function VoiceMode() {
             className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-rose-500 text-white font-bold text-lg shadow-xl shadow-rose-500/30 hover:bg-rose-600 hover:scale-105 transition-all"
           >
             <PhoneOff className="h-5 w-5" />
-            Akhiri Percakapan
+            {t("konsul.end_call")}
           </button>
         )}
 
         <div className="flex items-center gap-2 text-[11px] text-slate-400">
-          <span>⚡ Powered by</span>
-          <span className="font-semibold text-slate-600">ElevenLabs Conversational AI</span>
+          <span>{t("konsul.powered_by")}</span>
+          <span className="font-semibold text-slate-600">{t("konsul.elevenlabs")}</span>
           <span>•</span>
-          <span>Real-time streaming</span>
+          <span>{t("konsul.streaming")}</span>
         </div>
       </div>
     </motion.div>
@@ -214,9 +216,10 @@ function VoiceMode() {
 }
 
 function Konsul() {
+  const { t } = useLanguage();
   const [mode, setMode] = useState<"chat" | "voice">("chat");
   const [messages, setMessages] = useState<Msg[]>([
-    { id: Date.now().toString(), role: "doc", text: "Halo! Saya **Dr. Sembuhin AI**, asisten kesehatan virtual berbasis kecerdasan buatan. Saya bukan dokter manusia, tapi saya siap membantu menjawab pertanyaan kesehatan Anda dengan informasi terpercaya! Apa yang ingin Anda tanyakan hari ini?" },
+    { id: Date.now().toString(), role: "doc", text: t("konsul.welcome_message") },
   ]);
   const [input, setInput] = useState("");
   const [chatCount, setChatCount] = useState(0);
@@ -261,18 +264,18 @@ function Konsul() {
   }, [messages]);
 
   const send = async (text?: string) => {
-    const t = (text ?? input).trim();
-    if (!t) return;
+    const messageText = (text ?? input).trim();
+    if (!messageText) return;
     if (!user) { navigate({ to: '/auth' }); return; }
     if (chatLimit > 0 && chatCount >= chatLimit) {
-      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: `Maaf, Anda telah mencapai batas **${chatLimit} chat/hari**.` }]);
+      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: `${t("konsul.limit_reached")} **${chatLimit} ${t("konsul.chats_today")}**.` }]);
       return;
     }
 
-    setMessages((m) => [...m, { id: Date.now().toString(), role: "user", text: t }]);
+    setMessages((m) => [...m, { id: Date.now().toString(), role: "user", text: messageText }]);
     setInput("");
     setIsTyping(true);
-    await supabase.from('chat_history').insert({ user_id: user.id, message: t, sender: 'user' });
+    await supabase.from('chat_history').insert({ user_id: user.id, message: messageText, sender: 'user' });
     setChatCount(prev => prev + 1);
 
     try {
@@ -282,7 +285,7 @@ function Konsul() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `Kamu adalah Dr. Sembuhin, asisten kesehatan AI profesional dari Sembuhin. HANYA jawab tentang kesehatan. Jawab Bahasa Indonesia dengan markdown. Pertanyaan: ${t}` }] }]
+          contents: [{ parts: [{ text: `Kamu adalah Dr. Sembuhin, asisten kesehatan AI profesional dari Sembuhin. HANYA jawab tentang kesehatan. Jawab Bahasa Indonesia dengan markdown. Pertanyaan: ${messageText}` }] }]
         })
       });
       const data = await response.json();
@@ -302,7 +305,7 @@ function Konsul() {
       }, 20);
       await supabase.from('chat_history').insert({ user_id: user.id, message: botText, sender: 'doc' });
     } catch {
-      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: "Maaf, terjadi kesalahan. Silakan coba lagi." }]);
+      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: t("konsul.error_message") }]);
       setIsTyping(false);
     }
   };
@@ -314,13 +317,13 @@ function Konsul() {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
               <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
-                Konsul <span className="text-gradient">Dr. Sembuhin AI</span>
+                {t("konsul.title")} <span className="text-gradient">{t("konsul.title_accent")}</span>
               </h1>
               <p className="mt-2 text-muted-foreground">
-                Asisten kesehatan virtual berbasis AI 24/7 — chat atau voice, kamu pilih.
+                {t("konsul.subtitle")}
               </p>
               <p className="mt-1 text-xs text-amber-600 font-medium">
-                ⚠️ Ini adalah chat dengan AI, bukan dokter manusia. Untuk kondisi darurat, hubungi fasilitas kesehatan terdekat.
+                {t("konsul.warning")}
               </p>
             </div>
           {/* Usage counter pill */}
@@ -328,9 +331,9 @@ function Konsul() {
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/80 px-4 py-2 text-xs font-medium text-slate-600 shadow-sm">
               <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               {chatLimit > 0 ? (
-                <span>Sisa <strong>{chatLimit - chatCount}</strong> / {chatLimit} chat hari ini</span>
+                <span>{t("konsul.remaining")} <strong>{chatLimit - chatCount}</strong> {t("konsul.of")} {chatLimit} {t("konsul.chats_today")}</span>
               ) : (
-                <span><strong>Unlimited</strong> — tanpa batas</span>
+                <span><strong>{t("konsul.unlimited")}</strong></span>
               )}
             </div>
           )}
@@ -348,7 +351,7 @@ function Konsul() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {m === "chat" ? "💬 Chat" : "🎙 Voice"}
+              {m === "chat" ? t("konsul.chat_tab") : t("konsul.voice_tab")}
             </button>
           ))}
         </div>
@@ -381,7 +384,7 @@ function Konsul() {
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-emerald-600">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Online • {selectedModel.name} • Asisten Kesehatan Virtual
+                    {t("konsul.online")} • {selectedModel.name} • {t("konsul.virtual_assistant")}
                   </div>
                 </div>
               </div>
@@ -431,7 +434,7 @@ function Konsul() {
                         transition={{ delay: 0.3 }}
                         className="mt-2 flex items-center gap-1 px-1"
                       >
-                        <span className="text-[11px] text-muted-foreground mr-1">Bagaimana jawaban ini?</span>
+                        <span className="text-[11px] text-muted-foreground mr-1">{t("konsul.rating_question")}</span>
                         {[1, 2, 3, 4, 5].map(rating => (
                           <button
                             key={rating}
@@ -524,7 +527,7 @@ function Konsul() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && send()}
-                    placeholder="Ketik keluhanmu..."
+                    placeholder={t("konsul.placeholder")}
                     disabled={chatLimit > 0 && chatCount >= chatLimit}
                     className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400 disabled:opacity-50 min-w-0"
                   />
@@ -562,7 +565,7 @@ function Konsul() {
                       className="absolute bottom-full right-0 mb-2 w-64 rounded-2xl bg-white border border-slate-200/80 p-1.5 shadow-xl shadow-slate-900/8 z-50"
                     >
                       <p className="px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                        Pilihan Model AI
+                        {t("konsul.ai_model_choice")}
                       </p>
                       {MODELS.map((model) => {
                         const isActive = selectedModel.id === model.id;
@@ -589,7 +592,7 @@ function Konsul() {
                               <p className="text-[11px] text-slate-400 mt-0.5">{model.description}</p>
                             </div>
                             <span className="text-[10px] font-medium text-slate-400 flex-shrink-0 ml-3">
-                              {model.limit > 0 ? `${model.limit}/hari` : "∞"}
+                              {model.limit > 0 ? `${model.limit}${t("konsul.per_day")}` : "∞"}
                             </span>
                           </button>
                         );
@@ -602,7 +605,7 @@ function Konsul() {
               {/* Footer info */}
               <div className="mt-2 flex items-center justify-between px-1">
                 <p className="text-[10px] text-slate-400">
-                  🔒 Terenkripsi • Powered by {selectedModel.name}
+                  {t("konsul.encrypted")} {selectedModel.name}
                 </p>
                 {user && chatLimit > 0 && (
                   <div className="flex items-center gap-1">

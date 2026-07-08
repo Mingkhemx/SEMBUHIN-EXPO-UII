@@ -24,6 +24,7 @@ import {
   Flame,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export const Route = createFileRoute('/video-edukasi')({
   head: () => ({
@@ -181,6 +182,7 @@ function VideoThumbnail({ video, className }: { video: VideoItem, className?: st
 
 /* ─── Component ──────────────────────────────────────────────────── */
 function VideoEdukasiPage() {
+  const { t } = useLanguage()
   const [activeCategory, setActiveCategory] = useState('semua')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
@@ -221,13 +223,13 @@ function VideoEdukasiPage() {
             <div className="relative z-10 p-8 sm:p-12 max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-4 py-1.5 mb-5 backdrop-blur-sm">
                 <Video className="h-3.5 w-3.5 text-blue-200" />
-                <span className="text-xs font-semibold text-white/90 tracking-wide uppercase">Video Edukasi</span>
+                <span className="text-xs font-semibold text-white/90 tracking-wide uppercase">{t('video_edukasi.hero_badge')}</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
-                Belajar Lewat Video
+                {t('video_edukasi.hero_title')}
               </h1>
               <p className="mt-3 text-base sm:text-lg text-blue-100 leading-relaxed max-w-lg">
-                Konten visual interaktif dari dokter dan ahli kesehatan. Belajar tentang pencegahan penyakit dan gaya hidup sehat.
+                {t('video_edukasi.hero_desc')}
               </p>
             </div>
           </motion.div>
@@ -323,7 +325,7 @@ function VideoEdukasiPage() {
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari video edukasi..."
+                placeholder={t('video_edukasi.search_placeholder')}
                 className="flex-1 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
               />
             </div>

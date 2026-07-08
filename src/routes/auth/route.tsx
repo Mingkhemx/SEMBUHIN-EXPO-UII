@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import {
   Mail,
@@ -18,7 +18,16 @@ import {
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
+interface AuthSearchParams {
+  mode?: 'login' | 'register'
+}
+
 export const Route = createFileRoute('/auth')({
+  validateSearch: (search: Record<string, unknown>): AuthSearchParams => {
+    return {
+      mode: (search.mode as 'login' | 'register') || 'login',
+    }
+  },
   head: () => ({
     meta: [
       { title: 'Login / Register — Sembuhin' },
@@ -36,7 +45,15 @@ const fadeIn: Variants = {
 /* ─── Component ──────────────────────────────────────────────────── */
 function AuthPage() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const search = useSearch({ from: '/auth' })
+  const [mode, setMode] = useState<'login' | 'register'>(search.mode || 'login')
+
+  // Sync mode with search param if it changes
+  useEffect(() => {
+    if (search.mode && search.mode !== mode) {
+      setMode(search.mode)
+    }
+  }, [search.mode])
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)

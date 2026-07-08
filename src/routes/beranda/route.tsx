@@ -61,7 +61,7 @@ function Index() {
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="z-10 flex flex-col items-center max-w-4xl w-full text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-10">
-            <Sparkles className="h-3 w-3" /> Standard of Digital Care v4.0
+            {t("home.standard_badge")}
           </div>
 
           <div className="min-h-[380px] sm:min-h-[320px] w-full flex flex-col items-center justify-center">
@@ -104,7 +104,7 @@ function Index() {
       <section className="px-4 max-w-7xl mx-auto relative">
         <div className="relative z-10 mb-16 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold uppercase tracking-widest mb-4">{t("home.pilar_badge")}</div>
-          <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight">{t("home.pilar_title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">Sembuhin</span></h2>
+          <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight">{t("home.pilar_title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">{t("home.brand_name")}</span></h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">{t("home.pilar_desc")}</p>
         </div>
 
@@ -131,7 +131,7 @@ function Index() {
               <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-rose-600">{t("home.cards.heart")}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed mb-auto">{t("home.cards.heart_desc")}</p>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-                <span className="text-xs font-semibold uppercase tracking-wider text-rose-500/70 group-hover:text-rose-600 transition-colors">Heart Care</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-rose-500/70 group-hover:text-rose-600 transition-colors">{t("home.cards.heart_badge")}</span>
                 <ArrowRight className="h-4 w-4 text-rose-500 transition-transform duration-300 group-hover:translate-x-1" />
               </div>
             </div>
@@ -144,7 +144,7 @@ function Index() {
               <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-amber-600">{t("home.cards.triage")}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed mb-auto">{t("home.cards.triage_desc")}</p>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-500/70 group-hover:text-amber-600 transition-colors">Symptom Check</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-amber-500/70 group-hover:text-amber-600 transition-colors">{t("home.cards.triage_badge")}</span>
                 <ArrowRight className="h-4 w-4 text-amber-500 transition-transform duration-300 group-hover:translate-x-1" />
               </div>
             </div>

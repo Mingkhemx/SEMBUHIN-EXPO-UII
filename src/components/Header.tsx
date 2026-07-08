@@ -94,10 +94,10 @@ export function Header() {
   const isApotekinActive = matchRoute({ to: "/marketplace" });
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-xl w-full bg-white/30">
-      <div className="glass bg-white/70 backdrop-blur-md mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-2 sm:px-6 shadow-lg border border-sky-200/50">
-        <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <img src="gif_logo/logo.png" alt="Sembuhin" className="h-16 w-auto object-contain" />
+    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-4 backdrop-blur-xl w-full">
+      <div className="glass bg-white/70 backdrop-blur-md mx-auto flex max-w-[1400px] items-center justify-between rounded-3xl px-6 py-2 shadow-xl border border-sky-200/50">
+        <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105">
+          <img src="gif_logo/logo.png" alt="Sembuhin" className="h-14 w-auto object-contain" />
         </Link>
 
         {/* Desktop Nav */}
@@ -150,7 +150,7 @@ export function Header() {
                       icon={<Stethoscope className="h-4 w-4" />}
                       color="sky"
                     >
-                      {language === "id" ? "Temukan & buat janji dengan dokter spesialis terpercaya." : "Find & book appointments with trusted specialists."}
+                      {t("header.consultation_desc")}
                     </ListItem>
                     <ListItem
                       to="/cek-jantung"
@@ -158,7 +158,7 @@ export function Header() {
                       icon={<HeartPulse className="h-4 w-4" />}
                       color="rose"
                     >
-                      {language === "id" ? "Pantau detak jantung real-time terhubung langsung dari HP Anda." : "Monitor real-time heart rate connected directly from your phone."}
+                      {t("header.heart_check_desc")}
                     </ListItem>
                     <ListItem
                       to="/symptom-triage"
@@ -166,7 +166,7 @@ export function Header() {
                       icon={<AlertTriangle className="h-4 w-4" />}
                       color="amber"
                     >
-                      {language === "id" ? "Input gejala, AI klasifikasikan urgensi: darurat, perlu dokter, atau self-care." : "Input symptoms, AI classifies urgency: emergency, see a doctor, or self-care."}
+                      {t("header.symptom_triage_desc")}
                     </ListItem>
                     <ListItem
                       to="/mental-health"
@@ -174,7 +174,7 @@ export function Header() {
                       icon={<SmilePlus className="h-4 w-4" />}
                       color="violet"
                     >
-                      {language === "id" ? "Screening PHQ-9 & GAD-7 + modul CBT berbasis AI terhubung ke psikolog." : "PHQ-9 & GAD-7 screening + AI-based CBT modules connected to psychologists."}
+                      {t("header.mental_health_desc")}
                     </ListItem>
                     <ListItem
                       to="/komunitas-pasien"
@@ -182,7 +182,7 @@ export function Header() {
                       icon={<Users className="h-4 w-4" />}
                       color="orange"
                     >
-                      {language === "id" ? "Forum per kondisi medis, dimoderasi dokter, klaim medis divalidasi AI." : "Forums per medical condition, moderated by doctors, AI-validated medical claims."}
+                      {t("header.community_desc")}
                     </ListItem>
                     <ListItem
                       to="/rekam-medis"
@@ -190,7 +190,7 @@ export function Header() {
                       icon={<FolderOpen className="h-4 w-4" />}
                       color="teal"
                     >
-                      {language === "id" ? "Riwayat konsultasi, lab & resep tersimpan di akunmu, ekspor PDF kapan saja." : "Consultation history, labs & prescriptions saved in your account, export PDF anytime."}
+                      {t("header.medical_records_desc")}
                     </ListItem>
                     <ListItem
                       to="/dermatologi"
@@ -198,7 +198,7 @@ export function Header() {
                       icon={<ScanLine className="h-4 w-4" />}
                       color="pink"
                     >
-                      {language === "id" ? "Foto area kulit bermasalah, AI pre-screening awal sebelum ke dermatologis." : "Photo problematic skin areas, AI initial pre-screening before seeing a dermatologist."}
+                      {t("header.dermatology_desc")}
                     </ListItem>
                     <ListItem
                       to="/mood-check"
@@ -206,7 +206,7 @@ export function Header() {
                       icon={<Smile className="h-4 w-4" />}
                       color="cyan"
                     >
-                      {language === "id" ? "Cek mood via kamera. AI analisis ekspresi wajah untuk mengetahui kondisi emosional Anda." : "Check mood via camera. AI analyzes facial expressions to know your emotional state."}
+                      {t("header.mood_check_desc")}
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -233,17 +233,17 @@ export function Header() {
                   <ul className="grid w-[400px] gap-3 p-5 md:w-[500px] md:grid-cols-2 lg:w-[600px] glass-strong rounded-3xl">
                     <ListItem
                       to="/artikel"
-                      title="Artikel Kesehatan"
+                      title={t("header.articles_title")}
                       icon={<BookOpen className="h-4 w-4" />}
                     >
-                      Kumpulan riset dan artikel medis terpercaya untuk Anda.
+                      {t("header.articles_desc")}
                     </ListItem>
                     <ListItem
                       to="/video-edukasi"
-                      title="Video Edukasi"
+                      title={t("header.videos_title")}
                       icon={<Video className="h-4 w-4" />}
                     >
-                      Konten visual interaktif mengenai pencegahan penyakit.
+                      {t("header.videos_desc")}
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -305,7 +305,7 @@ export function Header() {
                 ? "bg-sky-100 border-sky-200 text-sky-600"
                 : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50",
             )}
-            title="Chat dengan Dokter"
+            title={t("header.chat_with_doctor")}
           >
             <MessageCircle className="h-4 w-4" />
           </Link>
@@ -450,7 +450,7 @@ export function Header() {
                 >
                   <div className="px-4 py-3 border-b border-slate-100 mb-1">
                     <p className="text-xs font-bold text-slate-800">{user.email}</p>
-                    <p className="text-[10px] text-slate-500">Sembuhin Member</p>
+                    <p className="text-[10px] text-slate-500">{t("header.sembuhin_member")}</p>
                   </div>
                   <Link
                     to="/profil"
@@ -458,7 +458,7 @@ export function Header() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 w-full"
                   >
                     <User className="h-4 w-4" />
-                    <span>Profil</span>
+                    <span>{t("header.profile")}</span>
                   </Link>
                   {isDoctor && (
                     <Link
@@ -467,7 +467,7 @@ export function Header() {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-sky-600 hover:bg-sky-50 w-full"
                     >
                       <Stethoscope className="h-4 w-4" />
-                      <span>Doctor Panel</span>
+                      <span>{t("header.doctor_panel")}</span>
                     </Link>
                   )}
                   <button
@@ -478,7 +478,7 @@ export function Header() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 w-full"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Keluar</span>
+                    <span>{t("header.logout")}</span>
                   </button>
                 </motion.div>
               )}
@@ -486,9 +486,9 @@ export function Header() {
           ) : (
             <Link
               to="/auth"
-              className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-sky-500 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-500/20 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/30 hover:from-sky-500 hover:to-sky-400 active:scale-[0.97]"
+              className="whitespace-nowrap flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-600 to-sky-500 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-500/20 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/30 hover:from-sky-500 hover:to-sky-400 active:scale-[0.97]"
             >
-              Login / Register
+              {t("header.login_register")}
             </Link>
           )}
         </div>

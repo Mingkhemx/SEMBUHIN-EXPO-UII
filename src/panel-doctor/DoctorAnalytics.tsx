@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Star,
@@ -8,107 +8,37 @@ import {
   CheckCircle,
   AlertCircle,
   ClipboardList,
+  Loader2,
 } from "lucide-react";
 import { DoctorLayout } from "@/panel-doctor/DoctorLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { formatDistanceToNow } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
-const STATS = [
-  {
-    label: "Total Konsultasi",
-    value: "248",
-    icon: ClipboardList,
-    color: "bg-sky-50 text-sky-700 border-sky-100",
-    trend: "+12% dari bulan lalu",
-    trendUp: true,
-  },
-  {
-    label: "Tingkat Kepuasan",
-    value: "4.8/5",
-    icon: Star,
-    color: "bg-amber-50 text-amber-700 border-amber-100",
-    trend: "+0.2 dari bulan lalu",
-    trendUp: true,
-  },
-  {
-    label: "Rata-rata Durasi",
-    value: "24 mnt",
-    icon: Clock,
-    color: "bg-violet-50 text-violet-700 border-violet-100",
-    trend: "-2 mnt dari bulan lalu",
-    trendUp: false,
-  },
-  {
-    label: "Pasien Baru",
-    value: "45",
-    icon: UserPlus,
-    color: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    trend: "+8 dari bulan lalu",
-    trendUp: true,
-  },
-];
-
-// Weekly bar chart data (Mon–Sun)
-const WEEKLY_DATA = [
-  { day: "Sen", value: 8, max: 15 },
-  { day: "Sel", value: 12, max: 15 },
-  { day: "Rab", value: 15, max: 15 },
-  { day: "Kam", value: 10, max: 15 },
-  { day: "Jum", value: 13, max: 15 },
-  { day: "Sab", value: 6, max: 15 },
-  { day: "Min", value: 4, max: 15 },
-];
-
-const TOP_DIAGNOSES = [
-  { name: "Demam & ISPA", count: 45, pct: 85 },
-  { name: "Hipertensi", count: 32, pct: 61 },
-  { name: "Diabetes", count: 28, pct: 53 },
-  { name: "Dermatitis", count: 21, pct: 40 },
-  { name: "Migrain", count: 18, pct: 34 },
-];
-
-const RECENT_ACTIVITIES = [
-  {
-    id: 1,
-    icon: CheckCircle,
-    iconColor: "text-emerald-600",
-    iconBg: "bg-emerald-50",
-    title: "Konsultasi dengan Aurelia Putri selesai",
-    time: "2 jam lalu",
-  },
-  {
-    id: 2,
-    icon: ClipboardList,
-    iconColor: "text-sky-600",
-    iconBg: "bg-sky-50",
-    title: "Resep baru diterbitkan untuk Budi Santoso",
-    time: "4 jam lalu",
-  },
-  {
-    id: 3,
-    icon: UserPlus,
-    iconColor: "text-violet-600",
-    iconBg: "bg-violet-50",
-    title: "Pasien baru terdaftar: Citra Dewi",
-    time: "6 jam lalu",
-  },
-  {
-    id: 4,
-    icon: AlertCircle,
-    iconColor: "text-amber-600",
-    iconBg: "bg-amber-50",
-    title: "Jadwal konsultasi Dimas Pratama berubah",
-    time: "1 hari lalu",
-  },
-  {
-    id: 5,
-    icon: CheckCircle,
-    iconColor: "text-emerald-600",
-    iconBg: "bg-emerald-50",
-    title: "Laporan bulanan Juni 2026 tersedia",
-    time: "2 hari lalu",
-  },
-];
+interface AnalyticsData {
+  stats: {
+    label: string;
+    value: string;
+    trend: string;
+    trendUp: boolean;
+    icon: any;
+    color: string;
+  }[];
+  weekly_data: { day: string; value: number; max: number }[];
+  top_diagnoses: { name: string; count: number; pct: number }[];
+  activities: {
+    id: string;
+    type: string;
+    title: string;
+    time: string;
+    icon: any;
+    iconColor: string;
+    iconBg: string;
+  }[];
+}
 
 const PERIODS = ["7 Hari", "30 Hari", "3 Bulan"] as const;
 type Period = (typeof PERIODS)[number];
@@ -116,7 +46,123 @@ type Period = (typeof PERIODS)[number];
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function DoctorAnalytics() {
+  const { user } = useAuth();
   const [activePeriod, setActivePeriod] = useState<Period>("7 Hari");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData>({
+    stats: [
+      { label: "Total Konsultasi", value: "0", trend: "0%", trendUp: true, icon: ClipboardList, color: "bg-sky-50 text-sky-700 border-sky-100" },
+      { label: "Tingkat Kepuasan", value: "0/5", trend: "0", trendUp: true, icon: Star, color: "bg-amber-50 text-amber-700 border-amber-100" },
+      { label: "Rata-rata Durasi", value: "0 mnt", trend: "0 mnt", trendUp: false, icon: Clock, color: "bg-violet-50 text-violet-700 border-violet-100" },
+      { label: "Pasien Baru", value: "0", trend: "0", trendUp: true, icon: UserPlus, color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+    ],
+    weekly_data: [
+      { day: "Sen", value: 0, max: 15 },
+      { day: "Sel", value: 0, max: 15 },
+      { day: "Rab", value: 0, max: 15 },
+      { day: "Kam", value: 0, max: 15 },
+      { day: "Jum", value: 0, max: 15 },
+      { day: "Sab", value: 0, max: 15 },
+      { day: "Min", value: 0, max: 15 },
+    ],
+    top_diagnoses: [],
+    activities: [],
+  });
+
+  const fetchAnalytics = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 1. Get doctor_id
+      const { data: doc, error: docError } = await supabase
+        .from("doctors")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (docError) throw docError;
+      
+      if (!doc) {
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch from backend
+      const res = await fetch(`http://127.0.0.1:5001/api/doctor/analytics?doctor_id=${doc.id}`);
+      if (!res.ok) throw new Error("Gagal mengambil data analitik dari server");
+      
+      const data = await res.json();
+
+      if (data.success) {
+        // Map icons and colors back for UI
+        const statsWithIcons = data.analytics.stats.map((s: any, i: number) => {
+          const icons = [ClipboardList, Star, Clock, UserPlus];
+          const colors = [
+            "bg-sky-50 text-sky-700 border-sky-100",
+            "bg-amber-50 text-amber-700 border-amber-100",
+            "bg-violet-50 text-violet-700 border-violet-100",
+            "bg-emerald-50 text-emerald-700 border-emerald-100",
+          ];
+          return { ...s, icon: icons[i], color: colors[i] };
+        });
+
+        const activitiesWithIcons = data.analytics.activities.map((a: any) => ({
+          ...a,
+          icon: a.type === 'consultation' ? CheckCircle : ClipboardList,
+          iconColor: "text-emerald-600",
+          iconBg: "bg-emerald-50",
+          time: formatDistanceToNow(new Date(a.time), { addSuffix: true, locale: idLocale })
+        }));
+
+        setAnalytics({
+          ...data.analytics,
+          stats: statsWithIcons,
+          activities: activitiesWithIcons
+        });
+      }
+    } catch (err: any) {
+      console.error("Error fetching analytics:", err);
+      setError(err.message || "Terjadi kesalahan saat memuat data");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
+
+  if (loading) {
+    return (
+      <DoctorLayout title="Analitik">
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+          <Loader2 className="h-8 w-8 text-sky-500 animate-spin" />
+          <p className="text-slate-500 text-sm">Memuat data analitik...</p>
+        </div>
+      </DoctorLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DoctorLayout title="Analitik">
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-3 text-center px-4">
+          <AlertCircle className="h-10 w-10 text-rose-500" />
+          <p className="text-slate-900 font-semibold">Gagal Memuat Data</p>
+          <p className="text-slate-500 text-sm max-w-xs">{error}</p>
+          <button 
+            onClick={fetchAnalytics}
+            className="mt-2 px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-lg hover:bg-sky-700 transition-colors"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </DoctorLayout>
+    );
+  }
 
   return (
     <DoctorLayout
@@ -142,7 +188,7 @@ export function DoctorAnalytics() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {STATS.map((stat, i) => (
+          {analytics.stats.map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 16 }}
@@ -189,13 +235,13 @@ export function DoctorAnalytics() {
 
             {/* Bar Chart */}
             <div className="flex items-end gap-3 h-36">
-              {WEEKLY_DATA.map((bar, i) => (
+              {analytics.weekly_data.map((bar, i) => (
                 <div key={bar.day} className="flex-1 flex flex-col items-center gap-1.5">
                   <span className="text-xs font-medium text-slate-700">{bar.value}</span>
                   <motion.div
                     className="w-full rounded-t-md bg-sky-500"
                     style={{ height: 0 }}
-                    animate={{ height: `${(bar.value / bar.max) * 112}px` }}
+                    animate={{ height: `${(bar.value / Math.max(bar.max, 1)) * 112}px` }}
                     transition={{ duration: 0.5, delay: 0.35 + i * 0.06, ease: "easeOut" }}
                   />
                   <span className="text-xs text-slate-500">{bar.day}</span>
@@ -215,7 +261,7 @@ export function DoctorAnalytics() {
             <p className="text-xs text-slate-500 mb-4">Berdasarkan frekuensi</p>
 
             <div className="space-y-3">
-              {TOP_DIAGNOSES.map((diag, i) => (
+              {analytics.top_diagnoses.map((diag, i) => (
                 <div key={diag.name}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
@@ -249,7 +295,7 @@ export function DoctorAnalytics() {
             <p className="text-sm font-semibold text-slate-900">Aktivitas Terbaru</p>
           </div>
           <ul className="divide-y divide-slate-100">
-            {RECENT_ACTIVITIES.map((activity) => (
+            {analytics.activities.map((activity) => (
               <li
                 key={activity.id}
                 className="px-5 py-3.5 flex items-start gap-3 hover:bg-slate-50 transition-colors"

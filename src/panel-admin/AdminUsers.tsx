@@ -425,7 +425,7 @@ export function AdminUsers() {
   // 1. Fetch Stats
   const fetchStats = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/admin/users/stats");
+      const response = await fetch("http://127.0.0.1:5001/api/admin/users/stats");
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
@@ -445,7 +445,7 @@ export function AdminUsers() {
         page: page.toString(),
         per_page: "10"
       });
-      const response = await fetch(`http://localhost:5001/api/admin/users?${params}`);
+      const response = await fetch(`http://127.0.0.1:5001/api/admin/users?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -469,17 +469,17 @@ export function AdminUsers() {
     status: UserStatus, 
     isActive: boolean, 
     reason?: string, 
-    banUntil?: string
+    ban_until?: string
   ) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/admin/users/${userId}/status`, {
+      const response = await fetch(`http://127.0.0.1:5001/api/admin/users/${userId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           status, 
           is_active: isActive,
           reason: reason || null,
-          ban_until: banUntil || null
+          ban_until: ban_until || null
         })
       });
       const data = await response.json();
@@ -501,7 +501,7 @@ export function AdminUsers() {
   const handleExportCSV = async () => {
     try {
       setIsExporting(true);
-      const response = await fetch("http://localhost:5001/api/admin/users/export");
+      const response = await fetch("http://127.0.0.1:5001/api/admin/users/export");
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);

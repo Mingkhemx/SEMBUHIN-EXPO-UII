@@ -78,21 +78,27 @@ export function DoctorConsultations() {
     let active = true;
 
     const fetchConsultations = async () => {
-      const { data, error: fetchErr } = await supabase
-        .from("consultations")
-        .select("*")
-        .eq("doctor_id", doctorId)
-        .order("created_at", { ascending: false });
-
-      if (!active) return;
-      if (fetchErr) {
+      try {
+        const params = new URLSearchParams({
+          doctor_id: doctorId,
+          status: filter
+        });
+        
+        const response = await fetch(`http://localhost:5001/api/doctor/consultations?${params}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setConsultations(data.data as Consultation[]);
+          setError(null);
+        } else {
+          setError(data.error);
+        }
+      } catch (fetchErr: any) {
         console.error("Gagal fetch konsultasi:", fetchErr);
         setError(fetchErr.message);
-      } else {
-        setConsultations((data || []) as Consultation[]);
-        setError(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchConsultations();

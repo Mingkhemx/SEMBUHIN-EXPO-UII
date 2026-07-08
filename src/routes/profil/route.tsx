@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export const Route = createFileRoute('/profil')({
   head: () => ({
@@ -28,6 +29,7 @@ interface MentalScreening {
 }
 
 function ProfilPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user: authUser, isDoctor, signOut, refreshUser } = useAuth();
   const [user, setUser] = useState<any>(null);
@@ -97,7 +99,7 @@ function ProfilPage() {
   // Debug: Tampilkan avatar URL di console setiap berubah
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Pengguna';
   const userEmail = user?.email || 'email@contoh.com';
-  const userPhone = user?.user_metadata?.phone || 'Belum ditambahkan';
+  const userPhone = user?.user_metadata?.phone || t("profil.phone_not_added");
   const userAvatar = user?.user_metadata?.avatar_url
     ? user.user_metadata.avatar_url.split('?')[0] + `?t=${user.updated_at || ''}` 
     : '';
@@ -125,7 +127,7 @@ function ProfilPage() {
       setImageError(false);
       if (!event.target.files || event.target.files.length === 0) return;
       if (!user?.id) {
-        showToast('error', 'Anda harus login terlebih dahulu');
+        showToast('error', t("profil.login_required"));
         return;
       }
 
@@ -133,7 +135,7 @@ function ProfilPage() {
 
       // Validasi ukuran (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        showToast('error', 'Ukuran foto maksimal 2MB');
+        showToast('error', t("profil.max_size_error"));
         return;
       }
 
@@ -180,9 +182,9 @@ function ProfilPage() {
         if (syncErr) console.warn('Gagal sync avatar ke doctors:', syncErr.message);
       }
 
-      showToast('success', 'Foto profil berhasil diperbarui!');
+      showToast('success', t("profil.upload_success"));
     } catch (error: any) {
-      const msg = error?.message || 'Gagal upload foto. Pastikan bucket "profiles" sudah dibuat.';
+      const msg = error?.message || t("profil.upload_error");
       showToast('error', msg);
     } finally {
       setUploading(false);
@@ -196,7 +198,7 @@ function ProfilPage() {
       <div className="min-h-[70vh] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-14 w-14 border-b-4 border-sky-500 mx-auto mb-4"></div>
-          <p className="text-slate-600 text-sm font-medium">Memuat profil...</p>
+          <p className="text-slate-600 text-sm font-medium">{t("profil.loading")}</p>
         </div>
       </div>
     );
@@ -264,21 +266,21 @@ function ProfilPage() {
               <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
                 <h2 className="text-2xl font-extrabold text-slate-800">{userName}</h2>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                  <Award className="w-3.5 h-3.5" /> Terverifikasi
+                  <Award className="w-3.5 h-3.5" /> {t("profil.verified")}
                 </span>
               </div>
               <p className="text-slate-500 text-base mb-4">{userEmail}</p>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-400">
                 <div className="inline-flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" /> Bergabung {memberSince}
+                  <Calendar className="w-4 h-4" /> {t("profil.joined")} {memberSince}
                 </div>
                 <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                 <div className="inline-flex items-center gap-1.5">
-                  <MessageSquare className="w-4 h-4" /> {chatCount} konsultasi
+                  <MessageSquare className="w-4 h-4" /> {chatCount} {t("profil.consultations")}
                 </div>
                 <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                 <div className="inline-flex items-center gap-1.5">
-                  <Clock className="w-4 h-4" /> {daysSinceJoin} hari aktif
+                  <Clock className="w-4 h-4" /> {daysSinceJoin} {t("profil.active_days")}
                 </div>
               </div>
             </div>
@@ -290,61 +292,61 @@ function ProfilPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Info Pribadi</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.personal_info")}</h3>
             <button className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all duration-300 hover:bg-emerald-50 px-3 py-1.5 rounded-xl">
-              <Edit3 className="w-3.5 h-3.5" /> Edit
+              <Edit3 className="w-3.5 h-3.5" /> {t("profil.edit")}
             </button>
           </div>
           <div className="px-6 pb-6 space-y-1">
-            <InfoRow icon={<User className="w-4 h-4" />} label="Nama Lengkap" value={userName} />
-            <InfoRow icon={<Mail className="w-4 h-4" />} label="Email" value={userEmail} accent />
-            <InfoRow icon={<Phone className="w-4 h-4" />} label="No. Telepon" value={userPhone} warn={userPhone === 'Belum ditambahkan'} />
-            <InfoRow icon={<Calendar className="w-4 h-4" />} label="Tanggal Lahir" value="Belum ditambahkan" warn />
-            <InfoRow icon={<MapPin className="w-4 h-4" />} label="Alamat" value="Belum ditambahkan" warn />
-            <InfoRow icon={<UserCircle className="w-4 h-4" />} label="Jenis Kelamin" value="Belum ditambahkan" warn last />
+            <InfoRow icon={<User className="w-4 h-4" />} label={t("profil.full_name")} value={userName} />
+            <InfoRow icon={<Mail className="w-4 h-4" />} label={t("profil.email")} value={userEmail} accent />
+            <InfoRow icon={<Phone className="w-4 h-4" />} label={t("profil.phone")} value={userPhone} warn={userPhone === t("profil.phone_not_added")} />
+            <InfoRow icon={<Calendar className="w-4 h-4" />} label={t("profil.birth_date")} value={t("profil.not_added")} warn />
+            <InfoRow icon={<MapPin className="w-4 h-4" />} label={t("profil.address")} value={t("profil.not_added")} warn />
+            <InfoRow icon={<UserCircle className="w-4 h-4" />} label={t("profil.gender")} value={t("profil.not_added")} warn last />
           </div>
         </div>
 
         <div className="rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Informasi Kesehatan</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.health_info")}</h3>
             <button className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all duration-300 hover:bg-emerald-50 px-3 py-1.5 rounded-xl">
-              <Edit3 className="w-3.5 h-3.5" /> Edit
+              <Edit3 className="w-3.5 h-3.5" /> {t("profil.edit")}
             </button>
           </div>
           <div className="px-6 pb-6">
             <div className="grid grid-cols-2 gap-3.5">
               <HealthCard
                 icon={<Droplets className="w-5 h-5 text-rose-500" />}
-                label="Gol. Darah"
-                value="Belum diatur"
+                label={t("profil.blood_type")}
+                value={t("profil.not_set")}
                 bg="bg-rose-50"
                 border="border-rose-100"
               />
               <HealthCard
                 icon={<AlertTriangle className="w-5 h-5 text-amber-500" />}
-                label="Alergi"
-                value="Belum diatur"
+                label={t("profil.allergies")}
+                value={t("profil.not_set")}
                 bg="bg-amber-50"
                 border="border-amber-100"
               />
               <HealthCard
                 icon={<Heart className="w-5 h-5 text-pink-500" />}
-                label="Riwayat Penyakit"
-                value="Belum diatur"
+                label={t("profil.disease_history")}
+                value={t("profil.not_set")}
                 bg="bg-pink-50"
                 border="border-pink-100"
               />
               <HealthCard
                 icon={<PhoneCall className="w-5 h-5 text-emerald-500" />}
-                label="Kontak Darurat"
-                value="Belum diatur"
+                label={t("profil.emergency_contact")}
+                value={t("profil.not_set")}
                 bg="bg-emerald-50"
                 border="border-emerald-100"
               />
             </div>
             <p className="text-[11px] text-slate-400 mt-4 leading-relaxed">
-              Informasi kesehatan membantu Dr. Sembuhin memberikan saran yang lebih akurat dan personal.
+              {t("profil.health_info_desc")}
             </p>
           </div>
         </div>
@@ -356,7 +358,7 @@ function ProfilPage() {
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
             <div className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-violet-500" />
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Riwayat Kesehatan Mental</h3>
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.mental_health_history")}</h3>
             </div>
             <div className="flex items-center gap-2">
               <button 
@@ -370,27 +372,27 @@ function ProfilPage() {
                       .order('created_at', { ascending: false })
                       .limit(10);
                     if (error) {
-                      showToast('error', `Gagal memuat: ${error.message}`);
+                      showToast('error', `${t("profil.load_failed")}: ${error.message}`);
                     } else {
                       setMentalScreenings(screenings || []);
-                      showToast('success', 'Riwayat berhasil diperbarui');
+                      showToast('success', t("profil.history_updated"));
                     }
                   } catch (err) {
-                    showToast('error', 'Gagal memperbarui riwayat');
+                    showToast('error', t("profil.history_update_failed"));
                   } finally {
                     setLoading(false);
                   }
                 }}
                 className="text-xs font-medium text-slate-500 hover:text-slate-700 flex items-center gap-1 transition-all duration-300 hover:bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100"
               >
-                Refresh
+                {t("profil.refresh")}
               </button>
 
               <button 
                 onClick={() => navigate({ to: '/mental-health' })}
                 className="text-xs font-medium text-violet-600 hover:text-violet-700 flex items-center gap-1 transition-all duration-300 hover:bg-violet-50 px-3 py-1.5 rounded-xl"
               >
-                Screening Baru <ArrowRight className="w-3.5 h-3.5" />
+                {t("profil.new_screening")} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -400,14 +402,14 @@ function ProfilPage() {
                 <div className="w-14 h-14 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mx-auto mb-3">
                   <Brain className="w-7 h-7 text-violet-400" />
                 </div>
-                <p className="text-sm text-slate-500 mb-1">Belum ada riwayat screening</p>
-                <p className="text-xs text-slate-400">Lakukan screening PHQ-9 atau GAD-7 untuk memantau kesehatan mental Anda.</p>
+                <p className="text-sm text-slate-500 mb-1">{t("profil.no_history")}</p>
+                <p className="text-xs text-slate-400">{t("profil.no_history_desc")}</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {mentalScreenings.map((s) => {
                   const maxScore = s.screening_type === 'phq9' ? 27 : 21;
-                  const typeLabel = s.screening_type === 'phq9' ? 'Depresi (PHQ-9)' : 'Kecemasan (GAD-7)';
+                  const typeLabel = s.screening_type === 'phq9' ? t("profil.depression_phq9") : t("profil.anxiety_gad7");
                   const typeColor = s.screening_type === 'phq9' 
                     ? 'bg-violet-50 border-violet-100 text-violet-700'
                     : 'bg-rose-50 border-rose-100 text-rose-700';
@@ -419,11 +421,11 @@ function ProfilPage() {
                     'severe': 'bg-red-50 text-red-700 border-red-100',
                   };
                   const severityLabels: Record<string, string> = {
-                    'minimal': 'Minimal',
-                    'mild': 'Ringan',
-                    'moderate': 'Sedang',
-                    'mod-severe': 'Cukup Berat',
-                    'severe': 'Berat',
+                    'minimal': t("profil.minimal"),
+                    'mild': t("profil.mild"),
+                    'moderate': t("profil.moderate"),
+                    'mod-severe': t("profil.mod_severe"),
+                    'severe': t("profil.severe"),
                   };
                   const dateStr = new Date(s.created_at).toLocaleDateString('id-ID', {
                     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -465,26 +467,26 @@ function ProfilPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-1 rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Statistik Aktivitas</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.activity_stats")}</h3>
           </div>
           <div className="px-6 pb-6">
             <div className="grid grid-cols-3 gap-3">
-              <StatCard value={chatCount.toString()} label="Total Chat" icon={<MessageSquare className="w-5 h-5" />} />
-              <StatCard value={daysSinceJoin.toString()} label="Hari Aktif" icon={<Calendar className="w-5 h-5" />} />
-              <StatCard value="0" label="Resep" icon={<Stethoscope className="w-5 h-5" />} />
+              <StatCard value={chatCount.toString()} label={t("profil.total_chat")} icon={<MessageSquare className="w-5 h-5" />} />
+              <StatCard value={daysSinceJoin.toString()} label={t("profil.active_days_label")} icon={<Calendar className="w-5 h-5" />} />
+              <StatCard value="0" label={t("profil.prescriptions")} icon={<Stethoscope className="w-5 h-5" />} />
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-2 rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Pengaturan Akun</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.account_settings")}</h3>
           </div>
           <div className="px-2 pb-2">
-            <MenuButton icon={<User className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label="Edit Profil" desc="Perbarui nama, foto, dan info pribadi" />
-            <MenuButton icon={<Bell className="w-5 h-5" />} iconBg="bg-amber-50" iconColor="text-amber-600" label="Notifikasi" desc="Atur preferensi notifikasi" />
-            <MenuButton icon={<Shield className="w-5 h-5" />} iconBg="bg-emerald-50" iconColor="text-emerald-600" label="Keamanan" desc="Password dan verifikasi dua langkah" />
-            <MenuButton icon={<Globe className="w-5 h-5" />} iconBg="bg-violet-50" iconColor="text-violet-600" label="Bahasa" desc="Bahasa Indonesia" last />
+            <MenuButton icon={<User className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label={t("profil.edit_profile")} desc={t("profil.edit_profile_desc")} />
+            <MenuButton icon={<Bell className="w-5 h-5" />} iconBg="bg-amber-50" iconColor="text-amber-600" label={t("profil.notifications")} desc={t("profil.notifications_desc")} />
+            <MenuButton icon={<Shield className="w-5 h-5" />} iconBg="bg-emerald-50" iconColor="text-emerald-600" label={t("profil.security")} desc={t("profil.security_desc")} />
+            <MenuButton icon={<Globe className="w-5 h-5" />} iconBg="bg-violet-50" iconColor="text-violet-600" label={t("profil.language")} desc={t("profil.language_desc")} last />
           </div>
         </div>
       </div>
@@ -492,8 +494,8 @@ function ProfilPage() {
       {/* Tentang & Doctor Panel */}
       <div className="rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden mb-6">
         <div className="px-2 pt-2 pb-2">
-          <MenuButton icon={<Activity className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label="Tentang Sembuhin" desc="Versi 1.1 • Syarat & Ketentuan" />
-          <MenuButton icon={<Lock className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label="Kebijakan Privasi" desc="Bagaimana kami melindungi data Anda" last />
+          <MenuButton icon={<Activity className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label={t("profil.about_sembuhin")} desc={t("profil.about_desc")} />
+          <MenuButton icon={<Lock className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label={t("profil.privacy_policy")} desc={t("profil.privacy_desc")} last />
         </div>
       </div>
 
@@ -504,7 +506,7 @@ function ProfilPage() {
           className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 text-white p-5 flex items-center justify-center gap-3 shadow-xl shadow-sky-200 hover:from-sky-600 hover:to-blue-700 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] mb-6"
         >
           <Stethoscope className="w-6 h-6" />
-          <span className="text-lg font-bold">Panel Dokter</span>
+          <span className="text-lg font-bold">{t("profil.doctor_panel")}</span>
         </button>
       )}
 
@@ -514,7 +516,7 @@ function ProfilPage() {
         className="w-full rounded-2xl bg-white border-2 border-red-100 text-red-600 p-5 flex items-center justify-center gap-3 hover:bg-red-50 transition-all duration-300 hover:border-red-200"
       >
         <LogOut className="w-6 h-6" />
-        <span className="text-lg font-bold">Keluar</span>
+        <span className="text-lg font-bold">{t("profil.logout")}</span>
       </button>
     </div>
   );

@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import { useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TESTIMONIALS = [
   {
@@ -160,6 +161,7 @@ function MarqueeRow({
 // ─── Section ─────────────────────────────────────────────────────────────────
 
 export function TestimonialSection() {
+  const { t } = useLanguage();
   return (
     <section className="relative mt-24 mb-24 overflow-hidden">
       {/* Ambient */}
@@ -169,16 +171,16 @@ export function TestimonialSection() {
       {/* Header */}
       <div className="text-center mb-12 px-4">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-[10px] font-bold uppercase tracking-widest mb-4">
-          Dipercaya Pengguna
+          {t("testimonial.badge")}
         </div>
         <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight mb-4">
-          Cerita Nyata dari{" "}
+          {t("testimonial.title")}{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">
-            Pengguna Kami
+            {t("testimonial.title_accent")}
           </span>
         </h2>
         <p className="text-muted-foreground max-w-xl mx-auto text-lg leading-relaxed">
-          Jutaan pengguna telah merasakan perbedaan nyata dengan ekosistem kesehatan Sembuhin.
+          {t("testimonial.desc")}
         </p>
       </div>
 

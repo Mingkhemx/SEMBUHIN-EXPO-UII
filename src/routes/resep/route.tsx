@@ -1,10 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { useState, useRef, useEffect } from "react";
 import { MoleculeViewer } from "@/components/three/MoleculeViewer";
 import { motion } from "framer-motion";
-import { FileText, Download, Share2 } from "lucide-react";
+import { FileText, Download, Share2, Loader2, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+
+interface ResepSearchParams {
+  id?: string;
+}
 
 export const Route = createFileRoute("/resep")({
+  validateSearch: (search: Record<string, unknown>): ResepSearchParams => {
+    return {
+      id: (search.id as string) || "",
+    };
+  },
   head: () => ({
     meta: [
       { title: "Resep Holografik — Sembuhin" },
@@ -22,15 +33,59 @@ export const Route = createFileRoute("/resep")({
   component: ResepPage,
 });
 
-const RESEP = [
-  { name: "Amoxicillin 500mg", dose: "3x sehari sesudah makan", days: 7 },
-  { name: "Vitamin B Complex", dose: "1x sehari pagi hari", days: 30 },
-  { name: "Paracetamol 500mg", dose: "Bila perlu, max 3x sehari", days: 5 },
-];
+interface Medicine {
+  name: string;
+  dose: string;
+  days: number | string;
+}
+
+interface PrescriptionData {
+  id: string;
+  patient_name: string;
+  patient_age: number;
+  doctor_name: string;
+  doctor_str: string;
+  created_at: string;
+  medicines: Medicine[];
+  status: string;
+}
 
 function ResepPage() {
+  const { id } = useSearch({ from: "/resep" });
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<PrescriptionData | null>(null);
+
+  useEffect(() => {
+    async function fetchResep() {
+      if (!id) {
+        setError("ID Resep tidak ditemukan");
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        // Fetch specific prescription from backend
+        // Note: For now we reuse the doctor prescriptions endpoint or create a new one
+        // But let's assume we have a way to get a single prescription
+        const res = await fetch(`http://127.0.0.1:5001/api/doctor/prescriptions/single?id=${id}`);
+        const result = await res.json();
+        if (result.success) {
+          setData(result.data);
+        } else {
+          throw new Error(result.error || "Gagal mengambil data resep");
+        }
+      } catch (err: any) {
+        console.error("Error fetching resep:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchResep();
+  }, [id]);
 
   const onMove = (e: React.MouseEvent) => {
     const r = cardRef.current?.getBoundingClientRect();
@@ -40,6 +95,41 @@ function ResepPage() {
     setTilt({ x: -py * 14, y: px * 14 });
   };
   const reset = () => setTilt({ x: 0, y: 0 });
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse">Menyiapkan hologram resep Anda...</p>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-5 text-center px-4">
+        <div className="h-16 w-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center">
+          <FileText className="h-8 w-8 text-slate-300" />
+        </div>
+        <div>
+          <h2 className="text-[17px] font-bold text-slate-900 mb-1">
+            {!id ? "ID Resep tidak ditemukan" : "Resep tidak tersedia"}
+          </h2>
+          <p className="text-[13px] text-slate-400 max-w-xs leading-relaxed">
+            {!id
+              ? "Akses halaman ini melalui rekam medis Anda."
+              : "Resep ini mungkin belum dibuat atau sudah dihapus oleh dokter."}
+          </p>
+        </div>
+        <a
+          href="/rekam-medis"
+          className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-[13px] font-semibold rounded-xl hover:bg-slate-800 transition-colors"
+        >
+          ← Kembali ke Rekam Medis
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-12">
@@ -84,23 +174,25 @@ function ResepPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Resep #AM-2891
+                    Resep #{data.id.slice(0, 8).toUpperCase()}
                   </div>
-                  <div className="mt-1 font-display text-2xl font-bold">Aurelia P., 28th</div>
+                  <div className="mt-1 font-display text-2xl font-bold">{data.patient_name}, {data.patient_age}th</div>
                 </div>
                 <div className="rounded-full bg-gradient-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-glow">
-                  VERIFIED
+                  {data.status.toUpperCase()}
                 </div>
               </div>
 
               <div className="mt-5 border-y border-white/40 py-4">
                 <div className="text-xs text-muted-foreground">Diresepkan oleh</div>
-                <div className="font-semibold">dr. Sembuhin Wijaya, Sp.PD</div>
-                <div className="text-xs text-muted-foreground">17 April 2026 · STR 4438291</div>
+                <div className="font-semibold">{data.doctor_name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {format(new Date(data.created_at), "dd MMMM yyyy", { locale: idLocale })} · STR {data.doctor_str}
+                </div>
               </div>
 
               <ul className="mt-4 space-y-3">
-                {RESEP.map((r, i) => (
+                {data.medicines.map((r, i) => (
                   <li key={i} className="rounded-xl bg-white/40 p-3">
                     <div className="flex items-baseline justify-between">
                       <div className="font-semibold">{r.name}</div>
@@ -127,7 +219,7 @@ function ResepPage() {
         <div className="glass-strong relative overflow-hidden rounded-3xl">
           <MoleculeViewer className="h-[60vh] min-h-[480px] w-full" />
           <div className="absolute left-4 top-4 rounded-xl bg-white/60 px-3 py-1.5 text-xs font-medium backdrop-blur">
-            Struktur molekul: Amoxicillin
+            Struktur molekul: {data.medicines[0]?.name || "Obat"}
           </div>
           <div className="glass absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-4 py-1.5 text-xs">
             Berputar otomatis • Visualisasi 3D

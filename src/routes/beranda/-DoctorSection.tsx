@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Palet aksen
 const ACCENTS = [
@@ -53,6 +54,7 @@ function mapDbDoctor(row: any, index: number): Doctor {
 }
 
 export function DoctorSection() {
+  const { t } = useLanguage();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -159,7 +161,7 @@ export function DoctorSection() {
               className="flex items-center gap-3 text-sky-600 font-bold text-[10px] uppercase tracking-[0.6em] mb-4"
             >
               <div className="w-10 h-px bg-sky-400/40" />
-              Pilihan Spesialis
+              {t("doctor_section.badge")}
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -167,8 +169,8 @@ export function DoctorSection() {
               viewport={{ once: true }}
               className="font-display text-5xl md:text-6xl font-bold text-foreground tracking-tighter leading-[0.95]"
             >
-              Temui Dokter <br />
-              <span className="text-sky-600">Spesialis Terbaik</span>
+              {t("doctor_section.title")} <br />
+              <span className="text-sky-600">{t("doctor_section.title_accent")}</span>
             </motion.h2>
           </div>
 
@@ -179,7 +181,11 @@ export function DoctorSection() {
             viewport={{ once: true }}
             className="flex items-center gap-8 shrink-0"
           >
-            {[["500+", "Dokter"], ["4.9", "Rating"], ["15+", "RS Mitra"]].map(([v, l]) => (
+            {[
+              ["500+", t("doctor_section.stats.doctors")],
+              ["4.9", t("doctor_section.stats.rating")],
+              ["15+", t("doctor_section.stats.hospitals")]
+            ].map(([v, l]) => (
               <div key={l} className="text-right">
                 <div className="text-2xl font-bold text-foreground font-display">{v}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-widest">{l}</div>
@@ -342,7 +348,7 @@ export function DoctorSection() {
                         <MapPin className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Rumah Sakit</div>
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("doctor_section.hospital")}</div>
                         <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">{active.hospital}</div>
                       </div>
                     </div>
@@ -352,7 +358,7 @@ export function DoctorSection() {
                         <Clock className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Jadwal</div>
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("doctor_section.schedule")}</div>
                         <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">{active.available}</div>
                       </div>
                     </div>
@@ -362,8 +368,8 @@ export function DoctorSection() {
                         <Star className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Rating</div>
-                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">{active.rating} / 5 · {active.reviews} ulasan</div>
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("doctor_section.rating_label")}</div>
+                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">{active.rating} / 5 · {active.reviews} {t("doctor_section.reviews")}</div>
                       </div>
                     </div>
                   </div>
@@ -389,10 +395,10 @@ export function DoctorSection() {
                   {/* Buttons */}
                   <div className="flex gap-3 w-full sm:w-auto">
                     <button className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass border border-sky-200/60 text-foreground text-sm font-semibold hover:bg-white/80 hover:border-sky-300/60 transition-all">
-                      Lihat Profil
+                      {t("doctor_section.view_profile")}
                     </button>
                     <button className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl text-sm font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95 bg-gradient-to-r ${active.accent} shadow-sky-400/20`}>
-                      Buat Janji <ArrowRight className="w-4 h-4" />
+                      {t("doctor_section.book_appointment")} <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -408,7 +414,7 @@ export function DoctorSection() {
           to="/dokter"
           className="group inline-flex items-center gap-2 text-sky-600 font-bold text-sm hover:gap-3 transition-all"
         >
-          Lihat Semua Dokter
+          {t("doctor_section.view_all")}
           <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>

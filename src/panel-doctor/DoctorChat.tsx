@@ -460,6 +460,11 @@ export function DoctorChat() {
                           key={msg.id}
                           className={`flex gap-2 mb-1 ${isDoctor ? "justify-end" : "justify-start"}`}
                         >
+                          {!isDoctor && (
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-sky-700 shadow-sm flex-shrink-0 mt-1">
+                              {selectedConsultation.patient_name[0].toUpperCase()}
+                            </div>
+                          )}
                           <div
                             className={`flex flex-col gap-0.5 max-w-[70%] ${
                               isDoctor ? "items-end" : "items-start"
@@ -489,6 +494,11 @@ export function DoctorChat() {
                               <span className="text-[10px] text-slate-400">{formatTime(msg.created_at)}</span>
                             </div>
                           </div>
+                          {isDoctor && (
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 flex items-center justify-center text-xs font-bold text-violet-700 shadow-sm flex-shrink-0 mt-1">
+                              Dr
+                            </div>
+                          )}
                         </div>
                       );
                     })}

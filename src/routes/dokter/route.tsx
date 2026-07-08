@@ -14,6 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/dokter")({
   head: () => ({
@@ -92,15 +93,14 @@ function mapDbDoctor(row: any, index: number): Doctor {
   };
 }
 
-const SORT_OPTIONS = ["Rating Tertinggi", "Ulasan Terbanyak", "Pengalaman Terlama"];
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 function DokterPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("Semua");
-  const [sortBy, setSortBy] = useState(SORT_OPTIONS[0]);
+  const [activeCategory, setActiveCategory] = useState(t("dokter.all"));
+  const [sortBy, setSortBy] = useState(t("dokter.sort_highest_rating"));
   const [showFilter, setShowFilter] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
 
@@ -144,7 +144,7 @@ function DokterPage() {
   // Bangun daftar kategori dinamis dari data yang dimuat
   const categories = useMemo(() => {
     const set = new Set<string>(doctors.map((d) => d.category).filter(Boolean));
-    return ["Semua", ...Array.from(set)];
+    return [t("dokter.all"), ...Array.from(set)];
   }, [doctors]);
 
   const filtered = useMemo(() => {
@@ -160,13 +160,13 @@ function DokterPage() {
       );
     }
 
-    if (activeCategory !== "Semua") {
+    if (activeCategory !== t("dokter.all")) {
       list = list.filter((d) => d.category === activeCategory);
     }
 
     list.sort((a, b) => {
-      if (sortBy === "Rating Tertinggi") return b.rating - a.rating;
-      if (sortBy === "Ulasan Terbanyak") return b.reviews - a.reviews;
+      if (sortBy === t("dokter.sort_highest_rating")) return b.rating - a.rating;
+      if (sortBy === t("dokter.sort_most_reviews")) return b.reviews - a.reviews;
       // Pengalaman Terlama
       return parseInt(b.experience) - parseInt(a.experience);
     });
@@ -197,22 +197,22 @@ function DokterPage() {
           <div className="relative z-10 p-8 lg:p-12 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/30 text-white text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
               <Stethoscope className="w-3 h-3" />
-              Direktori Dokter
+              {t("dokter.badge")}
             </div>
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tighter leading-[0.95]">
-              Semua <span className="text-sky-300">Dokter</span> <br />
-              Spesialis
+              {t("dokter.title")} <span className="text-sky-300">{t("dokter.title_accent")}</span> <br />
+              {t("dokter.subtitle")}
             </h1>
             <p className="mt-4 text-white/75 text-sm md:text-base max-w-lg leading-relaxed">
-              {doctors.length} dokter spesialis terverifikasi siap mendampingi kesehatan Anda.
+              {doctors.length} {t("dokter.description")}
             </p>
 
             {/* Quick stats */}
             <div className="flex items-center gap-8 mt-6">
               {[
-                ["500+", "Dokter Aktif"],
-                ["4.8", "Avg Rating"],
-                ["24/7", "Tersedia"],
+                ["500+", t("dokter.stats.active")],
+                ["4.8", t("dokter.stats.rating")],
+                ["24/7", t("dokter.stats.available")],
               ].map(([v, l]) => (
                 <div key={l}>
                   <div className="text-xl md:text-2xl font-bold font-display text-white">{v}</div>
@@ -231,7 +231,7 @@ function DokterPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
-            placeholder="Cari nama dokter, spesialisasi, atau rumah sakit…"
+            placeholder={t("dokter.search_placeholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/70 border border-sky-100/60 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky-400/40 focus:border-sky-300 transition-all"
@@ -252,9 +252,9 @@ function DokterPage() {
           onChange={(e) => setSortBy(e.target.value)}
           className="px-4 py-3 rounded-xl bg-white/70 border border-sky-100/60 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-sky-400/40 cursor-pointer min-w-[180px]"
         >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o}>{o}</option>
-          ))}
+          <option value={t("dokter.sort_highest_rating")}>{t("dokter.sort_highest_rating")}</option>
+          <option value={t("dokter.sort_most_reviews")}>{t("dokter.sort_most_reviews")}</option>
+          <option value={t("dokter.sort_most_experience")}>{t("dokter.sort_most_experience")}</option>
         </select>
 
         {/* Filter toggle */}
@@ -267,7 +267,7 @@ function DokterPage() {
           }`}
         >
           <Filter className="w-4 h-4" />
-          Filter
+          {t("dokter.filter")}
         </button>
       </div>
 
@@ -282,7 +282,7 @@ function DokterPage() {
           >
             <div className="glass rounded-2xl p-5 border border-sky-100/50">
               <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
-                Spesialisasi
+                {t("dokter.specialization")}
               </div>
               <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
@@ -308,13 +308,13 @@ function DokterPage() {
       {!loading && doctors.length > 0 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Menampilkan{" "}
-            <span className="font-semibold text-foreground">{filtered.length}</span> dokter
-            {activeCategory !== "Semua" && (
+            {t("dokter.showing")}{" "}
+            <span className="font-semibold text-foreground">{filtered.length}</span> {t("dokter.doctors")}
+            {activeCategory !== t("dokter.all") && (
               <>
                 {" "}·{" "}
                 <button
-                  onClick={() => setActiveCategory("Semua")}
+                  onClick={() => setActiveCategory(t("dokter.all"))}
                   className="text-sky-600 font-semibold hover:underline inline-flex items-center gap-1"
                 >
                   {activeCategory} <X className="w-3 h-3" />
@@ -346,12 +346,12 @@ function DokterPage() {
         </div>
       ) : fetchError ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-          <p className="font-semibold mb-1">⚠️ Gagal memuat data dokter</p>
+          <p className="font-semibold mb-1">{t("dokter.error_title")}</p>
           <p className="text-rose-600 text-xs">{fetchError}</p>
           <p className="text-rose-600 text-xs mt-2">
-            Pastikan tabel <code className="font-mono bg-rose-100 px-1 rounded">doctors</code> sudah dibuat.
-            Jalankan file <code className="font-mono bg-rose-100 px-1 rounded">supabase-doctors-columns.sql</code> dan{" "}
-            <code className="font-mono bg-rose-100 px-1 rounded">supabase-consultations.sql</code> di SQL Editor.
+            {t("dokter.error_hint")} <code className="font-mono bg-rose-100 px-1 rounded">doctors</code> {t("dokter.error_hint_2")}
+            <code className="font-mono bg-rose-100 px-1 rounded">supabase-doctors-columns.sql</code> {t("dokter.error_hint_3")}{" "}
+            <code className="font-mono bg-rose-100 px-1 rounded">supabase-consultations.sql</code> {t("dokter.error_hint_4")}
           </p>
         </div>
       ) : doctors.length === 0 ? (
@@ -362,11 +362,10 @@ function DokterPage() {
         >
           <div className="text-6xl mb-4">👨‍⚕️</div>
           <h3 className="font-display text-2xl font-bold text-foreground mb-2">
-            Belum Ada Dokter Tersedia
+            {t("dokter.no_doctors_title")}
           </h3>
           <p className="text-muted-foreground max-w-md mx-auto">
-            Saat ini belum ada dokter yang terdaftar di platform. Dokter akan muncul di sini
-            setelah pendaftaran mereka disetujui oleh admin.
+            {t("dokter.no_doctors_desc")}
           </p>
         </motion.div>
       ) : (
@@ -378,16 +377,16 @@ function DokterPage() {
           >
             <div className="text-5xl mb-4">🔍</div>
             <h3 className="font-display text-2xl font-bold text-foreground mb-2">
-              Tidak Ditemukan
+              {t("dokter.not_found_title")}
             </h3>
             <p className="text-muted-foreground">
-              Cari dengan kata kunci lain atau ubah filter.
+              {t("dokter.not_found_desc")}
             </p>
             <button
-              onClick={() => { setSearch(""); setActiveCategory("Semua"); }}
+              onClick={() => { setSearch(""); setActiveCategory(t("dokter.all")); }}
               className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold text-sm hover:bg-sky-600 transition-all"
             >
-              Reset Pencarian
+              {t("dokter.reset_search")}
             </button>
           </motion.div>
         ) : (
@@ -455,6 +454,7 @@ function DoctorCard({
   doc: Doctor;
   onView: () => void;
 }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:border-slate-200 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col">
@@ -505,7 +505,7 @@ function DoctorCard({
             {doc.available}
           </div>
           <div className="text-xs text-slate-500">
-            Pengalaman <span className="font-semibold text-slate-900">{doc.experience}</span>
+            {t("dokter.experience")} <span className="font-semibold text-slate-900">{doc.experience}</span>
           </div>
         </div>
 
@@ -513,7 +513,7 @@ function DoctorCard({
           <span className="text-2xl font-bold font-display text-slate-900">
             {doc.price}
           </span>
-          <span className="text-xs text-slate-400 ml-1">/konsultasi</span>
+          <span className="text-xs text-slate-400 ml-1">{t("dokter.per_consultation")}</span>
         </div>
 
         {/* Actions */}
@@ -522,13 +522,13 @@ function DoctorCard({
             onClick={onView}
             className="flex-1 py-3 rounded-xl text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-all border border-slate-200"
           >
-            Lihat Profil
+            {t("dokter.view_profile")}
           </button>
           <button 
             className={`flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${doc.accent} shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all`}
             onClick={() => navigate({ to: '/booking', search: { doctorId: doc.id, doctorName: doc.name, doctorSpec: doc.spec, doctorHospital: doc.hospital, doctorExperience: doc.experience, doctorImg: doc.img, doctorAccent: doc.accent, doctorPrice: doc.price } })}
           >
-            Buat Janji
+            {t("dokter.book_appointment")}
           </button>
         </div>
       </div>
@@ -545,6 +545,7 @@ function DoctorModal({
   doc: Doctor;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   return (
     <motion.div
@@ -603,14 +604,14 @@ function DoctorModal({
           {/* Info grid */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: MapPin, label: "Rumah Sakit", value: doc.hospital },
-              { icon: Clock, label: "Jadwal Praktek", value: doc.available },
+              { icon: MapPin, label: t("dokter.hospital"), value: doc.hospital },
+              { icon: Clock, label: t("dokter.schedule"), value: doc.available },
               {
                 icon: Star,
-                label: "Rating",
-                value: `${doc.rating} / 5 · ${doc.reviews} ulasan`,
+                label: t("dokter.rating"),
+                value: `${doc.rating} / 5 · ${doc.reviews} ${t("dokter.reviews")}`,
               },
-              { icon: Stethoscope, label: "Pengalaman", value: doc.experience },
+              { icon: Stethoscope, label: t("dokter.experience"), value: doc.experience },
             ].map(({ icon: Icon, label, value }) => (
               <div
                 key={label}
@@ -638,7 +639,7 @@ function DoctorModal({
                 <span className="text-white text-xs">💲</span>
               </div>
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                Biaya Konsultasi
+                {t("dokter.consultation_fee")}
               </span>
             </div>
             <p className="text-2xl font-bold font-display text-slate-900 leading-tight pl-9">
@@ -659,7 +660,7 @@ function DoctorModal({
               />
             ))}
             <span className="ml-2 text-sm font-bold text-slate-800">{doc.rating}</span>
-            <span className="text-sm text-slate-500">({doc.reviews} ulasan)</span>
+            <span className="text-sm text-slate-500">({doc.reviews} {t("dokter.reviews")})</span>
           </div>
 
           {/* CTA */}
@@ -668,13 +669,13 @@ function DoctorModal({
               onClick={onClose}
               className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-all"
             >
-              Tutup
+              {t("dokter.close")}
             </button>
             <button
               className={`flex-1 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${doc.accent} shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all inline-flex items-center justify-center gap-2`}
               onClick={() => navigate({ to: '/booking', search: { doctorId: doc.id, doctorName: doc.name, doctorSpec: doc.spec, doctorHospital: doc.hospital, doctorExperience: doc.experience, doctorImg: doc.img, doctorAccent: doc.accent, doctorPrice: doc.price } })}
             >
-              Buat Janji Temu <ArrowRight className="h-4 w-4" />
+              {t("dokter.book_meeting")} <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>

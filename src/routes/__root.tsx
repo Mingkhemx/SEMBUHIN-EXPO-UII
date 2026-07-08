@@ -123,6 +123,7 @@ function RootComponent() {
   const isDoctorPage = location.pathname.startsWith("/doctor");
   const isAdminPage = location.pathname.startsWith("/admin");
   const isDaftarDokterPage = location.pathname.startsWith("/daftar-dokter");
+  const isFullWidthPage = location.pathname.startsWith("/rekam-medis") || location.pathname.startsWith("/membership");
 
   // Scroll ke atas setiap kali route berubah
   useEffect(() => {
@@ -140,7 +141,7 @@ function RootComponent() {
           <div className="flex-1 flex flex-col min-h-screen">
             <AuroraBackground />
             <Header />
-            <main className={`${isDaftarDokterPage ? 'px-0 pt-10 pb-10' : 'mx-auto max-w-6xl px-4 pt-24'} flex-1`}>
+            <main className={`${isDaftarDokterPage || isFullWidthPage ? 'px-0 pt-10 pb-10' : 'mx-auto max-w-6xl px-4 pt-24'} flex-1`}>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={location.pathname}

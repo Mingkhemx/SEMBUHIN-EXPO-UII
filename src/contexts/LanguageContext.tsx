@@ -6,7 +6,7 @@ type Language = "id" | "en" | "ms" | "zh" | "ja" | "ko" | "ar";
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (path: string) => string;
+  t: (path: string) => any;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -23,28 +23,30 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   // Helper function to get translation from path like "nav.home"
-  const t = (path: string): string => {
+  const t = (path: string): any => {
     const keys = path.split(".");
     let result = translations[language];
     
     for (const key of keys) {
-      if (result && result[key]) {
+      if (result && result[key] !== undefined) {
         result = result[key];
       } else {
         // Fallback to ID if translation missing
         let fallback = translations["id"];
+        let foundFallback = true;
         for (const fKey of keys) {
-          if (fallback && fallback[fKey]) {
+          if (fallback && fallback[fKey] !== undefined) {
             fallback = fallback[fKey];
           } else {
-            return path; // Last resort: return the path itself
+            foundFallback = false;
+            break;
           }
         }
-        return fallback;
+        return foundFallback ? fallback : path;
       }
     }
     
-    return typeof result === "string" ? result : path;
+    return result !== undefined ? result : path;
   };
 
   return (

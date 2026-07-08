@@ -63,53 +63,31 @@ export function DoctorDashboard() {
     if (!doctorId) return;
     setLoading(true);
 
-    const today = new Date().toISOString().split("T")[0];
+    try {
+      // 1. Fetch stats from backend
+      const statsRes = await fetch(`http://127.0.0.1:5001/api/doctor/dashboard-stats?doctor_id=${doctorId}`);
+      const statsData = await statsRes.json();
+      
+      if (statsData.success) {
+        setStats(statsData.stats);
+      }
 
-    // Semua query paralel
-    const [consultationsRes, doctorRes, unreadRes] = await Promise.all([
-      // Konsultasi hari ini
-      supabase
+      // 2. Fetch recent consultations from Supabase (masih oke direct untuk data detail/list)
+      const today = new Date().toISOString().split("T")[0];
+      const { data: consultations } = await supabase
         .from("consultations")
         .select("id, patient_name, patient_phone, complaint, appointment_time, appointment_date, consultation_status, consultation_type")
         .eq("doctor_id", doctorId)
         .eq("appointment_date", today)
-        .order("appointment_time", { ascending: true }),
+        .order("appointment_time", { ascending: true });
 
-      // Total pasien dari tabel doctors
-      supabase
-        .from("doctors")
-        .select("total_patients")
-        .eq("id", doctorId)
-        .single(),
-
-      // Pesan belum dibaca dari pasien
-      supabase
-        .from("consultation_messages")
-        .select("id", { count: "exact", head: true })
-        .eq("sender_type", "patient")
-        .is("read_at", null)
-        .in(
-          "consultation_id",
-          (
-            await supabase
-              .from("consultations")
-              .select("id")
-              .eq("doctor_id", doctorId)
-          ).data?.map((c) => c.id) ?? []
-        ),
-    ]);
-
-    const todayList = (consultationsRes.data ?? []) as RecentConsultation[];
-    const completedToday = todayList.filter((c) => c.consultation_status === "completed").length;
-
-    setRecentConsultations(todayList.slice(0, 8));
-    setStats({
-      todayConsultations: todayList.length,
-      totalPatients: doctorRes.data?.total_patients ?? 0,
-      completedToday,
-      unreadMessages: unreadRes.count ?? 0,
-    });
-    setLoading(false);
+      setRecentConsultations((consultations || []) as RecentConsultation[]);
+      
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [doctorId]);
 
   useEffect(() => {

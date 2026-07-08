@@ -1,6 +1,7 @@
 import { ArrowRight, Clock, ArrowUpRight } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const BLOGS = [
   {
@@ -50,6 +51,7 @@ const BLOGS = [
 ];
 
 export function BlogSection() {
+  const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -71,20 +73,20 @@ export function BlogSection() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-            Neural Archive
+            {t("blog_section.badge")}
           </div>
           <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tighter leading-[0.95]">
             Sinkronisasi <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400">
-              Pengetahuan Medis
+              {t("blog_section.title_accent")}
             </span>
           </h2>
           <p className="mt-3 text-muted-foreground text-base max-w-md leading-relaxed">
-            Artikel & riset terkini langsung dari jaringan medis global Sembuhin.
+            {t("blog_section.desc")}
           </p>
         </div>
         <button className="hidden sm:flex items-center gap-2 text-sky-600 hover:text-sky-500 font-semibold text-sm transition-all hover:gap-3 group shrink-0">
-          Akses Arsip
+          {t("blog_section.access_archive")}
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </div>
@@ -135,7 +137,7 @@ export function BlogSection() {
             {/* Read button */}
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
               <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-bold hover:bg-white/25 transition-all">
-                Baca Selengkapnya <ArrowUpRight className="w-3.5 h-3.5" />
+                {t("blog_section.read_more")} <ArrowUpRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>
@@ -191,7 +193,7 @@ export function BlogSection() {
 
       {/* Mobile — view all */}
       <button className="w-full sm:hidden mt-8 py-3.5 rounded-xl glass border border-sky-200/50 text-foreground font-semibold text-sm flex items-center justify-center gap-2">
-        Akses Semua Arsip <ArrowRight className="w-4 h-4" />
+        {t("blog_section.access_all")} <ArrowRight className="w-4 h-4" />
       </button>
     </section>
   );

@@ -24,6 +24,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export const Route = createFileRoute('/artikel')({
   head: () => ({
@@ -228,6 +229,7 @@ const fadeIn: Variants = {
 
 /* ─── Component ──────────────────────────────────────────────────── */
 function ArtikelPage() {
+  const { t } = useLanguage()
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [activeCategory, setActiveCategory] = useState('semua')
   const [searchQuery, setSearchQuery] = useState('')
@@ -290,13 +292,13 @@ function ArtikelPage() {
             <div className="relative z-10 p-8 sm:p-12 max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-4 py-1.5 mb-5 backdrop-blur-sm">
                 <BookOpen className="h-3.5 w-3.5 text-sky-200" />
-                <span className="text-xs font-semibold text-white/90 tracking-wide uppercase">Edukasi Kesehatan</span>
+                <span className="text-xs font-semibold text-white/90 tracking-wide uppercase">{t('artikel.hero_badge')}</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
-                Artikel Kesehatan
+                {t('artikel.hero_title')}
               </h1>
               <p className="mt-3 text-base sm:text-lg text-sky-100 leading-relaxed max-w-lg">
-                Kumpulan riset dan artikel medis terpercaya yang ditulis oleh dokter dan ahli kesehatan untuk Anda.
+                {t('artikel.hero_desc')}
               </p>
             </div>
           </motion.div>
@@ -312,7 +314,7 @@ function ArtikelPage() {
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari artikel tentang kesehatan..."
+                placeholder={t('artikel.search_placeholder')}
                 className="flex-1 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
               />
             </div>

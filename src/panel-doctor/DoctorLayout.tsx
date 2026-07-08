@@ -19,6 +19,7 @@ import {
   X,
   LogOut,
   LogIn,
+  ClipboardList,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,13 +44,14 @@ export const useDoctorLayout = () => {
 // ─── Navigation config ────────────────────────────────────────────────────────
 
 export const DOCTOR_NAV = [
-  { id: "dashboard",     label: "Dashboard",    icon: LayoutDashboard, path: "/doctor" },
-  { id: "consultations", label: "Konsultasi",   icon: Calendar,        path: "/doctor/consultations" },
-  { id: "chat",          label: "Chat Pasien",  icon: MessageSquare,   path: "/doctor/chat" },
-  { id: "prescriptions", label: "Resep",        icon: FileText,        path: "/doctor/prescriptions" },
-  { id: "patients",      label: "Pasien",       icon: Users,           path: "/doctor/patients" },
-  { id: "analytics",     label: "Analitik",     icon: Activity,        path: "/doctor/analytics" },
-  { id: "settings",      label: "Pengaturan",   icon: Settings,        path: "/doctor/settings" },
+  { id: "dashboard",       label: "Dashboard",       icon: LayoutDashboard, path: "/doctor" },
+  { id: "consultations",   label: "Konsultasi",      icon: Calendar,        path: "/doctor/consultations" },
+  { id: "chat",            label: "Chat Pasien",     icon: MessageSquare,   path: "/doctor/chat" },
+  { id: "prescriptions",   label: "Resep",           icon: FileText,        path: "/doctor/prescriptions" },
+  { id: "medical-records", label: "Rekam Medis",     icon: ClipboardList,   path: "/doctor/medical-records" },
+  { id: "patients",        label: "Pasien",          icon: Users,           path: "/doctor/patients" },
+  { id: "analytics",       label: "Analitik",        icon: Activity,        path: "/doctor/analytics" },
+  { id: "settings",        label: "Pengaturan",      icon: Settings,        path: "/doctor/settings" },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -142,7 +144,7 @@ export function DoctorShell() {
                 const isActive =
                   item.id === "dashboard"
                     ? currentPath === "/doctor" || currentPath === "/doctor/"
-                    : currentPath === item.path;
+                    : currentPath.startsWith(item.path);
 
                 return (
                   <Link
