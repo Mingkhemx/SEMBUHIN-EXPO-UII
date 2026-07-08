@@ -275,11 +275,13 @@ function Konsul() {
     setMessages((m) => [...m, { id: Date.now().toString(), role: "user", text: messageText }]);
     setInput("");
     setIsTyping(true);
-    await supabase.from('chat_history').insert({ user_id: user.id, message: messageText, sender: 'user' });
+    // Save to chat_history (non-blocking, ignore if table doesn't exist)
+    supabase.from('chat_history').insert({ user_id: user.id, message: messageText, sender: 'user' }).then(() => {});
     setChatCount(prev => prev + 1);
 
     try {
       const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+      if (!API_KEY) throw new Error('API key tidak dikonfigurasi');
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -314,8 +316,9 @@ function Konsul() {
           setCurrentTypingText(""); setIsTyping(false);
         }
       }, 20);
-      await supabase.from('chat_history').insert({ user_id: user.id, message: botText, sender: 'doc' });
-    } catch {
+      await supabase.from('chat_history').insert({ user_id: user.id, message: botText, sender: 'doc' }).then(() => {});
+    } catch (err: any) {
+      console.error('AI error:', err.message);
       setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: t("konsul.error_message") }]);
       setIsTyping(false);
     }
