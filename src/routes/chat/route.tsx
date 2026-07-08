@@ -351,7 +351,8 @@ function ChatPage() {
   }
 
   return (
-    <div className="relative z-10 flex h-[calc(100vh-5rem)] overflow-hidden rounded-2xl border border-slate-200/80 shadow-xl bg-white mx-4 mt-6">
+    <div className="px-6 pt-6 pb-4">
+      <div className="relative z-10 flex h-[calc(100vh-8rem)] overflow-hidden rounded-2xl border border-slate-200/80 shadow-xl bg-white max-w-6xl mx-auto">
       {/* ── LEFT SIDEBAR ────────────────────────────────────────────── */}
       <div
         className={cn(
@@ -805,6 +806,7 @@ function ChatPage() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
