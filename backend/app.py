@@ -27,7 +27,7 @@ CORS(app)  # Izinkan CORS untuk frontend
 
 # Health check
 @app.route('/', methods=['GET'])
-def health_check():
+def root():
     return jsonify({'status': 'ok', 'service': 'Sembuhin Backend API'})
 
 # Initialize Supabase
