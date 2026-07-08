@@ -37,3 +37,16 @@ secrets/
 *.njsproj
 *.sln
 *.sw?
+
+# SQL migration files (keep locally, not in repo)
+supabase-*.sql
+supabase_schema.sql
+
+# AI tool configs
+.clinerules/
+.trae/
+ponytail/
+.vite/
+
+# Supabase edge functions (handled separately)
+supabase/functions/
