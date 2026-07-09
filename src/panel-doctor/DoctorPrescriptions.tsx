@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   FileText, Plus, Search, CheckCircle, XCircle,
-  Loader2, Trash2, Eye, X, User, Calendar,
+  Loader2, Trash2, Eye, X, User, Calendar, AlertCircle,
 } from "lucide-react";
 import { DoctorLayout } from "@/panel-doctor/DoctorLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,18 +16,26 @@ import { cn } from "@/lib/utils";
 
 interface Medicine {
   name: string;
-  dose: string;
-  days: number | string;
+  dosage: string;
+  quantity: number;
+  unit: string;
+  frequency: string;
+  duration: string;
+  notes?: string;
+  image?: string;
 }
 
 interface Prescription {
   id: string;
   patient_id: string;
-  patient: string;
+  patient_name: string;
+  patient_email?: string;
+  doctor_id: string;
   date: string;
   status: string;
   medicines: Medicine[];
   notes?: string;
+  diagnosis?: string;
 }
 
 // ─── Prescription Detail Modal ────────────────────────────────────────────────
@@ -85,7 +93,7 @@ function PrescriptionModal({
               <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                 <User className="h-3 w-3" /> Pasien
               </p>
-              <p className="text-[14px] font-bold text-slate-900">{presc.patient}</p>
+              <p className="text-[14px] font-bold text-slate-900">{presc.patient_name}</p>
             </div>
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
               <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
@@ -113,17 +121,33 @@ function PrescriptionModal({
             </span>
           </div>
 
+          {/* Diagnosis */}
+          {presc.diagnosis && (
+            <div>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnosis</p>
+              <p className="text-[13px] text-slate-600 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 leading-relaxed">
+                {presc.diagnosis}
+              </p>
+            </div>
+          )}
+
           {/* Medicines */}
           <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Daftar Obat</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Daftar Obat ({presc.medicines.length})</p>
             <div className="space-y-2">
               {presc.medicines.map((med, i) => (
                 <div key={i} className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-[14px] font-semibold text-slate-900">{med.name}</p>
-                    <span className="text-[11px] text-slate-400 flex-shrink-0">{med.days} hari</span>
+                    <div className="flex-1">
+                      <p className="text-[14px] font-semibold text-slate-900">{med.name}</p>
+                      <p className="text-[12px] text-slate-500 mt-0.5">{med.dosage}</p>
+                    </div>
                   </div>
-                  <p className="text-[12px] text-slate-500 mt-0.5">{med.dose}</p>
+                  <div className="grid grid-cols-3 gap-2 mt-3 text-[11px]">
+                    <span className="bg-white px-2 py-1 rounded border border-slate-100"><strong>Qty:</strong> {med.quantity} {med.unit}</span>
+                    <span className="bg-white px-2 py-1 rounded border border-slate-100"><strong>Frek:</strong> {med.frequency}</span>
+                    <span className="bg-white px-2 py-1 rounded border border-slate-100"><strong>Durasi:</strong> {med.duration}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -133,7 +157,7 @@ function PrescriptionModal({
           {presc.notes && (
             <div>
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Catatan</p>
-              <p className="text-[13px] text-slate-600 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 leading-relaxed">
+              <p className="text-[13px] text-slate-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 leading-relaxed">
                 {presc.notes}
               </p>
             </div>
@@ -168,35 +192,104 @@ export function DoctorPrescriptions() {
 
   // Form state
   const [selectedPatientId, setSelectedPatientId] = useState("");
-  const [newMedicines, setNewMedicines] = useState<Medicine[]>([{ name: "", dose: "", days: "" }]);
+  const [diagnosis, setDiagnosis] = useState("");
+  const [newMedicines, setNewMedicines] = useState<Medicine[]>([
+    { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" }
+  ]);
   const [newNotes, setNewNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get doctor ID
+  const getDoctorId = async () => {
+    if (!user) return null;
+    const { data: doc } = await supabase
+      .from("doctors")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+    return doc?.id || null;
+  };
+
+  // Fetch prescriptions
   const fetchPrescriptions = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
-      const { data: doc } = await supabase.from("doctors").select("id").eq("user_id", user.id).single();
-      if (!doc) return;
-      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/prescriptions?doctor_id=${doc.id}`);
-      const data = await res.json();
-      if (data.success) setPrescriptions(data.data);
+      const doctorId = await getDoctorId();
+      if (!doctorId) return;
+
+      const { data: prescData, error: prescError } = await supabase
+        .from("prescriptions")
+        .select("*")
+        .eq("doctor_id", doctorId)
+        .order("created_at", { ascending: false });
+
+      if (prescError) throw prescError;
+
+      // Fetch patient details
+      if (prescData && prescData.length > 0) {
+        const patientIds = [...new Set(prescData.map(p => p.patient_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", patientIds);
+
+        const profileMap = Object.fromEntries(
+          (profilesData || []).map(p => [p.id, p])
+        );
+
+        const transformed: Prescription[] = prescData.map(p => ({
+          id: p.id,
+          patient_id: p.patient_id,
+          patient_name: profileMap[p.patient_id]?.full_name || "Pasien",
+          patient_email: profileMap[p.patient_id]?.email,
+          doctor_id: p.doctor_id,
+          date: p.created_at,
+          status: p.status,
+          medicines: p.medicines || [],
+          notes: p.notes,
+          diagnosis: p.diagnosis,
+        }));
+
+        setPrescriptions(transformed);
+      } else {
+        setPrescriptions([]);
+      }
     } catch (err) {
       console.error("Error fetching prescriptions:", err);
+      toast.error("Gagal memuat resep");
     } finally {
       setLoading(false);
     }
   }, [user]);
 
+  // Fetch patients
   const fetchPatients = useCallback(async () => {
     if (!user) return;
     try {
-      const { data: doc } = await supabase.from("doctors").select("id").eq("user_id", user.id).single();
-      if (!doc) return;
-      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?doctor_id=${doc.id}`);
-      const data = await res.json();
-      if (data.success) {
-        setPatients(data.data.map((p: any) => ({ id: p.id, full_name: p.full_name || p.email })));
+      const doctorId = await getDoctorId();
+      if (!doctorId) return;
+
+      // Get patients from consultations
+      const { data: consultations } = await supabase
+        .from("consultations")
+        .select("patient_id")
+        .eq("doctor_id", doctorId)
+        .neq("patient_id", null);
+
+      if (consultations && consultations.length > 0) {
+        const patientIds = [...new Set(consultations.map(c => c.patient_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", patientIds);
+
+        setPatients(
+          (profiles || []).map(p => ({
+            id: p.id,
+            full_name: p.full_name || "Pasien",
+          }))
+        );
       }
     } catch (err) {
       console.error("Error fetching patients:", err);
@@ -208,44 +301,51 @@ export function DoctorPrescriptions() {
     fetchPatients();
   }, [fetchPrescriptions, fetchPatients]);
 
+  // Create prescription
   const handleCreatePrescription = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPatientId || newMedicines.some((m) => !m.name)) {
       toast.error("Pilih pasien dan isi minimal satu obat");
       return;
     }
+
     try {
       setIsSubmitting(true);
-      const { data: doc } = await supabase.from("doctors").select("id").eq("user_id", user?.id).single();
-      if (!doc) return;
-      const res = await fetch("https://sembuhin-expo-uii-production.up.railway.app/api/doctor/prescriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          doctor_id: doc.id,
-          patient_id: selectedPatientId,
-          medicines: newMedicines,
-          notes: newNotes,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success("Resep berhasil diterbitkan");
-        setShowCreateModal(false);
-        setSelectedPatientId("");
-        setNewMedicines([{ name: "", dose: "", days: "" }]);
-        setNewNotes("");
-        fetchPrescriptions();
-      } else {
-        throw new Error(data.error || "Gagal menerbitkan resep");
-      }
+      const doctorId = await getDoctorId();
+      if (!doctorId) throw new Error("Doctor not found");
+
+      const prescriptionData = {
+        doctor_id: doctorId,
+        patient_id: selectedPatientId,
+        medicines: newMedicines,
+        diagnosis: diagnosis || null,
+        notes: newNotes || null,
+        status: "Pending",
+      };
+
+      const { error } = await supabase
+        .from("prescriptions")
+        .insert([prescriptionData]);
+
+      if (error) throw error;
+
+      toast.success("Resep berhasil diterbitkan");
+      setShowCreateModal(false);
+      setSelectedPatientId("");
+      setDiagnosis("");
+      setNewMedicines([
+        { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" }
+      ]);
+      setNewNotes("");
+      fetchPrescriptions();
     } catch (err: any) {
-      toast.error(err.message || "Koneksi gagal");
+      toast.error(err.message || "Gagal menerbitkan resep");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Mark as dispensed
   const handleMarkDone = async (prescId: string) => {
     setMarkingId(prescId);
     try {
@@ -253,6 +353,7 @@ export function DoctorPrescriptions() {
         .from("prescriptions")
         .update({ status: "Dispensed" })
         .eq("id", prescId);
+
       if (error) throw error;
       toast.success("Resep ditandai sudah diambil");
       fetchPrescriptions();
@@ -263,16 +364,24 @@ export function DoctorPrescriptions() {
     }
   };
 
-  const addMedicineRow = () => setNewMedicines([...newMedicines, { name: "", dose: "", days: "" }]);
-  const removeMedicineRow = (i: number) => setNewMedicines(newMedicines.filter((_, idx) => idx !== i));
-  const updateMedicine = (i: number, field: keyof Medicine, value: string) => {
+  // Medicine helpers
+  const addMedicineRow = () =>
+    setNewMedicines([
+      ...newMedicines,
+      { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" }
+    ]);
+
+  const removeMedicineRow = (i: number) =>
+    setNewMedicines(newMedicines.filter((_, idx) => idx !== i));
+
+  const updateMedicine = (i: number, field: keyof Medicine, value: any) => {
     const updated = [...newMedicines];
     updated[i] = { ...updated[i], [field]: value };
     setNewMedicines(updated);
   };
 
   const filtered = prescriptions.filter((p) =>
-    p.patient.toLowerCase().includes(searchQuery.toLowerCase())
+    p.patient_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -328,33 +437,48 @@ export function DoctorPrescriptions() {
                       </div>
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-3">
-                          <h3 className="font-semibold text-slate-900">{presc.patient}</h3>
-                          <span className={cn(
-                            "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border",
-                            presc.status === "Dispensed"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                          <h3 className="font-semibold text-slate-900">{presc.patient_name}</h3>
+                          <span
+                            className={cn(
+                              "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border",
+                              presc.status === "Dispensed"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                : presc.status === "Pending"
+                                  ? "bg-amber-50 text-amber-700 border-amber-100"
+                                  : "bg-rose-50 text-rose-700 border-rose-100"
+                            )}
+                          >
+                            {presc.status === "Dispensed"
+                              ? "Sudah Diambil"
                               : presc.status === "Pending"
-                                ? "bg-amber-50 text-amber-700 border-amber-100"
-                                : "bg-rose-50 text-rose-700 border-rose-100"
-                          )}>
-                            {presc.status === "Dispensed" ? "Sudah Diambil"
-                              : presc.status === "Pending" ? "Menunggu"
-                              : "Dibatalkan"}
+                                ? "Menunggu"
+                                : "Dibatalkan"}
                           </span>
                         </div>
                         <p className="text-sm text-slate-500">
-                          {format(new Date(presc.date), "dd MMM yyyy, HH:mm", { locale: idLocale })}
+                          {format(new Date(presc.date), "dd MMM yyyy, HH:mm", {
+                            locale: idLocale,
+                          })}
                         </p>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Daftar Obat</p>
-                      {presc.medicines.map((med, i) => (
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Daftar Obat ({presc.medicines.length})
+                      </p>
+                      {presc.medicines.slice(0, 2).map((med, i) => (
                         <div key={i} className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                           <p className="font-medium text-slate-900 text-sm">{med.name}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{med.dose} · {med.days} hari</p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {med.dosage} · {med.frequency} · {med.duration}
+                          </p>
                         </div>
                       ))}
+                      {presc.medicines.length > 2 && (
+                        <p className="text-xs text-slate-500 italic">
+                          +{presc.medicines.length - 2} obat lainnya
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -373,9 +497,11 @@ export function DoctorPrescriptions() {
                         disabled={markingId === presc.id}
                         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                       >
-                        {markingId === presc.id
-                          ? <Loader2 className="h-4 w-4 animate-spin" />
-                          : <CheckCircle className="h-4 w-4" />}
+                        {markingId === presc.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4" />
+                        )}
                         Tandai Selesai
                       </button>
                     )}
@@ -413,29 +539,53 @@ export function DoctorPrescriptions() {
 
             <form onSubmit={handleCreatePrescription} className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Pilih Pasien</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                  Pilih Pasien
+                </label>
                 <select
                   value={selectedPatientId}
                   onChange={(e) => setSelectedPatientId(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all text-sm"
                   required
                 >
-                  <option value="">-- Pilih Pasien Konsultasi --</option>
+                  <option value="">-- Pilih Pasien --</option>
                   {patients.map((p) => (
-                    <option key={p.id} value={p.id}>{p.full_name}</option>
+                    <option key={p.id} value={p.id}>
+                      {p.full_name}
+                    </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                  Diagnosis (Opsional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Cth: Sakit Kepala Migrain"
+                  value={diagnosis}
+                  onChange={(e) => setDiagnosis(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all text-sm"
+                />
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-bold text-slate-700">Daftar Obat</label>
-                  <button type="button" onClick={addMedicineRow} className="text-sky-600 hover:text-sky-700 text-xs font-bold flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={addMedicineRow}
+                    className="text-sky-600 hover:text-sky-700 text-xs font-bold flex items-center gap-1"
+                  >
                     <Plus className="h-3.5 w-3.5" /> Tambah Obat
                   </button>
                 </div>
                 {newMedicines.map((med, idx) => (
-                  <div key={idx} className="p-4 rounded-xl border border-slate-100 bg-slate-50 relative group">
+                  <div
+                    key={idx}
+                    className="p-4 rounded-xl border border-slate-100 bg-slate-50 relative group"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="md:col-span-2">
                         <input
@@ -447,17 +597,45 @@ export function DoctorPrescriptions() {
                         />
                       </div>
                       <input
-                        placeholder="Dosis (cth: 3x1 sesudah makan)"
-                        value={med.dose}
-                        onChange={(e) => updateMedicine(idx, "dose", e.target.value)}
+                        placeholder="Dosis (cth: 2 tablet)"
+                        value={med.dosage}
+                        onChange={(e) => updateMedicine(idx, "dosage", e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
+                        required
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          placeholder="Qty"
+                          type="number"
+                          min="1"
+                          value={med.quantity}
+                          onChange={(e) => updateMedicine(idx, "quantity", parseInt(e.target.value) || 1)}
+                          className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
+                          required
+                        />
+                        <select
+                          value={med.unit}
+                          onChange={(e) => updateMedicine(idx, "unit", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
+                        >
+                          <option>tablet</option>
+                          <option>kaplet</option>
+                          <option>ml</option>
+                          <option>tetes</option>
+                          <option>sachet</option>
+                        </select>
+                      </div>
+                      <input
+                        placeholder="Frekuensi (cth: 3x1 sehari)"
+                        value={med.frequency}
+                        onChange={(e) => updateMedicine(idx, "frequency", e.target.value)}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
                         required
                       />
                       <input
-                        placeholder="Durasi (hari)"
-                        type="number"
-                        value={med.days}
-                        onChange={(e) => updateMedicine(idx, "days", e.target.value)}
+                        placeholder="Durasi (cth: 7 hari)"
+                        value={med.duration}
+                        onChange={(e) => updateMedicine(idx, "duration", e.target.value)}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
                         required
                       />
@@ -476,7 +654,9 @@ export function DoctorPrescriptions() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Catatan Tambahan (Opsional)</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                  Catatan Tambahan (Opsional)
+                </label>
                 <textarea
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
@@ -491,9 +671,13 @@ export function DoctorPrescriptions() {
                 className="w-full py-3.5 rounded-xl bg-sky-600 text-white font-bold hover:bg-sky-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
-                  <><Loader2 className="h-5 w-5 animate-spin" /> Memproses...</>
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" /> Memproses...
+                  </>
                 ) : (
-                  <><CheckCircle className="h-5 w-5" /> Terbitkan Resep Digital</>
+                  <>
+                    <CheckCircle className="h-5 w-5" /> Terbitkan Resep Digital
+                  </>
                 )}
               </button>
             </form>

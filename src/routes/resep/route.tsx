@@ -113,14 +113,25 @@ function ResepPage() {
             let specialty = "Umum";
 
             if (p.doctor_id) {
+              // Get doctor info with user profile
               const { data: doctor, error: docError } = await supabase
                 .from("doctors")
-                .select("id, specialization, profiles!inner(full_name)")
+                .select(`
+                  id,
+                  specialization,
+                  user_id,
+                  profiles:user_id(full_name)
+                `)
                 .eq("id", p.doctor_id)
                 .single();
 
               if (!docError && doctor) {
-                doctorName = doctor.profiles?.[0]?.full_name || "Dokter Anda";
+                // Handle the nested relationship
+                if (Array.isArray(doctor.profiles)) {
+                  doctorName = doctor.profiles?.[0]?.full_name || "Dokter Anda";
+                } else if (doctor.profiles?.full_name) {
+                  doctorName = doctor.profiles.full_name;
+                }
                 specialty = doctor.specialization || "Umum";
               }
             }
@@ -140,6 +151,7 @@ function ResepPage() {
               status: p.status as ResepStatus,
               medicines: (p.medicines || []) as Medicine[],
               notes: p.notes,
+              diagnosis: p.diagnosis,
             };
           })
         );
@@ -452,6 +464,19 @@ function ResepPage() {
                       <div>
                         <p className="text-xs font-semibold text-amber-900 uppercase tracking-wider">Catatan Dokter</p>
                         <p className="text-sm text-amber-800 mt-1.5">{selectedResep.notes}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Diagnosis */}
+                {selectedResep.diagnosis && (
+                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                    <div className="flex gap-3">
+                      <AlertCircle className="h-5 w-5 text-blue-700 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-blue-900 uppercase tracking-wider">Diagnosis</p>
+                        <p className="text-sm text-blue-800 mt-1.5">{selectedResep.diagnosis}</p>
                       </div>
                     </div>
                   </div>
