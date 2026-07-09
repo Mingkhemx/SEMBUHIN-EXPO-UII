@@ -346,7 +346,7 @@ function MoodCheckPage() {
           </motion.div>
 
           {/* ══ CONTENT PANEL — berubah sesuai tab ══ */}
-          <div>
+          <div className="max-w-3xl mx-auto">
 
             {/* ── CAMERA VIEW ── */}
             {viewMode === 'camera' && (
