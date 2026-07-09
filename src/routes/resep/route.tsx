@@ -83,7 +83,9 @@ const MOCK_PRESCRIPTIONS: Record<string, PrescriptionData> = {
 };
 
 function ResepPage() {
-  const { id } = useSearch({ from: "/resep" });
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const idFromUrl = searchParams.get('id');
+  
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [loading, setLoading] = useState(true);
@@ -92,33 +94,34 @@ function ResepPage() {
 
   useEffect(() => {
     async function fetchResep() {
-      if (!id) {
-        setError("ID Resep tidak ditemukan");
-        setLoading(false);
-        return;
-      }
       try {
         setLoading(true);
         
+        // If no ID provided, show available demo prescriptions
+        if (!idFromUrl) {
+          setData(MOCK_PRESCRIPTIONS["demo-1"]);
+          setLoading(false);
+          return;
+        }
+
         // Try mock data first
-        const mockData = MOCK_PRESCRIPTIONS[id];
+        const mockData = MOCK_PRESCRIPTIONS[idFromUrl];
         if (mockData) {
           setData(mockData);
           setLoading(false);
           return;
         }
 
-        // If not in mock, show error
-        throw new Error(`Resep dengan ID "${id}" tidak ditemukan. Coba: "demo-1" atau "test-resep"`);
+        // If not in mock, show error with available options
+        throw new Error(`Resep dengan ID "${idFromUrl}" tidak ditemukan. Coba: "demo-1" atau "test-resep"`);
       } catch (err: any) {
         console.error("Error fetching resep:", err);
         setError(err.message || "Gagal memuat resep. Silakan coba lagi atau hubungi dukungan.");
-      } finally {
         setLoading(false);
       }
     }
     fetchResep();
-  }, [id]);
+  }, [idFromUrl]);
 
   const handleDownloadPDF = async () => {
     if (!data) return;
