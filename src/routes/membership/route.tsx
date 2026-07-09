@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import {
   Check, Loader2, ArrowRight,
   ScanLine, Heart, Brain, Zap, Stethoscope, Shield,
+  Microscope, Pill,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -125,6 +126,9 @@ function MembershipPage() {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n);
   const savings = monthlyPrice * 12 - yearlyTotal;
 
+  // Stats display (statis untuk marketing page)
+  const stats = { total: "50K+", konsultasi: "30K+", lab: "5K+", resep: "15K+" };
+
   useEffect(() => {
     const key = import.meta.env.VITE_MIDTRANS_CLIENT_KEY || "";
     const isSandbox = (import.meta.env.VITE_MIDTRANS_ENV || "sandbox") !== "production";
@@ -181,126 +185,93 @@ function MembershipPage() {
     <div className="min-h-screen">
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="px-4 pt-10 pb-10">
+      <section className="px-4 pt-28 pb-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.45 }}
           className="max-w-5xl mx-auto"
         >
           {/* Hero card */}
-          <div
-            className="relative rounded-3xl overflow-hidden"
-            style={{
-              background: "linear-gradient(145deg, oklch(0.17 0.04 250), oklch(0.13 0.05 260))",
-              minHeight: "480px",
-            }}
-          >
-            {/* ── Decorative blobs ── */}
-            <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-sky-500/10 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-violet-500/8 blur-3xl pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-sky-400/5 blur-3xl pointer-events-none" />
-
-            {/* ── Grid lines overlay (subtle) ── */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.04]"
-              style={{
-                backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
-                backgroundSize: "60px 60px",
-              }}
+          <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: 200 }}>
+            {/* Background image */}
+            <img
+              src="/images/payment.jpg"
+              alt="Sembuhin Premium"
+              className="absolute inset-0 w-full h-full object-cover"
             />
+            {/* Dark overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/60 to-slate-900/30" />
 
-            {/* ── Floating feature pills ── */}
-            <div className="absolute top-8 right-8 flex flex-col gap-2 hidden md:flex">
+            {/* Floating stat chips — desktop only */}
+            <div className="absolute top-5 right-5 flex-col gap-2 hidden md:flex">
               {[
-                { icon: ScanLine, label: "Dermatologi AI" },
-                { icon: Heart,    label: "Cek Jantung"    },
-                { icon: Brain,    label: "Mental Health"  },
-              ].map(({ icon: Icon, label }, i) => (
-                <motion.div
-                  key={label}
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                  className="flex items-center gap-2.5 bg-white/5 border border-white/8 backdrop-blur-sm rounded-xl px-3.5 py-2"
-                >
-                  <span className="h-6 w-6 rounded-lg bg-sky-500/20 flex items-center justify-center flex-shrink-0">
-                    <Icon className="h-3.5 w-3.5 text-sky-400" />
-                  </span>
+                { icon: Stethoscope, label: "Konsultasi",  value: stats.konsultasi, color: "text-sky-400"    },
+                { icon: Microscope,  label: "Lab",         value: stats.lab,        color: "text-violet-400" },
+                { icon: Pill,        label: "Resep",       value: stats.resep,      color: "text-emerald-400"},
+              ].map(({ icon: Icon, label, value, color }) => (
+                <div key={label} className="flex items-center gap-2.5 bg-white/10 border border-white/15 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                  <Icon className={cn("h-3.5 w-3.5 flex-shrink-0", color)} />
                   <span className="text-[12px] font-medium text-white/70">{label}</span>
-                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                </motion.div>
+                  <span className={cn("ml-auto text-[13px] font-bold", color)}>{value}</span>
+                </div>
               ))}
             </div>
 
-            {/* ── Stat chips bottom-right ── */}
-            <div className="absolute bottom-8 right-8 flex gap-2 hidden md:flex">
-              <div className="bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-center">
-                <p className="text-[18px] font-bold text-white leading-none">50K+</p>
-                <p className="text-[10px] text-white/40 mt-0.5">Pengguna</p>
-              </div>
-              <div className="bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-center">
-                <p className="text-[18px] font-bold text-white leading-none">4.9</p>
-                <p className="text-[10px] text-white/40 mt-0.5">Rating</p>
-              </div>
-              <div className="bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-center">
-                <p className="text-[18px] font-bold text-white leading-none">6</p>
-                <p className="text-[10px] text-white/40 mt-0.5">Fitur AI</p>
-              </div>
-            </div>
-
-            {/* ── Main content ── */}
-            <div className="relative flex flex-col items-center justify-center text-center px-8 py-20 md:py-24">
-              {/* Eyebrow pill */}
-              <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8
-                bg-white/8 border border-white/10 backdrop-blur-sm">
+            {/* Main content */}
+            <div className="relative px-7 py-8 md:py-10 max-w-lg">
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 mb-4">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-400" />
                 </span>
-                <span className="text-[11px] font-semibold text-white/60 tracking-widest uppercase">
-                  Sembuhin Premium
-                </span>
+                <span className="text-[11px] font-bold text-white/60 tracking-widest uppercase">Sembuhin Premium</span>
               </div>
 
-              <h1 className="text-[2.75rem] sm:text-[3.5rem] font-bold leading-[1.05] tracking-tight text-white mb-5 max-w-2xl">
+              <h1 className="text-[1.9rem] sm:text-[2.4rem] font-bold text-white leading-[1.1] tracking-tight mb-2.5">
                 Satu langganan untuk<br />
-                <span className="text-white/35">semua kebutuhan</span><br />
+                <span className="text-white/40">semua kebutuhan</span><br />
                 kesehatanmu.
               </h1>
-
-              <p className="text-[16px] text-white/45 leading-relaxed max-w-md mx-auto mb-10">
-                AI medis, cek jantung, scan kulit, mental health — semuanya dalam
-                satu platform. Mulai dari&nbsp;
-                <span className="font-semibold text-white/70">Rp 49.000/bulan</span>.
+              <p className="text-[13px] text-white/50 leading-relaxed mb-5 max-w-sm">
+                AI medis, cek jantung, scan kulit, mental health — mulai dari&nbsp;
+                <span className="font-semibold text-white/75">Rp 49.000/bulan</span>.
               </p>
 
-              {/* Billing toggle */}
-              <div className="inline-flex items-center bg-white/8 border border-white/10 rounded-xl p-1 gap-1">
-                {(["monthly", "yearly"] as const).map((b) => (
-                  <button
-                    key={b}
-                    onClick={() => setBilling(b)}
-                    className={cn(
-                      "relative px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-200 flex items-center gap-2.5",
-                      billing === b
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-white/50 hover:text-white/70"
-                    )}
-                  >
-                    {b === "monthly" ? "Bulanan" : "Tahunan"}
-                    {b === "yearly" && (
-                      <span className={cn(
-                        "text-[10px] font-bold px-2 py-0.5 rounded-md transition-colors",
-                        billing === "yearly"
-                          ? "bg-emerald-500 text-white"
-                          : "bg-emerald-500/20 text-emerald-400"
-                      )}>
-                        Hemat 25%
-                      </span>
-                    )}
-                  </button>
+              {/* Stat chips + billing toggle row */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {[
+                  { label: "Total",      value: stats.total,      dot: "bg-sky-400"     },
+                  { label: "Konsultasi", value: stats.konsultasi, dot: "bg-emerald-400" },
+                  { label: "Resep",      value: stats.resep,      dot: "bg-violet-400"  },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-center gap-1.5 bg-white/8 border border-white/10 rounded-lg px-2.5 py-1">
+                    <span className={cn("h-1.5 w-1.5 rounded-full", s.dot)} />
+                    <span className="text-[12px] font-bold text-white/80">{s.value}</span>
+                    <span className="text-[11px] text-white/40">{s.label}</span>
+                  </div>
                 ))}
+
+                {/* Billing toggle */}
+                <div className="ml-auto inline-flex items-center bg-white/10 border border-white/15 rounded-lg p-0.5 gap-0.5">
+                  {(["monthly", "yearly"] as const).map((b) => (
+                    <button
+                      key={b}
+                      onClick={() => setBilling(b)}
+                      className={cn(
+                        "px-3.5 py-1.5 rounded-md text-[12px] font-semibold transition-all flex items-center gap-1.5",
+                        billing === b ? "bg-white text-slate-900 shadow-sm" : "text-white/50 hover:text-white/70"
+                      )}
+                    >
+                      {b === "monthly" ? "Bulanan" : "Tahunan"}
+                      {b === "yearly" && (
+                        <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded", billing === "yearly" ? "bg-emerald-500 text-white" : "bg-emerald-500/20 text-emerald-400")}>
+                          -25%
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
