@@ -277,49 +277,32 @@ export function DoctorPrescriptions() {
       const doctorId = await getDoctorId();
       if (!doctorId) return;
 
-      // Strategy 1: Get patients from consultations (preferred)
-      const { data: consultations } = await supabase
-        .from("consultations")
-        .select("patient_id")
-        .eq("doctor_id", doctorId)
-        .neq("patient_id", null);
+      // Always fetch all users as patients (not dependent on consultations)
+      const { data: allProfiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, role")
+        .order("full_name");
 
-      let patientIds: string[] = [];
-      if (consultations && consultations.length > 0) {
-        patientIds = [...new Set(consultations.map(c => c.patient_id))];
-      }
-
-      // Strategy 2: If no consultations, get all regular users (fallback)
-      if (patientIds.length === 0) {
-        const { data: allProfiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, role")
-          .in("role", ["user", "premium"])
-          .order("full_name");
-
-        if (allProfiles) {
-          setPatients(
-            allProfiles.map(p => ({
-              id: p.id,
-              full_name: p.full_name || "User",
-            }))
-          );
-        }
+      if (profileError) {
+        console.error("Error fetching profiles:", profileError);
         return;
       }
 
-      // Fetch profiles for consultation patients
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", patientIds);
+      if (allProfiles) {
+        // Filter to only show users (exclude doctors and admins)
+        const userProfiles = allProfiles.filter(
+          p => p.role === "user" || p.role === "premium" || !p.role
+        );
 
-      setPatients(
-        (profiles || []).map(p => ({
-          id: p.id,
-          full_name: p.full_name || "Pasien",
-        }))
-      );
+        setPatients(
+          userProfiles.map(p => ({
+            id: p.id,
+            full_name: p.full_name || "User",
+          }))
+        );
+
+        console.log("Loaded patients:", userProfiles.length);
+      }
     } catch (err) {
       console.error("Error fetching patients:", err);
     }
