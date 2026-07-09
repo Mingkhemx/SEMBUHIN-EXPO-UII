@@ -482,39 +482,48 @@ function DermatologiPage() {
     <div className="relative z-10 min-h-screen">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
 
-      {/* ── Hero ──────────────────────────────────────────────── */}
-        <motion.header variants={fadeIn} initial="hidden" animate="visible" className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-pink-100/80 border border-pink-200/60 px-4 py-1.5 mb-5">
-            <ScanLine className="h-3.5 w-3.5 text-pink-600" />
-            <span className="text-xs font-semibold text-pink-700 tracking-wide uppercase">Dermatologi AI Scan</span>
+      {/* ── Hero Card with Image ──────────────────────────────── */}
+        <motion.div variants={fadeIn} initial="hidden" animate="visible"
+          className="relative w-full overflow-hidden rounded-3xl shadow-2xl flex flex-col justify-end min-h-[380px]"
+        >
+          <img src="/images/scan.jpg" alt="Dermatologi AI Scan" className="absolute inset-0 w-full h-full object-cover object-center" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
+          <div className="relative p-7 sm:p-10 lg:p-12">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1.5 mb-5 w-fit">
+              <ScanLine className="h-3 w-3 text-pink-300" />
+              <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">Dermatologi AI Scan</span>
+              <span className="h-3.5 w-px bg-white/30 mx-1" />
+              <span className="text-[11px] font-semibold text-pink-300">Sembuhin AI 1.2</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-lg max-w-2xl">
+              Pre-Screening Kulit Anda
+            </h1>
+            <p className="mt-4 text-sm sm:text-base text-white/80 leading-relaxed max-w-xl">
+              Upload foto area kulit yang bermasalah. AI kami akan menganalisis dan memberikan indikasi awal sebelum konsultasi ke dermatologis.
+            </p>
+            {/* Navigation tabs */}
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              {[
+                { key: 'upload',   label: 'Scan Baru',    icon: Camera },
+                { key: 'history',  label: 'Riwayat Scan', icon: Clock  },
+              ].map(({ key, label, icon: Icon }) => (
+                <button key={key}
+                  onClick={() => setViewMode(key as ViewMode)}
+                  className={cn(
+                    'flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all',
+                    viewMode === key
+                      ? 'bg-white/20 border-white/40 text-white backdrop-blur-sm shadow-md'
+                      : 'bg-white/10 border-white/20 text-white/60 hover:bg-white/15 hover:text-white/80 backdrop-blur-sm'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />{label}
+                  {viewMode === key && <div className="h-1.5 w-1.5 rounded-full bg-pink-400 ml-1" />}
+                </button>
+              ))}
+            </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
-            Pre-Screening Kulit Anda
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg">
-            Upload foto area kulit yang bermasalah. AI kami akan menganalisis dan memberikan indikasi awal sebelum konsultasi ke dermatologis.
-          </p>
-        </motion.header>
-
-        {/* ── Navigation ───────────────────────────────────────── */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1 w-fit">
-          {[
-            { key: 'upload', label: 'Scan Baru', icon: Camera },
-            { key: 'history', label: 'Riwayat Scan', icon: Clock },
-          ].map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setViewMode(key as ViewMode)}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200',
-                viewMode === key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-              )}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
+        </motion.div>
 
         {/* ═══════════════════ UPLOAD / LIVE CAMERA ═══════════════════ */}
         {viewMode === 'upload' && (
