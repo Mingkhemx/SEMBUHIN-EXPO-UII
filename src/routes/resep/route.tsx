@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { FileText, Download, Share2, Loader2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 interface ResepSearchParams {
@@ -52,6 +51,37 @@ interface PrescriptionData {
   status: string;
 }
 
+// Mock data untuk testing
+const MOCK_PRESCRIPTIONS: Record<string, PrescriptionData> = {
+  "demo-1": {
+    id: "demo-1",
+    patient_name: "Ahmad Rizki",
+    patient_age: 28,
+    doctor_name: "Dr. Siti Nurhaliza",
+    doctor_str: "1234567890",
+    created_at: new Date().toISOString(),
+    medicines: [
+      { name: "Paracetamol", dose: "500mg", days: 7 },
+      { name: "Ibuprofen", dose: "400mg", days: 5 },
+      { name: "Amoxicillin", dose: "250mg 3x sehari", days: 10 }
+    ],
+    status: "ACTIVE"
+  },
+  "test-resep": {
+    id: "test-resep",
+    patient_name: "Budi Santoso",
+    patient_age: 35,
+    doctor_name: "Dr. Eka Wijaya",
+    doctor_str: "9876543210",
+    created_at: new Date().toISOString(),
+    medicines: [
+      { name: "Omeprazole", dose: "20mg", days: 14 },
+      { name: "Antasida", dose: "500mg", days: 7 }
+    ],
+    status: "DISPENSED"
+  }
+};
+
 function ResepPage() {
   const { id } = useSearch({ from: "/resep" });
   const cardRef = useRef<HTMLDivElement>(null);
@@ -69,78 +99,17 @@ function ResepPage() {
       }
       try {
         setLoading(true);
-        let prescription = null;
-        let fetchError = null;
         
-        // Try to fetch from 'prescriptions' table first
-        const { data: prescData, error: prescError } = await supabase
-          .from('prescriptions')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (!prescError && prescData) {
-          prescription = prescData;
-        } else {
-          // Fallback: try to get from consultations table if prescription data is stored there
-          const { data: consultData, error: consultError } = await supabase
-            .from('consultations')
-            .select('*')
-            .eq('id', id)
-            .single();
-          
-          if (!consultError && consultData) {
-            prescription = consultData;
-          } else {
-            // If both fail, use the prescriptions error
-            fetchError = prescError || consultError;
-          }
+        // Try mock data first
+        const mockData = MOCK_PRESCRIPTIONS[id];
+        if (mockData) {
+          setData(mockData);
+          setLoading(false);
+          return;
         }
 
-        if (fetchError) {
-          console.error('Supabase error:', fetchError);
-          
-          // If table doesn't exist or prescription not found, show appropriate error
-          if (fetchError.code === 'PGRST116' || fetchError.message?.includes('not found')) {
-            throw new Error("Resep tidak ditemukan");
-          } else if (fetchError.code === '42P01' || fetchError.message?.includes('relation')) {
-            throw new Error("Tabel resep belum dibuat di database. Hubungi administrator.");
-          } else {
-            throw new Error(fetchError.message || "Gagal mengambil data resep");
-          }
-        }
-
-        if (!prescription) {
-          throw new Error("Resep tidak ditemukan");
-        }
-
-        // Parse medicines if stored as JSON string
-        let medicines: Medicine[] = [];
-        if (prescription.medicines) {
-          try {
-            medicines = typeof prescription.medicines === 'string' 
-              ? JSON.parse(prescription.medicines)
-              : prescription.medicines;
-          } catch (parseError) {
-            console.warn('Error parsing medicines:', parseError);
-            medicines = [];
-          }
-        }
-
-        // Handle both prescription and consultation table fields
-        const patientName = prescription.patient_name || prescription.patient_full_name || "Pasien";
-        const doctorName = prescription.doctor_name || prescription.doctor_full_name || "Dokter";
-
-        setData({
-          id: prescription.id,
-          patient_name: patientName,
-          patient_age: prescription.patient_age || prescription.age || 0,
-          doctor_name: doctorName,
-          doctor_str: prescription.doctor_str || prescription.doctor_license || "-",
-          created_at: prescription.created_at || new Date().toISOString(),
-          medicines,
-          status: prescription.status || prescription.consultation_status || "ACTIVE"
-        });
+        // If not in mock, show error
+        throw new Error(`Resep dengan ID "${id}" tidak ditemukan. Coba: "demo-1" atau "test-resep"`);
       } catch (err: any) {
         console.error("Error fetching resep:", err);
         setError(err.message || "Gagal memuat resep. Silakan coba lagi atau hubungi dukungan.");
