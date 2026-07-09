@@ -149,7 +149,7 @@ async function analyzeWithOpenRouter(b64: string): Promise<AIEmotionResult | nul
     const res = await fetch(`${DAHONO_GATEWAY}/chat/completions`, {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${FACE_API_KEY}` },
-      body: JSON.stringify({ model:'dahono/claude-haiku-4.5', messages:[{role:'user',content:[{type:'text',text:prompt},{type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}}]}], temperature:0.1, max_tokens:512 }),
+      body: JSON.stringify({ model:'dahono/deepseek-v4-flash', messages:[{role:'user',content:[{type:'text',text:prompt},{type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}}]}], temperature:0.1, max_tokens:512 }),
     })
     if (!res.ok) return null
     const data = await res.json()

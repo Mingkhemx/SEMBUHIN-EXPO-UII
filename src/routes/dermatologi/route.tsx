@@ -120,7 +120,7 @@ confidence adalah angka 0-100`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'dahono/claude-opus-4.8',
+        model: 'dahono/claude-sonnet-4.5-free',
         messages: [{
           role: 'user',
           content: [

@@ -35,7 +35,7 @@ export const Route = createFileRoute('/symptom-triage')({
 /* ─── Dahono Config ─────────────────────────────────────────── */
 const DAHONO_KEY = import.meta.env.VITE_DAHONO_API_KEY || ''
 const DAHONO_GATEWAY = import.meta.env.VITE_DAHONO_GATEWAY || ''
-const MODEL = 'dahono/claude-haiku-4.5' // Sembuhin 1.3: cepat, hemat biaya, dan akurat
+const MODEL = 'dahono/deepseek-v3.2' // Sembuhin 1.3: model pro untuk symptom analysis
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type UrgencyLevel = 'emergency' | 'urgent' | 'moderate' | 'mild' | null
