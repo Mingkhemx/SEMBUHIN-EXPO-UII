@@ -56,8 +56,9 @@ interface PastScan {
   characteristics?: string[]
 }
 
-/* ─── OpenRouter Skin Analysis ───────────────────────────────────── */
-const OPENROUTER_KEY = import.meta.env.VITE_GEMINI_FACE_API_KEY as string | undefined
+/* ─── Dahono Skin Analysis ───────────────────────────────────── */
+const DAHONO_KEY = import.meta.env.VITE_DAHONO_API_KEY as string | undefined
+const DAHONO_GATEWAY = import.meta.env.VITE_DAHONO_GATEWAY as string | undefined
 
 /* Kompres gambar ke max 800px supaya tidak 400 error */
 async function compressImage(base64: string): Promise<string> {
@@ -81,9 +82,8 @@ async function compressImage(base64: string): Promise<string> {
 }
 
 async function analyzeSkinWithAI(imageBase64: string): Promise<ScanResult | null> {
-  if (!OPENROUTER_KEY) return null
+  if (!DAHONO_KEY || !DAHONO_GATEWAY) return null
 
-  // Kompres dulu supaya tidak 400
   const compressed = await compressImage(imageBase64)
 
   const prompt = `Kamu adalah dokter spesialis dermatologi AI yang sangat berpengalaman dengan keahlian tingkat tinggi dalam diagnosis visual kondisi kulit.
@@ -113,16 +113,14 @@ severity hanya boleh: "ringan", "sedang", atau "perlu-perhatian"
 confidence adalah angka 0-100`
 
   try {
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetch(`${DAHONO_GATEWAY}/chat/completions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_KEY}`,
+        'Authorization': `Bearer ${DAHONO_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'Sembuhin Dermatologi AI',
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-opus-4.8',
+        model: 'dahono/claude-opus-4.8',
         messages: [{
           role: 'user',
           content: [
@@ -144,7 +142,6 @@ confidence adalah angka 0-100`
     const data = await res.json()
     const text: string = data?.choices?.[0]?.message?.content ?? ''
     const clean = text.replace(/```json|```/g, '').trim()
-    // Extract JSON object even if Claude adds text before/after
     const jsonMatch = clean.match(/\{[\s\S]*\}/)
     if (!jsonMatch) { console.error('[DermaAI] No JSON in response:', clean); return null }
     const parsed = JSON.parse(jsonMatch[0]) as ScanResult
