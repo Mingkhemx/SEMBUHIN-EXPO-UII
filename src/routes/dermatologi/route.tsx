@@ -1002,32 +1002,34 @@ function DermatologiPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {pastScans.map((scan, i) => (
-                  <motion.div key={scan.id} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}}
-                    className="w-full rounded-2xl bg-white border border-white/60 shadow-lg p-5 flex items-center gap-4 hover:shadow-xl transition-all">
-                    <div className="relative shrink-0">
-                      <div className="text-3xl leading-none">{scan.thumbnail}</div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className={cn('text-sm font-bold',SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
-                        <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border',SEVERITY_CONFIG[scan.severity].bgColor,SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
+                {pastScans.map((scan,i)=>{
+                  return (
+                    <motion.div key={scan.id} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}}
+                      className="rounded-2xl bg-white border border-white/60 shadow-lg p-5 flex items-center gap-4">
+                      <div className="relative shrink-0">
+                        <div className="text-3xl leading-none">{scan.thumbnail}</div>
                       </div>
-                      <p className="text-xs text-slate-400 flex items-center gap-1">
-                        <Clock className="h-3 w-3 shrink-0" />{scan.date}
-                      </p>
-                    </div>
-                    <div className="hidden sm:flex flex-col items-end gap-1 shrink-0 w-24">
-                      <span className="text-[10px] text-slate-400">Akurasi</span>
-                      <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <div className={cn('h-full rounded-full',
-                          scan.severity==='ringan'?'bg-emerald-400':scan.severity==='sedang'?'bg-amber-400':'bg-red-400'
-                        )} style={{width:`${scan.confidence}%`}} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className={cn('text-sm font-bold',SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
+                          <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border',SEVERITY_CONFIG[scan.severity].bgColor,SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
+                        </div>
+                        <p className="text-xs text-slate-400 flex items-center gap-1">
+                          <Clock className="h-3 w-3 shrink-0" />{scan.date}
+                        </p>
                       </div>
-                      <span className={cn('text-xs font-bold',SEVERITY_CONFIG[scan.severity].color)}>{scan.confidence}%</span>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="hidden sm:flex flex-col items-end gap-1 shrink-0 w-24">
+                        <span className="text-[10px] text-slate-400">Akurasi</span>
+                        <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                          <div className={cn('h-full rounded-full',
+                            scan.severity==='ringan'?'bg-emerald-400':scan.severity==='sedang'?'bg-amber-400':'bg-red-400'
+                          )} style={{width:`${scan.confidence}%`}} />
+                        </div>
+                        <span className={cn('text-xs font-bold',SEVERITY_CONFIG[scan.severity].color)}>{scan.confidence}%</span>
+                      </div>
+                    </motion.div>
+                  )
+                })}
               </div>
             )}
           </motion.div>
