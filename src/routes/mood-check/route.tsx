@@ -608,7 +608,7 @@ function MoodCheckPage() {
               alt="Mood Check"
               className="absolute inset-0 w-full h-full object-cover object-center"
             />
-            {/* Gradient overlay — stronger on left, fades to semi-dark right */}
+            {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/50" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
 
@@ -631,65 +631,42 @@ function MoodCheckPage() {
                 </p>
               </div>
 
-              {/* RIGHT — action panel (inline CTA) */}
-              <div className="sm:w-72 flex flex-col justify-center p-6 sm:p-8 sm:border-l sm:border-white/10">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  {/* Icon */}
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-cyan-400/25 animate-ping" />
-                    <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white/15 border-2 border-white/30 backdrop-blur-sm">
-                      <Brain className="h-10 w-10 text-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-white">Siap Cek Mood?</p>
-                    <p className="text-xs text-white/60 mt-1 leading-relaxed">
-                      Nyalakan kamera — scan dimulai otomatis dalam 3 detik
-                    </p>
-                  </div>
+              {/* RIGHT — navigation tabs */}
+              <div className="sm:w-64 flex flex-col justify-center items-center gap-3 p-6 sm:p-8 sm:border-l sm:border-white/10">
+                <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-1">Menu</p>
+                {([
+                  { key: 'camera',  label: 'Cek Mood',     icon: Camera, desc: 'Scan ekspresi wajah' },
+                  { key: 'history', label: 'Riwayat Mood', icon: Clock,  desc: 'Lihat riwayat hasil' },
+                ] as const).map(({ key, label, icon: Icon, desc }) => (
                   <button
-                    onClick={startCamera}
-                    disabled={cameraActive || scanning}
-                    className="flex items-center gap-2 rounded-xl bg-white text-cyan-700 px-7 py-3.5 text-sm font-bold hover:bg-cyan-50 shadow-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center"
+                    key={key}
+                    onClick={() => { if (key === 'camera') resetAll(); else setViewMode(key) }}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-left',
+                      viewMode === key
+                        ? 'bg-white/20 border-white/40 backdrop-blur-sm shadow-lg'
+                        : 'bg-white/8 border-white/15 hover:bg-white/15 backdrop-blur-sm'
+                    )}
                   >
-                    <Camera className="h-4 w-4" /> Nyalakan Kamera
+                    <div className={cn(
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+                      viewMode === key ? 'bg-cyan-400/30' : 'bg-white/10'
+                    )}>
+                      <Icon className={cn('h-4 w-4', viewMode === key ? 'text-cyan-300' : 'text-white/60')} />
+                    </div>
+                    <div>
+                      <p className={cn('text-sm font-bold', viewMode === key ? 'text-white' : 'text-white/70')}>{label}</p>
+                      <p className="text-[11px] text-white/40">{desc}</p>
+                    </div>
+                    {viewMode === key && (
+                      <div className="ml-auto h-2 w-2 rounded-full bg-cyan-400 shrink-0" />
+                    )}
                   </button>
-                  {/* Quick tips inline */}
-                  <div className="w-full space-y-2 mt-1">
-                    {[
-                      { icon: Smile,  text: 'Wajah natural & menghadap kamera' },
-                      { icon: Sun,    text: 'Pastikan pencahayaan cukup' },
-                    ].map(tip => {
-                      const I = tip.icon
-                      return (
-                        <div key={tip.text} className="flex items-center gap-2 text-left">
-                          <I className="h-3.5 w-3.5 text-cyan-300 shrink-0" />
-                          <span className="text-[11px] text-white/60">{tip.text}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
+                ))}
               </div>
 
             </div>
           </motion.div>
-
-          {/* Navigation */}
-          <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1 w-fit">
-            {([
-              { key: 'camera',  label: 'Cek Mood',     icon: Camera },
-              { key: 'history', label: 'Riwayat Mood', icon: Clock  },
-            ] as const).map(({ key, label, icon: Icon }) => (
-              <button key={key}
-                onClick={() => { if (key === 'camera') resetAll(); else setViewMode(key) }}
-                className={cn('flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all',
-                  viewMode === key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
-              >
-                <Icon className="h-3.5 w-3.5" />{label}
-              </button>
-            ))}
-          </div>
 
           {/* ══════ CAMERA VIEW ══════ */}
           {viewMode === 'camera' && (
@@ -736,23 +713,45 @@ function MoodCheckPage() {
               )}
 
               {!cameraActive ? (
-                /* ── Tips card only (CTA sudah di hero card) ── */
-                <div className="rounded-2xl bg-white border border-white/60 shadow-lg p-6">
-                  <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                    <Info className="h-4 w-4 text-slate-400" /> Tips untuk Hasil Terbaik
-                  </h3>
-                  <div className="grid sm:grid-cols-3 gap-3">
-                    {[
-                      { icon: Smile,  title: 'Wajah Natural',  desc: 'Tunjukkan ekspresi alami Anda' },
-                      { icon: Sun,    title: 'Cahaya Merata',   desc: 'Pastikan wajah terkena cahaya cukup' },
-                      { icon: Camera, title: 'Kamera Depan',    desc: 'Posisikan wajah di tengah frame' },
-                    ].map(tip => { const I = tip.icon; return (
-                      <div key={tip.title} className="rounded-xl bg-slate-50 border border-slate-100 p-4">
-                        <I className="h-5 w-5 text-cyan-600 mb-2" />
-                        <p className="text-xs font-bold text-slate-800">{tip.title}</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{tip.desc}</p>
+                /* ── Start CTA ── */
+                <div className="space-y-6">
+                  <div className="rounded-2xl bg-gradient-to-br from-cyan-600 via-sky-700 to-blue-800 p-8 sm:p-12 text-center shadow-2xl">
+                    <div className="flex flex-col items-center gap-5">
+                      <div className="relative">
+                        <div className="absolute inset-0 rounded-full bg-cyan-400/20 animate-ping" />
+                        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/15 border-2 border-white/30">
+                          <Brain className="h-12 w-12 text-white" />
+                        </div>
                       </div>
-                    )})}
+                      <div>
+                        <h3 className="text-xl font-bold text-white">Siap Cek Mood?</h3>
+                        <p className="text-sm text-cyan-100 mt-1 max-w-sm mx-auto">
+                          Nyalakan kamera dan hadap layar — scan dimulai otomatis dalam 3 detik.
+                        </p>
+                      </div>
+                      <button onClick={startCamera}
+                        className="flex items-center gap-2 rounded-xl bg-white text-cyan-700 px-8 py-4 text-base font-bold hover:bg-cyan-50 shadow-lg transition-all hover:scale-105">
+                        <Camera className="h-5 w-5" /> Nyalakan Kamera
+                      </button>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl bg-white border border-white/60 shadow-lg p-6">
+                    <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <Info className="h-4 w-4 text-slate-400" /> Tips untuk Hasil Terbaik
+                    </h3>
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      {[
+                        { icon: Smile,  title: 'Wajah Natural',  desc: 'Tunjukkan ekspresi alami Anda' },
+                        { icon: Sun,    title: 'Cahaya Merata',   desc: 'Pastikan wajah terkena cahaya cukup' },
+                        { icon: Camera, title: 'Kamera Depan',    desc: 'Posisikan wajah di tengah frame' },
+                      ].map(tip => { const I = tip.icon; return (
+                        <div key={tip.title} className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                          <I className="h-5 w-5 text-cyan-600 mb-2" />
+                          <p className="text-xs font-bold text-slate-800">{tip.title}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{tip.desc}</p>
+                        </div>
+                      )})}
+                    </div>
                   </div>
                 </div>
               ) : (
