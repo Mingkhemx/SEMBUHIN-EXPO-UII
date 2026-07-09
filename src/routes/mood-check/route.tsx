@@ -600,7 +600,7 @@ function MoodCheckPage() {
 
           {/* ── Hero Card with Image ─────────────────────────────── */}
           <motion.div variants={fadeIn} initial="hidden" animate="visible"
-            className="relative overflow-hidden rounded-3xl shadow-2xl min-h-[320px] sm:min-h-[380px]"
+            className="relative overflow-hidden rounded-3xl shadow-2xl h-[320px] sm:h-[380px]"
           >
             {/* Background image */}
             <img
@@ -613,7 +613,7 @@ function MoodCheckPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
 
             {/* Content: full-left layout, foto kanan terlihat bebas */}
-            <div className="relative z-10 flex flex-col justify-end h-full p-7 sm:p-10 min-h-[320px] sm:min-h-[380px] max-w-lg">
+            <div className="relative z-10 flex flex-col justify-end h-full p-7 sm:p-10 max-w-lg">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1.5 mb-5 w-fit">
                 <Zap className="h-3 w-3 text-cyan-300" />
                 <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">AI Mood Tracker</span>
