@@ -96,69 +96,86 @@ function ResepPage() {
           .order("created_at", { ascending: false });
 
         if (prescError) {
-          console.error("Supabase error:", prescError);
+          console.error("❌ Supabase error fetching prescriptions:", prescError);
           throw prescError;
         }
 
         if (!prescriptions || prescriptions.length === 0) {
+          console.log("✅ No prescriptions found");
           setReseps([]);
           setLoading(false);
           return;
         }
 
-        // Fetch all doctor IDs
+        console.log("✅ Fetched prescriptions:", prescriptions.length);
+
+        // Fetch all doctors in batch
         const doctorIds = [...new Set(prescriptions.map(p => p.doctor_id).filter(Boolean))];
-        
-        // Fetch doctor details in batch
-        const doctorMap: Record<string, { name: string; specialty: string }> = {};
-        
+        console.log("👨‍⚕️ Doctor IDs to fetch:", doctorIds);
+
+        const doctorNameMap: Record<string, string> = {};
+        const doctorSpecialtyMap: Record<string, string> = {};
+
         if (doctorIds.length > 0) {
-          const { data: doctors, error: docError } = await supabase
+          // Fetch doctors with their user_id
+          const { data: doctorsData, error: docError } = await supabase
             .from("doctors")
             .select("id, user_id, specialization")
             .in("id", doctorIds);
 
-          if (!docError && doctors && doctors.length > 0) {
-            const userIds = doctors.map(d => d.user_id).filter(Boolean);
-            
+          console.log("📋 Doctors data:", doctorsData);
+
+          if (!docError && doctorsData) {
+            // Get all user IDs from doctors
+            const userIds = doctorsData.map(d => d.user_id).filter(Boolean);
+            console.log("👤 User IDs to fetch:", userIds);
+
             if (userIds.length > 0) {
-              const { data: profiles, error: profError } = await supabase
+              // Fetch profiles for doctor names
+              const { data: profilesData, error: profError } = await supabase
                 .from("profiles")
                 .select("id, full_name")
                 .in("id", userIds);
 
-              const profileMap: Record<string, string> = {};
-              if (profiles) {
-                profiles.forEach(p => {
+              console.log("✅ Profiles fetched:", profilesData?.length);
+
+              if (profilesData) {
+                // Build map of user_id -> full_name
+                const profileMap: Record<string, string> = {};
+                profilesData.forEach(p => {
                   profileMap[p.id] = p.full_name || "Dokter";
                 });
-              }
 
-              doctors.forEach(doc => {
-                doctorMap[doc.id] = {
-                  name: profileMap[doc.user_id] || "Dokter Anda",
-                  specialty: doc.specialization || "Umum"
-                };
-              });
+                // Map doctor_id -> doctor_name
+                doctorsData.forEach(doc => {
+                  doctorNameMap[doc.id] = profileMap[doc.user_id] || "Dokter Anda";
+                  doctorSpecialtyMap[doc.id] = doc.specialization || "Umum";
+                });
+
+                console.log("✅ Doctor name map:", doctorNameMap);
+              }
             }
           }
         }
 
-        // Transform prescriptions
+        // Transform prescriptions with doctor info
         const transformed: Resep[] = prescriptions.map((p: any) => {
-          const doctorInfo = doctorMap[p.doctor_id] || { name: "Dokter Anda", specialty: "Umum" };
-          
+          const doctorName = doctorNameMap[p.doctor_id] || "Dokter Anda";
+          const specialty = doctorSpecialtyMap[p.doctor_id] || "Umum";
+
           const date = new Date(p.created_at).toLocaleDateString("id-ID", {
             day: "numeric",
             month: "short",
             year: "numeric",
           });
 
+          console.log(`📄 Prescription ${p.id}: Doctor=${doctorName}, Specialty=${specialty}`);
+
           return {
             id: p.id,
-            doctorName: doctorInfo.name,
+            doctorName,
             doctorId: p.doctor_id,
-            doctorSpecialty: doctorInfo.specialty,
+            doctorSpecialty: specialty,
             date,
             status: p.status as ResepStatus,
             medicines: (p.medicines || []) as Medicine[],
@@ -167,10 +184,11 @@ function ResepPage() {
           };
         });
 
+        console.log("✅ Transformed prescriptions:", transformed);
         setReseps(transformed);
       } catch (err) {
-        console.error("Error fetching prescriptions:", err);
-        setError(null); // Don't show error to user, just show empty state
+        console.error("❌ Error fetching prescriptions:", err);
+        setError(null);
         setReseps([]);
       } finally {
         setLoading(false);
