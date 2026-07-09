@@ -270,41 +270,45 @@ export function DoctorPrescriptions() {
     }
   }, [user]);
 
-  // Fetch patients
+  // Fetch patients - SIMPLIFIED VERSION
   const fetchPatients = useCallback(async () => {
     if (!user) return;
     try {
-      const doctorId = await getDoctorId();
-      if (!doctorId) return;
-
-      // Always fetch all users as patients (not dependent on consultations)
+      console.log("🔍 Fetching patients...");
+      
+      // Fetch ALL profiles without any filter first
       const { data: allProfiles, error: profileError } = await supabase
         .from("profiles")
-        .select("id, full_name, role")
-        .order("full_name");
+        .select("id, full_name, email, role");
 
       if (profileError) {
-        console.error("Error fetching profiles:", profileError);
+        console.error("❌ Error fetching profiles:", profileError);
         return;
       }
 
-      if (allProfiles) {
-        // Filter to only show users (exclude doctors and admins)
-        const userProfiles = allProfiles.filter(
-          p => p.role === "user" || p.role === "premium" || !p.role
+      console.log("✅ Fetched profiles:", allProfiles?.length || 0);
+
+      if (allProfiles && allProfiles.length > 0) {
+        // Filter out doctors and admins manually
+        const regularUsers = allProfiles.filter(
+          p => p.role !== "doctor" && p.role !== "admin"
         );
 
-        setPatients(
-          userProfiles.map(p => ({
-            id: p.id,
-            full_name: p.full_name || "User",
-          }))
-        );
+        console.log("👥 Regular users:", regularUsers.length);
 
-        console.log("Loaded patients:", userProfiles.length);
+        const patientList = regularUsers.map(p => ({
+          id: p.id,
+          full_name: p.full_name || p.email || "User",
+        }));
+
+        setPatients(patientList);
+        console.log("✅ Patients loaded:", patientList);
+      } else {
+        console.warn("⚠️ No profiles found in database");
+        setPatients([]);
       }
     } catch (err) {
-      console.error("Error fetching patients:", err);
+      console.error("❌ Catch error fetching patients:", err);
     }
   }, [user]);
 
@@ -610,12 +614,20 @@ export function DoctorPrescriptions() {
                   required
                 >
                   <option value="">-- Pilih Pasien --</option>
+                  {patients.length === 0 && (
+                    <option disabled>Loading patients...</option>
+                  )}
                   {patients.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.full_name}
                     </option>
                   ))}
                 </select>
+                <p className="text-xs text-slate-500 mt-1.5">
+                  {patients.length > 0 
+                    ? `${patients.length} pasien tersedia` 
+                    : "Sedang memuat daftar pasien..."}
+                </p>
               </div>
 
               <div>
