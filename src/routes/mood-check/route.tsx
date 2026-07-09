@@ -134,8 +134,7 @@ const MOOD_RECO_DETAIL: Record<MoodLevel, MoodRecoDetail> = {
 
 const fadeIn: Variants = { hidden:{opacity:0,y:12}, visible:{opacity:1,y:0,transition:{duration:0.4,ease:'easeOut'}} }
 
-const FACE_API_KEY = import.meta.env.VITE_DAHONO_API_KEY as string | undefined
-const DAHONO_GATEWAY = import.meta.env.VITE_DAHONO_GATEWAY as string | undefined
+const FACE_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY as string | undefined
 
 function emotionToMoodLevel(key: string): MoodLevel {
   const map: Record<string,MoodLevel> = { happy:'happy',calm:'calm',neutral:'neutral',fearful:'anxious',sad:'sad',angry:'angry',disgusted:'angry',surprised:'neutral',tired:'tired' }
@@ -143,13 +142,13 @@ function emotionToMoodLevel(key: string): MoodLevel {
 }
 
 async function analyzeWithOpenRouter(b64: string): Promise<AIEmotionResult | null> {
-  if (!FACE_API_KEY || !DAHONO_GATEWAY) return null
+  if (!FACE_API_KEY) return null
   const prompt = `Sistem deteksi ekspresi wajah AI. LANGKAH 1: apakah ada wajah manusia jelas? Jika tidak: faceDetected:false, emotions semua 0. Jika ya: faceDetected:true, analisis ekspresi. Skor emosi 0.0-1.0 (total ~1.0): happy,calm,neutral,fearful,sad,angry,disgusted,surprised,tired. Response HANYA JSON (tanpa markdown): {"faceDetected":true,"emotions":{"happy":0.0,"calm":0.0,"neutral":0.0,"fearful":0.0,"sad":0.0,"angry":0.0,"disgusted":0.0,"surprised":0.0,"tired":0.0},"primaryEmotion":"neutral","confidence":75,"geminiDescription":"Deskripsi singkat Bahasa Indonesia"}`
   try {
-    const res = await fetch(`${DAHONO_GATEWAY}/chat/completions`, {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${FACE_API_KEY}` },
-      body: JSON.stringify({ model:'dahono/deepseek-v4-flash', messages:[{role:'user',content:[{type:'text',text:prompt},{type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}}]}], temperature:0.1, max_tokens:512 }),
+      headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${FACE_API_KEY}`, 'HTTP-Referer':window.location.origin, 'X-Title':'Sembuhin Mood Tracker' },
+      body: JSON.stringify({ model:'google/gemini-2.5-flash', messages:[{role:'user',content:[{type:'text',text:prompt},{type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}}]}], temperature:0.1, max_tokens:512 }),
     })
     if (!res.ok) return null
     const data = await res.json()

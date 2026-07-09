@@ -56,9 +56,8 @@ interface PastScan {
   characteristics?: string[]
 }
 
-/* ─── Dahono Skin Analysis ───────────────────────────────────── */
-const DAHONO_KEY = import.meta.env.VITE_DAHONO_API_KEY as string | undefined
-const DAHONO_GATEWAY = import.meta.env.VITE_DAHONO_GATEWAY as string | undefined
+/* ─── OpenRouter Skin Analysis ───────────────────────────────────── */
+const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY as string | undefined
 
 /* Kompres gambar ke max 800px supaya tidak 400 error */
 async function compressImage(base64: string): Promise<string> {
@@ -82,7 +81,7 @@ async function compressImage(base64: string): Promise<string> {
 }
 
 async function analyzeSkinWithAI(imageBase64: string): Promise<ScanResult | null> {
-  if (!DAHONO_KEY || !DAHONO_GATEWAY) return null
+  if (!OPENROUTER_KEY) return null
 
   const compressed = await compressImage(imageBase64)
 
@@ -113,14 +112,16 @@ severity hanya boleh: "ringan", "sedang", atau "perlu-perhatian"
 confidence adalah angka 0-100`
 
   try {
-    const res = await fetch(`${DAHONO_GATEWAY}/chat/completions`, {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${DAHONO_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Sembuhin Dermatologi AI',
       },
       body: JSON.stringify({
-        model: 'dahono/claude-sonnet-4.5-free',
+        model: 'anthropic/claude-opus-4.8',
         messages: [{
           role: 'user',
           content: [

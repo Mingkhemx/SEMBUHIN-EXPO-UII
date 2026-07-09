@@ -32,10 +32,9 @@ export const Route = createFileRoute('/symptom-triage')({
   component: SymptomTriagePage,
 })
 
-/* ─── Dahono Config ─────────────────────────────────────────── */
-const DAHONO_KEY = import.meta.env.VITE_DAHONO_API_KEY || ''
-const DAHONO_GATEWAY = import.meta.env.VITE_DAHONO_GATEWAY || ''
-const MODEL = 'dahono/deepseek-v3.2' // Sembuhin 1.3: model pro untuk symptom analysis
+/* ─── OpenRouter Config ─────────────────────────────────────────── */
+const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || ''
+const MODEL = 'anthropic/claude-haiku-4.5' // Sembuhin 1.3: cepat, hemat biaya, dan akurat
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type UrgencyLevel = 'emergency' | 'urgent' | 'moderate' | 'mild' | null
@@ -118,7 +117,7 @@ const MEDICAL_KEYWORDS = [
 
 /* ─── AI Function ─────────────────────────────────────────────────── */
 const analyzeSymptomsWithAI = async (symptomsText: string): Promise<TriageResult | null> => {
-  if (!DAHONO_KEY || !DAHONO_GATEWAY) {
+  if (!OPENROUTER_KEY) {
     console.log('[SymptomAI] No API key, using mock')
     return null
   }
@@ -155,11 +154,13 @@ Hanya jawab dengan JSON, tidak ada teks lain.
 `
 
   try {
-    const res = await fetch(`${DAHONO_GATEWAY}/chat/completions`, {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${DAHONO_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Sembuhin Symptom Checker',
       },
       body: JSON.stringify({
         model: MODEL,
