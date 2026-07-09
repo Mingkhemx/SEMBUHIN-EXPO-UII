@@ -256,9 +256,11 @@ function MoodCheckPage() {
   const streamRef   = useRef<MediaStream | null>(null)
   const rafRef      = useRef<number | null>(null)
   const frameRef    = useRef(0)
-  // hold the AI result promise so we can await it when progress hits 100
   const aiResultRef = useRef<Promise<AIEmotionResult | null> | null>(null)
   const capturedB64 = useRef<string | null>(null)
+  const autoCountdownRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [autoCountdown, setAutoCountdown] = useState<number | null>(null)
 
   /* attach stream */
   useEffect(() => {
@@ -271,6 +273,7 @@ function MoodCheckPage() {
   /* cleanup */
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    if (autoCountdownRef.current) clearTimeout(autoCountdownRef.current)
     streamRef.current?.getTracks().forEach(t => t.stop())
   }, [])
 
@@ -333,7 +336,7 @@ function MoodCheckPage() {
     rafRef.current = requestAnimationFrame(tick)
   }, [])
 
-  /* ── startCamera ─────────────────────────────────────────── */
+  /* ── startCamera: auto-start scan after 3s countdown ────── */
   const startCamera = async () => {
     setError(null)
     try {
@@ -343,6 +346,25 @@ function MoodCheckPage() {
       })
       streamRef.current = stream
       setCameraActive(true)
+
+      // Auto-scan after 3 second countdown
+      let c = 3
+      setAutoCountdown(c)
+      const tick = () => {
+        c -= 1
+        if (c > 0) {
+          setAutoCountdown(c)
+          autoCountdownRef.current = setTimeout(tick, 1000)
+        } else {
+          setAutoCountdown(0)
+          // small delay so user sees "0" flash before scan starts
+          autoCountdownRef.current = setTimeout(() => {
+            setAutoCountdown(null)
+            startScan()
+          }, 300)
+        }
+      }
+      autoCountdownRef.current = setTimeout(tick, 1000)
     } catch {
       setError('Gagal mengakses kamera! Izinkan akses kamera di browser.')
     }
@@ -420,6 +442,7 @@ function MoodCheckPage() {
   /* ── stopCamera ──────────────────────────────────────────── */
   const stopCamera = useCallback(() => {
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+    if (autoCountdownRef.current) { clearTimeout(autoCountdownRef.current); autoCountdownRef.current = null }
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
     setCameraActive(false)
@@ -427,6 +450,7 @@ function MoodCheckPage() {
     setScanProgress(0)
     setFaceFound(false)
     setLiveDetections([])
+    setAutoCountdown(null)
   }, [])
 
   /* ── reset ───────────────────────────────────────────────── */
@@ -508,7 +532,7 @@ function MoodCheckPage() {
                       <div>
                         <h3 className="text-xl font-bold text-white">Siap Cek Mood?</h3>
                         <p className="text-sm text-cyan-100 mt-1 max-w-sm mx-auto">
-                          Nyalakan kamera, hadap layar, lalu tekan Mulai Scan. AI akan menganalisis ekspresi wajah Anda selama ~5 detik.
+                          Nyalakan kamera dan hadap layar — scan dimulai otomatis dalam 3 detik.
                         </p>
                       </div>
                       <button onClick={startCamera}
@@ -556,13 +580,26 @@ function MoodCheckPage() {
                       </div>
                     )}
 
-                    {/* No face warning — only before scanning */}
+                    {/* No face warning / countdown — only before scanning */}
                     {!scanning && (
                       <div className="absolute inset-x-0 bottom-20 flex justify-center pointer-events-none">
-                        <div className="flex items-center gap-2 bg-amber-500/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-2 rounded-full">
-                          <AlertTriangle className="h-3.5 w-3.5" />
-                          Hadap kamera lalu tekan Mulai Scan
-                        </div>
+                        {autoCountdown !== null && autoCountdown > 0 ? (
+                          <motion.div
+                            key={autoCountdown}
+                            initial={{ scale: 1.4, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.6, opacity: 0 }}
+                            className="flex items-center gap-3 bg-black/55 backdrop-blur-sm text-white font-bold px-6 py-3 rounded-2xl"
+                          >
+                            <span className="text-3xl font-black tabular-nums text-cyan-300">{autoCountdown}</span>
+                            <span className="text-sm">Scan dimulai dalam...</span>
+                          </motion.div>
+                        ) : autoCountdown === null && !scanning ? (
+                          <div className="flex items-center gap-2 bg-amber-500/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-2 rounded-full">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            Hadap kamera dengan baik
+                          </div>
+                        ) : null}
                       </div>
                     )}
 
@@ -657,8 +694,11 @@ function MoodCheckPage() {
                         ) : liveDetections.length > 0 ? (
                           <><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                             <span className="text-[10px] font-semibold text-emerald-600">Analisis selesai!</span></>
+                        ) : autoCountdown !== null && autoCountdown > 0 ? (
+                          <><div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                            <span className="text-[10px] font-semibold text-amber-600">Auto-scan dalam {autoCountdown}s...</span></>
                         ) : (
-                          <span className="text-[10px] text-slate-400">Tekan Mulai Scan</span>
+                          <span className="text-[10px] text-slate-400">Mempersiapkan...</span>
                         )}
                       </div>
                     </div>
@@ -706,8 +746,8 @@ function MoodCheckPage() {
                         })}
                       </AnimatePresence>
                     </div>
-                    {/* Start scan button */}
-                    {!scanning && (
+                    {/* Start scan button — only show if countdown was cancelled */}
+                    {!scanning && autoCountdown === null && liveDetections.length === 0 && (
                       <div className="px-4 pb-4">
                         <button onClick={startScan}
                           className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 text-white px-6 py-3.5 text-sm font-bold hover:from-cyan-700 hover:to-sky-700 shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.01]">
