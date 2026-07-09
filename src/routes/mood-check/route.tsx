@@ -140,6 +140,7 @@ function emotionToMoodLevel(key: string): MoodLevel {
 }
 
 interface AIEmotionResult {
+  faceDetected: boolean
   emotions: Record<string, number>
   primaryEmotion: string
   confidence: number
@@ -148,15 +149,18 @@ interface AIEmotionResult {
 
 async function analyzeWithOpenRouter(imageBase64: string): Promise<AIEmotionResult | null> {
   if (!FACE_API_KEY) return null
-  const prompt = `Kamu adalah ahli psikologi emosi. Analisis ekspresi wajah pada gambar ini.
+  const prompt = `Kamu adalah sistem deteksi ekspresi wajah berbasis AI.
 
+LANGKAH 1: Periksa apakah ada wajah manusia yang terlihat jelas di gambar ini.
+- Jika TIDAK ada wajah (foto kosong, foto objek/benda, foto dari jauh tanpa wajah jelas, gambar gelap): set "faceDetected": false dan isi emotions dengan 0 semua.
+- Jika ADA wajah: set "faceDetected": true dan analisis ekspresi.
+
+LANGKAH 2 (hanya jika faceDetected = true):
 Berikan skor emosi (0.0-1.0, total mendekati 1.0):
 happy, calm, neutral, fearful, sad, angry, disgusted, surprised, tired
 
-Tentukan emosi dominan dan confidence score 0-100.
-
-Response HANYA JSON valid (tanpa markdown):
-{"emotions":{"happy":0.0,"calm":0.0,"neutral":0.0,"fearful":0.0,"sad":0.0,"angry":0.0,"disgusted":0.0,"surprised":0.0,"tired":0.0},"primaryEmotion":"neutral","confidence":75,"geminiDescription":"Deskripsi singkat dalam Bahasa Indonesia"}`
+Response HANYA JSON valid ini (tanpa markdown, tanpa kode block):
+{"faceDetected":true,"emotions":{"happy":0.0,"calm":0.0,"neutral":0.0,"fearful":0.0,"sad":0.0,"angry":0.0,"disgusted":0.0,"surprised":0.0,"tired":0.0},"primaryEmotion":"neutral","confidence":75,"geminiDescription":"Deskripsi singkat kondisi emosional dalam Bahasa Indonesia"}`
 
   try {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -411,28 +415,40 @@ function MoodCheckPage() {
         // Animation done — now wait for AI result
         setScanProgress(100)
         const aiResult = await aiResultRef.current
+
         // Stop camera
         streamRef.current?.getTracks().forEach(t => t.stop())
         streamRef.current = null
         setCameraActive(false)
         setScanning(false)
+        setLiveDetections([])
 
-        if (aiResult) {
-          // Final frame: show real emotion values
-          const finalDets: MoodDetection[] = Object.entries(aiResult.emotions)
-            .filter(([k]) => EMOTION_MAP[k])
-            .map(([k, v]) => ({ ...EMOTION_MAP[k], pct: Math.round(v * 100) }))
-            .sort((a, b) => b.pct - a.pct)
-          setLiveDetections(finalDets)
-
-          const result = buildMoodResult(aiResult.emotions, aiResult.confidence, aiResult.geminiDescription)
-          setMoodResult(result)
-          setGeminiUsed(true)
-          setViewMode('result')
-          saveMoodResult(result)
-        } else {
+        if (!aiResult) {
+          // Network/API error
           setError('Analisis AI gagal. Pastikan VITE_GEMINI_FACE_API_KEY sudah diset di Vercel.')
+          return
         }
+
+        if (!aiResult.faceDetected) {
+          // No face in frame — reset camera so user can try again
+          setFaceFound(false)
+          setScanProgress(0)
+          setError('Tidak ada wajah yang terdeteksi. Pastikan wajah Anda terlihat jelas di kamera, lalu coba lagi.')
+          return
+        }
+
+        // Valid face detected — show result
+        const finalDets: MoodDetection[] = Object.entries(aiResult.emotions)
+          .filter(([k]) => EMOTION_MAP[k])
+          .map(([k, v]) => ({ ...EMOTION_MAP[k], pct: Math.round(v * 100) }))
+          .sort((a, b) => b.pct - a.pct)
+        setLiveDetections(finalDets)
+
+        const result = buildMoodResult(aiResult.emotions, aiResult.confidence, aiResult.geminiDescription)
+        setMoodResult(result)
+        setGeminiUsed(true)
+        setViewMode('result')
+        saveMoodResult(result)
       }
     }
 
@@ -511,11 +527,43 @@ function MoodCheckPage() {
             <motion.div key="camera" variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
 
               {error && (
-                <div className="flex items-center gap-3 rounded-xl bg-rose-50 border border-rose-200 p-4">
-                  <AlertTriangle className="h-5 w-5 text-rose-500 shrink-0" />
-                  <p className="text-sm text-rose-700">{error}</p>
-                  <button onClick={() => setError(null)} className="ml-auto"><X className="h-4 w-4 text-rose-400" /></button>
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                  className={cn(
+                    'flex items-start gap-3 rounded-2xl border p-5',
+                    error.includes('wajah') 
+                      ? 'bg-amber-50 border-amber-200' 
+                      : 'bg-rose-50 border-rose-200'
+                  )}
+                >
+                  <div className={cn(
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-2xl',
+                    error.includes('wajah') ? 'bg-amber-100' : 'bg-rose-100'
+                  )}>
+                    {error.includes('wajah') ? '🙈' : '⚠️'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn('text-sm font-bold mb-1', error.includes('wajah') ? 'text-amber-800' : 'text-rose-800')}>
+                      {error.includes('wajah') ? 'Wajah Tidak Terdeteksi' : 'Terjadi Kesalahan'}
+                    </p>
+                    <p className={cn('text-xs leading-relaxed', error.includes('wajah') ? 'text-amber-700' : 'text-rose-700')}>
+                      {error}
+                    </p>
+                    {error.includes('wajah') && (
+                      <button
+                        onClick={() => { setError(null); startCamera() }}
+                        className="mt-3 flex items-center gap-2 rounded-xl bg-amber-500 text-white px-4 py-2 text-xs font-bold hover:bg-amber-600 transition-all"
+                      >
+                        <Camera className="h-3.5 w-3.5" /> Coba Lagi
+                      </button>
+                    )}
+                  </div>
+                  {!error.includes('wajah') && (
+                    <button onClick={() => setError(null)} className="shrink-0">
+                      <X className="h-4 w-4 text-rose-400 hover:text-rose-600" />
+                    </button>
+                  )}
+                </motion.div>
               )}
 
               {!cameraActive ? (
