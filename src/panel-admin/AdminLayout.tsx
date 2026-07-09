@@ -80,6 +80,13 @@ export const ADMIN_NAV = [
     badge: 5,
   },
   {
+    id: "api-usage",
+    label: "API Usage",
+    icon: Bell,
+    path: "/admin/api-usage",
+    description: "Monitor penggunaan API",
+  },
+  {
     id: "settings",
     label: "Pengaturan",
     icon: Settings,
