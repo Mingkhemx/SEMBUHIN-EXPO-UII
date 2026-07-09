@@ -79,23 +79,64 @@ export function DoctorConsultations() {
 
     const fetchConsultations = async () => {
       try {
-        const params = new URLSearchParams({
-          doctor_id: doctorId,
-          status: filter
-        });
+        setLoading(true);
         
-        const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/consultations?${params}`);
-        const data = await response.json();
-        
-        if (data.success) {
-          setConsultations(data.data as Consultation[]);
+        // Fetch consultations directly from Supabase
+        const { data: consultData, error: consultError } = await supabase
+          .from("consultations")
+          .select("*")
+          .eq("doctor_id", doctorId)
+          .order("created_at", { ascending: false });
+
+        if (consultError) throw consultError;
+
+        if (!consultData || consultData.length === 0) {
+          setConsultations([]);
           setError(null);
-        } else {
-          setError(data.error);
+          setLoading(false);
+          return;
         }
+
+        // Fetch patient details in batch
+        const patientIds = [...new Set(consultData.map(c => c.patient_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email, phone")
+          .in("id", patientIds);
+
+        const profileMap: Record<string, { full_name: string; email?: string; phone?: string }> = {};
+        if (profilesData) {
+          profilesData.forEach(p => {
+            profileMap[p.id] = {
+              full_name: p.full_name || "Pasien",
+              email: p.email,
+              phone: p.phone
+            };
+          });
+        }
+
+        // Transform data
+        const transformed: Consultation[] = consultData.map(c => ({
+          id: c.id,
+          doctor_id: c.doctor_id,
+          patient_id: c.patient_id,
+          patient_name: profileMap[c.patient_id]?.full_name || "Pasien",
+          patient_phone: profileMap[c.patient_id]?.phone || "-",
+          patient_email: profileMap[c.patient_id]?.email || null,
+          appointment_date: c.appointment_date,
+          appointment_time: c.appointment_time,
+          consultation_type: c.consultation_type,
+          complaint: c.complaint,
+          consultation_status: c.consultation_status,
+          payment_status: c.payment_status,
+          created_at: c.created_at,
+        }));
+
+        setConsultations(transformed);
+        setError(null);
       } catch (fetchErr: any) {
         console.error("Gagal fetch konsultasi:", fetchErr);
-        setError(fetchErr.message);
+        setError(fetchErr.message || "Gagal memuat konsultasi");
       } finally {
         setLoading(false);
       }
@@ -124,7 +165,7 @@ export function DoctorConsultations() {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, [doctorId]);
+  }, [doctorId, filter]);
 
   const filteredConsultations = consultations.filter((c) => {
     const matchesFilter = filter === "All" || c.consultation_status === filter;
