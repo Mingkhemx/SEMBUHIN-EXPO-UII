@@ -32,7 +32,7 @@ interface ScanResult {
   description: string
   recommendation: string
   characteristics: string[]
-  aiSource?: 'claude' | 'mock'
+  aiSource?: 'sembuhin' | 'mock'
 }
 
 interface SkinCondition {
@@ -137,7 +137,7 @@ confidence adalah angka 0-100`
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      console.error('[DermaAI Claude] HTTP', res.status, err)
+      console.error('[DermaAI] HTTP', res.status, err)
       return null
     }
 
@@ -151,10 +151,10 @@ confidence adalah angka 0-100`
     if (!['ringan', 'sedang', 'perlu-perhatian'].includes(parsed.severity)) {
       parsed.severity = 'ringan'
     }
-    parsed.aiSource = 'claude'
+    parsed.aiSource = 'sembuhin'
     return parsed
   } catch (err) {
-    console.error('[DermaAI Claude] Error:', err)
+    console.error('[DermaAI] Error:', err)
     return null
   }
 }
@@ -885,9 +885,9 @@ function DermatologiPage() {
                         </span>
                       )}
                       <span className="text-xs text-slate-500">• Akurasi {scanResult.confidence}%</span>
-                      {scanResult.aiSource === 'claude' && (
+                      {scanResult.aiSource === 'sembuhin' && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">
-                          <Sparkles className="h-3 w-3" /> Sembuhin AI 1.2
+                          <Sparkles className="h-3 w-3" /> Sembuhin AI 1.3
                         </span>
                       )}
                     </div>

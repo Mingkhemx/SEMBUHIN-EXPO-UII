@@ -34,7 +34,7 @@ export const Route = createFileRoute('/symptom-triage')({
 
 /* ─── OpenRouter Config ─────────────────────────────────────────── */
 const OPENROUTER_KEY = import.meta.env.VITE_GEMINI_FACE_API_KEY || ''
-const MODEL = 'anthropic/claude-haiku-4.5' // Claude Haiku 4.5: cepat, hemat biaya, dan akurat
+const MODEL = 'anthropic/claude-haiku-4.5' // Sembuhin 1.3: cepat, hemat biaya, dan akurat
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type UrgencyLevel = 'emergency' | 'urgent' | 'moderate' | 'mild' | null
@@ -264,7 +264,7 @@ function SymptomTriagePage() {
         >
           <div className="inline-flex items-center gap-2 rounded-full bg-sky-100/80 border border-sky-200/60 px-5 py-2 mb-6">
             <Stethoscope className="h-4 w-4 text-sky-600" />
-            <span className="text-xs font-semibold text-sky-700 tracking-wide uppercase">AI Symptom Checker 1.3 (Claude Haiku 4.5)</span>
+            <span className="text-xs font-semibold text-sky-700 tracking-wide uppercase">AI Symptom Checker 1.3 (Sembuhin 1.3)</span>
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold text-slate-900 leading-tight tracking-tight">
             Cek Tingkat Urgensi<br className="hidden sm:block" /> Kesehatan Anda
@@ -277,7 +277,7 @@ function SymptomTriagePage() {
           <div className="flex flex-wrap justify-center items-center gap-4 mt-8">
             {[
               { icon: ShieldCheck, label: 'Data Terenkripsi' },
-              { icon: Activity, label: 'AI Powered (Claude Haiku 4.5)' },
+              { icon: Activity, label: 'AI Powered (Sembuhin 1.3)' },
               { icon: Clock, label: 'Tersedia 24/7' },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-2 rounded-full glass px-4 py-2 text-xs font-medium text-slate-600 shadow-sm">
@@ -404,7 +404,7 @@ function SymptomTriagePage() {
                     </div>
                     <div>
                       <p className="font-bold text-slate-800 text-base">Memeriksa gejala Anda</p>
-                      <p className="text-sm text-slate-500 mt-1">Menganalisis dengan AI Claude Haiku 4.5...</p>
+                      <p className="text-sm text-slate-500 mt-1">Menganalisis dengan AI Sembuhin 1.3...</p>
                     </div>
                   </div>
                 </motion.div>
@@ -529,7 +529,7 @@ function SymptomTriagePage() {
               <div className="space-y-4">
                 {[
                   { n: '1', t: 'Ceritakan keluhan', d: 'Tulis atau pilih gejala yang Anda rasakan' },
-                  { n: '2', t: 'Sistem memeriksa', d: 'Gejala dianalisis dengan AI Claude Haiku 4.5' },
+                  { n: '2', t: 'Sistem memeriksa', d: 'Gejala dianalisis dengan AI Sembuhin 1.3' },
                   { n: '3', t: 'Dapatkan hasil', d: 'Klasifikasi urgensi dan langkah selanjutnya' },
                 ].map((s) => (
                   <div key={s.n} className="flex gap-4">
