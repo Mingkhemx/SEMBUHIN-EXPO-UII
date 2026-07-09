@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Pill, ShoppingCart, Store, MapPin, Calendar, Clock,
   ChevronRight, ChevronDown, Star, Package, Truck, AlertCircle,
-  Search, Filter, X, Check, Heart,
+  Search, Filter, X, Check, Heart, Loader2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,10 +24,10 @@ export const Route = createFileRoute("/resep")({
 
 /* ─── Types ─────────────────────────────────────────────────── */
 type PurchaseOption = "apotek" | "marketplace";
-type ResepStatus = "active" | "expired" | "used";
+type ResepStatus = "Pending" | "Dispensed" | "Cancelled";
 
 interface Medicine {
-  id: string;
+  id?: string;
   name: string;
   dosage: string;
   quantity: number;
@@ -41,12 +41,13 @@ interface Medicine {
 interface Resep {
   id: string;
   doctorName: string;
+  doctorId: string;
   doctorSpecialty: string;
   date: string;
-  expiryDate: string;
+  expiryDate?: string;
   status: ResepStatus;
   medicines: Medicine[];
-  diagnosis: string;
+  diagnosis?: string;
   notes?: string;
   rating?: number;
 }
@@ -60,75 +61,110 @@ interface ResepWithImages extends Resep {
   medicines: MedicineWithImage[];
 }
 
-const MOCK_RESEPS: ResepWithImages[] = [
-  {
-    id: "1",
-    doctorName: "Dr. Budi Santoso, Sp.PD",
-    doctorSpecialty: "Penyakit Dalam",
-    date: "15 Feb 2026",
-    expiryDate: "15 May 2026",
-    status: "active",
-    diagnosis: "Demam Tifoid",
-    notes: "Minum dengan air hangat setelah makan pagi, siang, dan malam",
-    medicines: [
-      { id: "m1", name: "Kloramfenikol", dosage: "500mg", quantity: 30, unit: "tablet", frequency: "3x sehari", duration: "7 hari", image: "/images/obat/kloramfenikol.svg" },
-      { id: "m2", name: "Paracetamol", dosage: "500mg", quantity: 30, unit: "tablet", frequency: "2x sehari", duration: "3 hari", image: "/images/obat/paracetamol.svg" },
-      { id: "m3", name: "Vitamin C", dosage: "500mg", quantity: 14, unit: "tablet", frequency: "1x sehari", duration: "2 minggu", image: "/images/obat/vitamin-c.svg" },
-    ],
-  },
-  {
-    id: "2",
-    doctorName: "Dr. Siti Nur Azizah, Sp.KK",
-    doctorSpecialty: "Dermatologi",
-    date: "10 Feb 2026",
-    expiryDate: "10 Apr 2026",
-    status: "active",
-    diagnosis: "Dermatitis Atopik",
-    notes: "Oleskan krim pada area kulit yang terkena, hindari faktor pemicu",
-    medicines: [
-      { id: "m4", name: "Mometason", dosage: "0.1%", quantity: 1, unit: "tube 10g", frequency: "2x sehari", duration: "2 minggu", image: "/images/obat/mometason.svg" },
-      { id: "m5", name: "Cetirizine", dosage: "10mg", quantity: 14, unit: "tablet", frequency: "1x malam", duration: "2 minggu", image: "/images/obat/cetirizine.svg" },
-    ],
-  },
-  {
-    id: "3",
-    doctorName: "Dr. Ahmad Rifai, Sp.THT",
-    doctorSpecialty: "Telinga Hidung Tenggorokan",
-    date: "01 Feb 2026",
-    expiryDate: "01 Mar 2026",
-    status: "expired",
-    diagnosis: "Sinusitis Kronis",
-    medicines: [
-      { id: "m6", name: "Amoxicillin", dosage: "500mg", quantity: 21, unit: "kaplet", frequency: "3x sehari", duration: "7 hari", image: "/images/obat/amoxicillin.svg" },
-    ],
-  },
-];
-
 /* ─── Component ─────────────────────────────────────────────── */
 function ResepPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const [reseps, setReseps] = useState<Resep[]>(MOCK_RESEPS);
+  const [reseps, setReseps] = useState<Resep[]>([]);
   const [selectedResep, setSelectedResep] = useState<Resep | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [purchaseOption, setPurchaseOption] = useState<PurchaseOption>("apotek");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | ResepStatus>("all");
   const [savedMedicines, setSavedMedicines] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch prescriptions from Supabase
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch prescriptions untuk patient ini
+        const { data: prescriptions, error: prescError } = await supabase
+          .from("prescriptions")
+          .select(`
+            id,
+            status,
+            medicines,
+            notes,
+            created_at,
+            updated_at,
+            doctor_id,
+            doctors:doctor_id(
+              id,
+              user_id,
+              specialization,
+              profiles:user_id(full_name)
+            )
+          `)
+          .eq("patient_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (prescError) throw prescError;
+
+        if (!prescriptions) {
+          setReseps([]);
+          return;
+        }
+
+        // Transform data ke format Resep
+        const transformed: Resep[] = prescriptions.map((p: any) => {
+          const doctorData = p.doctors;
+          const doctorName = doctorData?.profiles?.full_name || "Dr. Umum";
+          const specialty = doctorData?.specialization || "Umum";
+          const date = new Date(p.created_at).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+
+          return {
+            id: p.id,
+            doctorName,
+            doctorId: p.doctor_id,
+            doctorSpecialty: specialty,
+            date,
+            status: p.status as ResepStatus,
+            medicines: (p.medicines || []) as Medicine[],
+            notes: p.notes,
+          };
+        });
+
+        setReseps(transformed);
+      } catch (err) {
+        console.error("Error fetching prescriptions:", err);
+        setError("Gagal memuat resep. Silahkan coba lagi.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrescriptions();
+  }, [user]);
 
   // Handle rating
-  const handleRating = (resepId: string, rating: number) => {
+  const handleRating = async (resepId: string, rating: number) => {
     setReseps(prev =>
       prev.map(r => r.id === resepId ? { ...r, rating } : r)
     );
+
+    // Optionally update to Supabase if needed
+    // await supabase.from("prescriptions").update({ rating }).eq("id", resepId);
   };
 
   // Filter reseps
   const filteredReseps = reseps.filter(r => {
     const matchesSearch = 
-      r.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
+      r.doctorName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || r.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -138,7 +174,6 @@ function ResepPage() {
     if (option === "marketplace") {
       navigate({ to: "/marketplace" });
     } else {
-      // Show nearby pharmacies
       alert(`Cari apotek terdekat untuk: ${medicine.name}`);
     }
   };
@@ -229,7 +264,23 @@ function ResepPage() {
           transition={{ delay: 0.2 }}
           className="space-y-4"
         >
-          {filteredReseps.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12 rounded-2xl bg-white border border-slate-100">
+              <Loader2 className="h-8 w-8 text-slate-400 mx-auto mb-3 animate-spin" />
+              <p className="text-slate-600 font-medium">Memuat resep...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 rounded-2xl bg-red-50 border border-red-200">
+              <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+              <p className="text-red-700 font-medium">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          ) : filteredReseps.length === 0 ? (
             <div className="text-center py-12 rounded-2xl bg-white border border-slate-100">
               <Pill className="h-12 w-12 text-slate-300 mx-auto mb-3" />
               <p className="text-slate-600 font-medium">Belum ada resep</p>
@@ -254,12 +305,20 @@ function ResepPage() {
                       <div className="flex items-center gap-2.5 mb-1.5">
                         <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Resep Obat</span>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          resep.status === "active"
+                          resep.status === "Pending"
                             ? "bg-emerald-100 text-emerald-700"
+                            : resep.status === "Dispensed"
+                            ? "bg-blue-100 text-blue-700"
                             : "bg-slate-100 text-slate-700"
                         }`}>
-                          <span className={`h-1.5 w-1.5 rounded-full ${resep.status === "active" ? "bg-emerald-500" : "bg-slate-400"}`} />
-                          {resep.status === "active" ? "Aktif" : "Kadaluarsa"}
+                          <span className={`h-1.5 w-1.5 rounded-full ${
+                            resep.status === "Pending"
+                              ? "bg-emerald-500"
+                              : resep.status === "Dispensed"
+                              ? "bg-blue-500"
+                              : "bg-slate-400"
+                          }`} />
+                          {resep.status === "Pending" ? "Aktif" : resep.status === "Dispensed" ? "Selesai" : "Dibatalkan"}
                         </span>
                       </div>
                       <h3 className="text-lg font-bold text-slate-900 truncate">
@@ -274,19 +333,11 @@ function ResepPage() {
 
                   <div className="space-y-3">
                     <div className="px-3 py-2.5 rounded-lg bg-blue-50 border border-blue-100">
-                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Diagnosis</p>
-                      <p className="text-sm font-semibold text-slate-900 mt-0.5">{resep.diagnosis}</p>
+                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Tanggal</p>
+                      <p className="text-sm font-semibold text-slate-900 mt-0.5">{resep.date}</p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                        <span>{resep.date}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 text-slate-400" />
-                        <span>Berlaku hingga {resep.expiryDate}</span>
-                      </div>
                       <div className="flex items-center gap-1.5">
                         <Package className="h-3.5 w-3.5 text-slate-400" />
                         <span>{resep.medicines.length} obat</span>
@@ -347,20 +398,26 @@ function ResepPage() {
                 <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Spesialisasi</p>
-                      <p className="text-sm font-semibold text-slate-900 mt-1">{selectedResep.doctorSpecialty}</p>
+                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Dokter</p>
+                      <p className="text-sm font-semibold text-slate-900 mt-1">{selectedResep.doctorName}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Diagnosis</p>
-                      <p className="text-sm font-semibold text-slate-900 mt-1">{selectedResep.diagnosis}</p>
+                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Spesialisasi</p>
+                      <p className="text-sm font-semibold text-slate-900 mt-1">{selectedResep.doctorSpecialty}</p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Tanggal Resep</p>
                       <p className="text-sm font-semibold text-slate-900 mt-1">{selectedResep.date}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Berlaku Hingga</p>
-                      <p className="text-sm font-semibold text-slate-900 mt-1">{selectedResep.expiryDate}</p>
+                      <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Status</p>
+                      <p className={`text-sm font-semibold mt-1 ${
+                        selectedResep.status === "Pending" ? "text-emerald-700" :
+                        selectedResep.status === "Dispensed" ? "text-blue-700" :
+                        "text-slate-700"
+                      }`}>
+                        {selectedResep.status === "Pending" ? "Aktif" : selectedResep.status === "Dispensed" ? "Selesai" : "Dibatalkan"}
+                      </p>
                     </div>
                   </div>
                 </div>
