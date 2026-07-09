@@ -38,10 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error
       setUserProfile(profile)
       
-      // Check premium from profile if columns exist, otherwise check memberships table
-      if (profile?.is_premium !== undefined) {
-        setIsPremium(!!profile.is_premium)
+      // Cek premium dari profiles.is_premium DULU
+      if (profile?.is_premium === true) {
+        setIsPremium(true)
       } else {
+        // Fallback: cek tabel memberships
         fetchMembership(userId)
       }
 
@@ -86,40 +87,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const upgradeToPremium = async () => {
-    // Fungsi ini sekarang hanya akan dipanggil jika pembayaran berhasil di route.tsx
     if (!user) return
     try {
-      // First check if membership exists
+      // Upsert ke tabel memberships
       const { data: existing } = await supabase
         .from('memberships')
-        .select('*')
+        .select('id')
         .eq('user_id', user.id)
         .maybeSingle()
       
       if (existing) {
-        // Update existing membership
         await supabase
           .from('memberships')
-          .update({
-            plan: 'premium',
-            is_active: true,
-            updated_at: new Date().toISOString()
-          })
+          .update({ plan: 'premium', is_active: true, updated_at: new Date().toISOString() })
           .eq('id', existing.id)
       } else {
-        // Create new membership
         await supabase
           .from('memberships')
-          .insert({
-            user_id: user.id,
-            plan: 'premium',
-            is_active: true
-          })
+          .insert({ user_id: user.id, plan: 'premium', is_active: true })
       }
+
+      // Update profiles.is_premium = true agar reload langsung terbaca
+      await supabase
+        .from('profiles')
+        .update({ is_premium: true })
+        .eq('id', user.id)
+
       setIsPremium(true)
     } catch (err) {
       console.error('Error upgrading membership:', err)
-      throw err // lempar error agar bisa ditangkap oleh route.tsx
+      throw err
     }
   }
 
