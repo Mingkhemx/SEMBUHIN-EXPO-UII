@@ -21,6 +21,7 @@ import {
   LogOut,
   Crown,
   MessageCircle,
+  Pill,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -74,7 +75,8 @@ export function Header() {
   const isPelayananActive =
     matchRoute({ to: "/dokter" }) ||
     matchRoute({ to: "/twin" }) ||
-    matchRoute({ to: "/cek-jantung" });
+    matchRoute({ to: "/cek-jantung" }) ||
+    matchRoute({ to: "/resep" });
 
   // Check if any Edukasi Kesehatan routes are active
   const isEdukasiActive =
@@ -192,6 +194,14 @@ export function Header() {
                       color="pink"
                     >
                       {t("header.dermatology_desc")}
+                    </ListItem>
+                    <ListItem
+                      to="/resep"
+                      title={t("nav.prescription") || "Resep Obat"}
+                      icon={<Pill className="h-4 w-4" />}
+                      color="blue"
+                    >
+                      {t("header.prescription_desc") || "Kelola resep dari dokter"}
                     </ListItem>
                     <ListItem
                       to="/mood-check"
@@ -543,6 +553,11 @@ const colorMap: Record<string, { icon: string; title: string; hover: string }> =
     icon: "bg-pink-100 text-pink-600",
     title: "text-pink-700",
     hover: "hover:border-pink-200",
+  },
+  blue: {
+    icon: "bg-blue-100 text-blue-600",
+    title: "text-blue-700",
+    hover: "hover:border-blue-200",
   },
 };
 
