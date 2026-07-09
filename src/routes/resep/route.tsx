@@ -69,16 +69,45 @@ function ResepPage() {
       }
       try {
         setLoading(true);
+        let prescription = null;
+        let fetchError = null;
         
-        // Fetch prescription directly from Supabase
-        const { data: prescription, error: fetchError } = await supabase
+        // Try to fetch from 'prescriptions' table first
+        const { data: prescData, error: prescError } = await supabase
           .from('prescriptions')
           .select('*')
           .eq('id', id)
           .single();
 
+        if (!prescError && prescData) {
+          prescription = prescData;
+        } else {
+          // Fallback: try to get from consultations table if prescription data is stored there
+          const { data: consultData, error: consultError } = await supabase
+            .from('consultations')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (!consultError && consultData) {
+            prescription = consultData;
+          } else {
+            // If both fail, use the prescriptions error
+            fetchError = prescError || consultError;
+          }
+        }
+
         if (fetchError) {
-          throw new Error(fetchError.message || "Gagal mengambil data resep");
+          console.error('Supabase error:', fetchError);
+          
+          // If table doesn't exist or prescription not found, show appropriate error
+          if (fetchError.code === 'PGRST116' || fetchError.message?.includes('not found')) {
+            throw new Error("Resep tidak ditemukan");
+          } else if (fetchError.code === '42P01' || fetchError.message?.includes('relation')) {
+            throw new Error("Tabel resep belum dibuat di database. Hubungi administrator.");
+          } else {
+            throw new Error(fetchError.message || "Gagal mengambil data resep");
+          }
         }
 
         if (!prescription) {
@@ -88,24 +117,33 @@ function ResepPage() {
         // Parse medicines if stored as JSON string
         let medicines: Medicine[] = [];
         if (prescription.medicines) {
-          medicines = typeof prescription.medicines === 'string' 
-            ? JSON.parse(prescription.medicines)
-            : prescription.medicines;
+          try {
+            medicines = typeof prescription.medicines === 'string' 
+              ? JSON.parse(prescription.medicines)
+              : prescription.medicines;
+          } catch (parseError) {
+            console.warn('Error parsing medicines:', parseError);
+            medicines = [];
+          }
         }
+
+        // Handle both prescription and consultation table fields
+        const patientName = prescription.patient_name || prescription.patient_full_name || "Pasien";
+        const doctorName = prescription.doctor_name || prescription.doctor_full_name || "Dokter";
 
         setData({
           id: prescription.id,
-          patient_name: prescription.patient_name || "Pasien",
-          patient_age: prescription.patient_age || 0,
-          doctor_name: prescription.doctor_name || "Dokter",
-          doctor_str: prescription.doctor_str || "-",
+          patient_name: patientName,
+          patient_age: prescription.patient_age || prescription.age || 0,
+          doctor_name: doctorName,
+          doctor_str: prescription.doctor_str || prescription.doctor_license || "-",
           created_at: prescription.created_at || new Date().toISOString(),
           medicines,
-          status: prescription.status || "ACTIVE"
+          status: prescription.status || prescription.consultation_status || "ACTIVE"
         });
       } catch (err: any) {
         console.error("Error fetching resep:", err);
-        setError(err.message || "Gagal memuat resep");
+        setError(err.message || "Gagal memuat resep. Silakan coba lagi atau hubungi dukungan.");
       } finally {
         setLoading(false);
       }
