@@ -531,7 +531,7 @@ function MoodCheckPage() {
 
         if (!aiResult) {
           // Network/API error
-          setError('Analisis AI gagal. Pastikan VITE_GEMINI_FACE_API_KEY sudah diset di Vercel.')
+          setError('Analisis gagal. Pastikan koneksi internet stabil dan coba lagi.')
           return
         }
 
@@ -608,7 +608,7 @@ function MoodCheckPage() {
               Cek Mood Via Kamera
             </h1>
             <p className="mt-3 text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg">
-              AI menganalisis ekspresi wajah Anda secara real-time menggunakan Gemini Vision.
+              Sembuhin Vision menganalisis ekspresi wajah Anda secara real-time untuk mendeteksi kondisi emosional.
             </p>
           </motion.header>
 
@@ -933,7 +933,7 @@ function MoodCheckPage() {
                         <span className="text-xs text-slate-500">• Akurasi {moodResult.confidence}%</span>
                         {geminiUsed && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">
-                            <Sparkles className="h-3 w-3" /> Gemini Vision
+                            <Sparkles className="h-3 w-3" /> Sembuhin Vision
                           </span>
                         )}
                       </div>
@@ -955,7 +955,7 @@ function MoodCheckPage() {
                     className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-400" />
                 </div>
                 <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-violet-400" /> Analisis visual oleh Gemini 2.5 Flash
+                  <Sparkles className="h-3 w-3 text-violet-400" /> Dianalisis oleh Sembuhin Vision 1.5
                 </p>
               </div>
 
