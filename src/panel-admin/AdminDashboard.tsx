@@ -156,15 +156,15 @@ export function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
 
-  // 1. Fetch Initial Data
+  // 1. Fetch Initial Data - Direct dari Supabase
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Fetch stats count
       const [usersCount, doctorsCount, pendingDocs, activeConsultations] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('doctors').select('*', { count: 'exact', head: true }), // Count all active doctors
+        supabase.from('doctors').select('*', { count: 'exact', head: true }),
         supabase.from('doctor_registrations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('consultations').select('*', { count: 'exact', head: true }).eq('payment_status', 'paid')
       ]);
@@ -178,7 +178,7 @@ export function AdminDashboard() {
         doctorChange: "+1.2%",
       });
 
-      // Fetch Recent Doctor Requests (from doctor_registrations table)
+      // Fetch Recent Doctor Requests
       const { data: docs } = await supabase
         .from('doctor_registrations')
         .select('id, name, specialty, created_at, status')
@@ -186,7 +186,6 @@ export function AdminDashboard() {
         .limit(5);
       
       if (docs) {
-        // Map to match the interface if necessary
         setDoctorRequests(docs.map(d => ({
           id: d.id,
           full_name: d.name,
@@ -205,7 +204,6 @@ export function AdminDashboard() {
       
       if (users) setRecentUsers(users);
 
-      // Initial Activities (Mocking from data)
       const initialActivities: SystemActivity[] = [
         { id: '1', type: 'info', label: 'Dashboard Admin dimuat', time: 'Baru saja', icon: Activity, color: 'text-sky-400' }
       ];
@@ -213,6 +211,15 @@ export function AdminDashboard() {
 
     } catch (err) {
       console.error("Error fetching dashboard:", err);
+      // Set default empty stats
+      setStats({
+        totalUsers: 0,
+        totalDoctors: 0,
+        pendingRequests: 0,
+        activeChats: 0,
+        userChange: "—",
+        doctorChange: "—",
+      });
     } finally {
       setIsLoading(false);
     }

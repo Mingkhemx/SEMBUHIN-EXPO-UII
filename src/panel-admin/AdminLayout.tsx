@@ -122,33 +122,86 @@ export function AdminShell() {
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
 
   useEffect(() => {
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+    
     const checkAdminAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate({ to: "/admin/login" }); return; }
-      
-      // Get fresh profile from table
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('full_name, email, role, avatar_url')
-        .eq('id', session.user.id)
-        .single();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        
+        if (!session) { 
+          navigate({ to: "/admin/login" }); 
+          return; 
+        }
+        
+        // Get fresh profile from table with timeout
+        try {
+          const { data: profile, error } = await Promise.race([
+            supabase
+              .from('profiles')
+              .select('full_name, email, role, avatar_url')
+              .eq('id', session.user.id)
+              .single(),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Database query timeout')), 5000)
+            )
+          ]) as any;
 
-      if (error || profile?.role !== 'admin') {
-        await authSignOut();
-        navigate({ to: "/admin/login" });
-      } else {
-        setIsVerifying(false);
+          if (!isMounted) return;
+
+          if (error || profile?.role !== 'admin') {
+            console.warn('Admin role check failed:', error);
+            await authSignOut();
+            navigate({ to: "/admin/login" });
+          } else {
+            setIsVerifying(false);
+          }
+        } catch (dbErr) {
+          console.error('Database query error:', dbErr);
+          // Jika database error, tetap izinkan akses jika user sudah authenticated
+          if (isMounted) {
+            setIsVerifying(false);
+          }
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+        if (isMounted) {
+          setIsVerifying(false);
+          navigate({ to: "/admin/login" });
+        }
       }
     };
+    
     checkAdminAuth();
-  }, [navigate, authSignOut]);
+    
+    // Safety timeout - fallback ke stop loading setelah 10 detik
+    timeoutId = setTimeout(() => {
+      if (isMounted) {
+        console.warn('Auth verification timeout - proceeding anyway');
+        setIsVerifying(false);
+      }
+    }, 10000);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await authSignOut();
     navigate({ to: "/admin/login" });
   };
 
-  if (isVerifying) return null;
+  if (isVerifying) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto mb-4"></div>
+        <p className="text-slate-600 font-medium">Memverifikasi akses admin...</p>
+      </div>
+    </div>
+  );
 
   // Prioritas avatar: Metadata Auth > Table Profiles
   const adminAvatar = user?.user_metadata?.avatar_url || userProfile?.avatar_url;

@@ -422,48 +422,73 @@ export function AdminUsers() {
   const [isExporting, setIsExporting] = useState(false);
   const [actionModal, setActionModal] = useState<{ user: UserRow; type: 'suspend' | 'ban' } | null>(null);
 
-  // 1. Fetch Stats
+  // 1. Fetch Stats - Direct dari Supabase
   const fetchStats = async () => {
     try {
-      const response = await fetch("https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/stats");
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.stats);
-      }
+      const [usersRes, bannedRes] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'banned')
+      ]);
+
+      const activeCount = (usersRes.count || 0) - (bannedRes.count || 0);
+
+      setStats({
+        total: usersRes.count || 0,
+        active: activeCount,
+        banned: bannedRes.count || 0
+      });
     } catch (err) {
       console.error("Error fetching user stats:", err);
+      setStats({ total: 0, active: 0, banned: 0 });
     }
   };
 
-  // 2. Fetch Users
+  // 2. Fetch Users - Direct dari Supabase
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const params = new URLSearchParams({
-        search,
-        status: filter,
-        page: page.toString(),
-        per_page: "10"
-      });
-      const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/admin/users?${params}`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setUsers(data.data.map((u: any) => ({
+      let query = supabase.from('profiles').select('*', { count: 'exact' });
+
+      // Search
+      if (search) {
+        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+      }
+
+      // Filter status
+      if (filter === 'Aktif') {
+        query = query.eq('is_active', true).neq('status', 'banned');
+      } else if (filter === 'Banned') {
+        query = query.eq('status', 'banned');
+      } else if (filter === 'Premium') {
+        query = query.eq('is_premium', true);
+      }
+
+      // Pagination
+      const start = (page - 1) * 10;
+      const end = start + 10 - 1;
+
+      const result = await query
+        .order('created_at', { ascending: false })
+        .range(start, end);
+
+      if (result.data) {
+        setUsers(result.data.map((u: any) => ({
           ...u,
           avatar: u.full_name ? u.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : '??'
         })));
-        setTotalItems(data.total);
+        setTotalItems(result.count || 0);
       }
     } catch (err) {
       console.error("Error fetching users:", err);
       toast.error("Gagal memuat data user");
+      setUsers([]);
+      setTotalItems(0);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 3. Update User Status
+  // 3. Update User Status - Direct ke Supabase
   const handleUpdateStatus = async (
     userId: string, 
     status: UserStatus, 
@@ -472,52 +497,79 @@ export function AdminUsers() {
     ban_until?: string
   ) => {
     try {
-      const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/${userId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status, 
-          is_active: isActive,
-          reason: reason || null,
-          ban_until: ban_until || null
-        })
-      });
-      const data = await response.json();
-      if (data.success) {
-        toast.success(data.message);
-        fetchUsers();
-        fetchStats();
-        setActionModal(null);
-      } else {
-        toast.error(data.error);
+      const updateData: any = {
+        status,
+        is_active: isActive,
+        status_reason: reason || null
+      };
+
+      if (ban_until) {
+        updateData.ban_until = ban_until;
       }
-    } catch (err) {
+
+      await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', userId);
+
+      toast.success('Status user berhasil diperbarui');
+      fetchUsers();
+      fetchStats();
+      setActionModal(null);
+    } catch (err: any) {
       console.error("Error updating status:", err);
-      toast.error("Gagal memperbarui status user");
+      toast.error(err.message || "Gagal memperbarui status user");
     }
   };
 
-  // 4. Export CSV
+  // 4. Export CSV - Generate dari data local
   const handleExportCSV = async () => {
     try {
       setIsExporting(true);
-      const response = await fetch("https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/export");
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Sembuhin_Users_${format(new Date(), 'yyyyMMdd')}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        toast.success("Data user berhasil diekspor");
-      } else {
-        toast.error("Gagal mengekspor data");
+
+      // Fetch semua data (tanpa pagination)
+      const result = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!result.data || result.data.length === 0) {
+        toast.error("Tidak ada data untuk diekspor");
+        return;
       }
-    } catch (err) {
+
+      // Generate CSV
+      const headers = ['ID', 'Nama', 'Email', 'Role', 'Premium', 'Status', 'Bergabung'];
+      const rows = result.data.map((u: any) => [
+        u.id,
+        u.full_name || '',
+        u.email || '',
+        u.role || 'user',
+        u.is_premium ? 'Ya' : 'Tidak',
+        u.status || 'active',
+        format(new Date(u.created_at), 'dd MMM yyyy')
+      ]);
+
+      let csv = headers.join(',') + '\n';
+      rows.forEach((row: any) => {
+        csv += row.map((cell: any) => `"${cell}"`).join(',') + '\n';
+      });
+
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Sembuhin_Users_${format(new Date(), 'yyyyMMdd')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Data user berhasil diekspor");
+    } catch (err: any) {
       console.error("Error exporting CSV:", err);
-      toast.error("Terjadi kesalahan saat mengekspor");
+      toast.error(err.message || "Gagal mengekspor data");
     } finally {
       setIsExporting(false);
     }
