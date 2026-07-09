@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { FileText, Download, Share2, Loader2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface ResepSearchParams {
   id?: string;
@@ -67,25 +69,75 @@ function ResepPage() {
       }
       try {
         setLoading(true);
-        // Fetch specific prescription from backend
-        // Note: For now we reuse the doctor prescriptions endpoint or create a new one
-        // But let's assume we have a way to get a single prescription
-        const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/prescriptions/single?id=${id}`);
-        const result = await res.json();
-        if (result.success) {
-          setData(result.data);
-        } else {
-          throw new Error(result.error || "Gagal mengambil data resep");
+        
+        // Fetch prescription directly from Supabase
+        const { data: prescription, error: fetchError } = await supabase
+          .from('prescriptions')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (fetchError) {
+          throw new Error(fetchError.message || "Gagal mengambil data resep");
         }
+
+        if (!prescription) {
+          throw new Error("Resep tidak ditemukan");
+        }
+
+        // Parse medicines if stored as JSON string
+        let medicines: Medicine[] = [];
+        if (prescription.medicines) {
+          medicines = typeof prescription.medicines === 'string' 
+            ? JSON.parse(prescription.medicines)
+            : prescription.medicines;
+        }
+
+        setData({
+          id: prescription.id,
+          patient_name: prescription.patient_name || "Pasien",
+          patient_age: prescription.patient_age || 0,
+          doctor_name: prescription.doctor_name || "Dokter",
+          doctor_str: prescription.doctor_str || "-",
+          created_at: prescription.created_at || new Date().toISOString(),
+          medicines,
+          status: prescription.status || "ACTIVE"
+        });
       } catch (err: any) {
         console.error("Error fetching resep:", err);
-        setError(err.message);
+        setError(err.message || "Gagal memuat resep");
       } finally {
         setLoading(false);
       }
     }
     fetchResep();
   }, [id]);
+
+  const handleDownloadPDF = async () => {
+    if (!data) return;
+    toast.success("Fitur download sedang dalam pengembangan");
+  };
+
+  const handleShare = async () => {
+    if (!id) return;
+    const url = `${window.location.origin}/resep?id=${id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Resep Sembuhin - ${data?.patient_name}`,
+          text: "Lihat resep digitalku di Sembuhin",
+          url
+        });
+      } catch (err) {
+        console.error("Share error:", err);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(url);
+      toast.success("Link resep disalin ke clipboard");
+    }
+  };
 
   const onMove = (e: React.MouseEvent) => {
     const r = cardRef.current?.getBoundingClientRect();
@@ -109,16 +161,14 @@ function ResepPage() {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-5 text-center px-4">
         <div className="h-16 w-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center">
-          <FileText className="h-8 w-8 text-slate-300" />
+          <AlertCircle className="h-8 w-8 text-rose-500" />
         </div>
         <div>
           <h2 className="text-[17px] font-bold text-slate-900 mb-1">
             {!id ? "ID Resep tidak ditemukan" : "Resep tidak tersedia"}
           </h2>
           <p className="text-[13px] text-slate-400 max-w-xs leading-relaxed">
-            {!id
-              ? "Akses halaman ini melalui rekam medis Anda."
-              : "Resep ini mungkin belum dibuat atau sudah dihapus oleh dokter."}
+            {error || "Resep ini mungkin belum dibuat atau sudah dihapus oleh dokter."}
           </p>
         </div>
         <a
@@ -192,22 +242,32 @@ function ResepPage() {
               </div>
 
               <ul className="mt-4 space-y-3">
-                {data.medicines.map((r, i) => (
-                  <li key={i} className="rounded-xl bg-white/40 p-3">
-                    <div className="flex items-baseline justify-between">
-                      <div className="font-semibold">{r.name}</div>
-                      <div className="text-xs text-muted-foreground">{r.days} hari</div>
-                    </div>
-                    <div className="mt-0.5 text-sm text-muted-foreground">{r.dose}</div>
-                  </li>
-                ))}
+                {data.medicines && data.medicines.length > 0 ? (
+                  data.medicines.map((r, i) => (
+                    <li key={i} className="rounded-xl bg-white/40 p-3">
+                      <div className="flex items-baseline justify-between">
+                        <div className="font-semibold">{r.name}</div>
+                        <div className="text-xs text-muted-foreground">{r.days} hari</div>
+                      </div>
+                      <div className="mt-0.5 text-sm text-muted-foreground">{r.dose}</div>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-xs text-muted-foreground italic">Tidak ada data obat</li>
+                )}
               </ul>
 
               <div className="mt-5 flex gap-2">
-                <button className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow">
+                <button 
+                  onClick={handleDownloadPDF}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow hover:shadow-lg transition-all"
+                >
                   <Download className="h-4 w-4" /> Unduh PDF
                 </button>
-                <button className="glass flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold">
+                <button 
+                  onClick={handleShare}
+                  className="glass flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-white/20 transition-colors"
+                >
                   <Share2 className="h-4 w-4" /> Bagikan
                 </button>
               </div>
@@ -219,7 +279,7 @@ function ResepPage() {
         <div className="glass-strong relative overflow-hidden rounded-3xl">
           <MoleculeViewer className="h-[60vh] min-h-[480px] w-full" />
           <div className="absolute left-4 top-4 rounded-xl bg-white/60 px-3 py-1.5 text-xs font-medium backdrop-blur">
-            Struktur molekul: {data.medicines[0]?.name || "Obat"}
+            Struktur molekul: {data.medicines?.[0]?.name || "Obat"}
           </div>
           <div className="glass absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-4 py-1.5 text-xs">
             Berputar otomatis • Visualisasi 3D
