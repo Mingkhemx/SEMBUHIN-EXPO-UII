@@ -35,6 +35,7 @@ interface Medicine {
   frequency: string;
   duration: string;
   notes?: string;
+  image?: string;
 }
 
 interface Resep {
@@ -51,7 +52,15 @@ interface Resep {
 }
 
 /* ─── Mock Data ─────────────────────────────────────────────── */
-const MOCK_RESEPS: Resep[] = [
+interface MedicineWithImage extends Medicine {
+  image?: string;
+}
+
+interface ResepWithImages extends Resep {
+  medicines: MedicineWithImage[];
+}
+
+const MOCK_RESEPS: ResepWithImages[] = [
   {
     id: "1",
     doctorName: "Dr. Budi Santoso, Sp.PD",
@@ -62,9 +71,9 @@ const MOCK_RESEPS: Resep[] = [
     diagnosis: "Demam Tifoid",
     notes: "Minum dengan air hangat setelah makan pagi, siang, dan malam",
     medicines: [
-      { id: "m1", name: "Kloramfenikol", dosage: "500mg", quantity: 30, unit: "tablet", frequency: "3x sehari", duration: "7 hari" },
-      { id: "m2", name: "Paracetamol", dosage: "500mg", quantity: 30, unit: "tablet", frequency: "2x sehari", duration: "3 hari" },
-      { id: "m3", name: "Vitamin C", dosage: "500mg", quantity: 14, unit: "tablet", frequency: "1x sehari", duration: "2 minggu" },
+      { id: "m1", name: "Kloramfenikol", dosage: "500mg", quantity: 30, unit: "tablet", frequency: "3x sehari", duration: "7 hari", image: "/images/obat/kloramfenikol.svg" },
+      { id: "m2", name: "Paracetamol", dosage: "500mg", quantity: 30, unit: "tablet", frequency: "2x sehari", duration: "3 hari", image: "/images/obat/paracetamol.svg" },
+      { id: "m3", name: "Vitamin C", dosage: "500mg", quantity: 14, unit: "tablet", frequency: "1x sehari", duration: "2 minggu", image: "/images/obat/vitamin-c.svg" },
     ],
   },
   {
@@ -77,8 +86,8 @@ const MOCK_RESEPS: Resep[] = [
     diagnosis: "Dermatitis Atopik",
     notes: "Oleskan krim pada area kulit yang terkena, hindari faktor pemicu",
     medicines: [
-      { id: "m4", name: "Mometason", dosage: "0.1%", quantity: 1, unit: "tube 10g", frequency: "2x sehari", duration: "2 minggu" },
-      { id: "m5", name: "Cetirizine", dosage: "10mg", quantity: 14, unit: "tablet", frequency: "1x malam", duration: "2 minggu" },
+      { id: "m4", name: "Mometason", dosage: "0.1%", quantity: 1, unit: "tube 10g", frequency: "2x sehari", duration: "2 minggu", image: "/images/obat/mometason.svg" },
+      { id: "m5", name: "Cetirizine", dosage: "10mg", quantity: 14, unit: "tablet", frequency: "1x malam", duration: "2 minggu", image: "/images/obat/cetirizine.svg" },
     ],
   },
   {
@@ -90,7 +99,7 @@ const MOCK_RESEPS: Resep[] = [
     status: "expired",
     diagnosis: "Sinusitis Kronis",
     medicines: [
-      { id: "m6", name: "Amoxicillin", dosage: "500mg", quantity: 21, unit: "kaplet", frequency: "3x sehari", duration: "7 hari" },
+      { id: "m6", name: "Amoxicillin", dosage: "500mg", quantity: 21, unit: "kaplet", frequency: "3x sehari", duration: "7 hari", image: "/images/obat/amoxicillin.svg" },
     ],
   },
 ];
@@ -374,13 +383,25 @@ function ResepPage() {
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Daftar Obat ({selectedResep.medicines.length})</h3>
                   {selectedResep.medicines.map((medicine, idx) => (
-                    <div key={medicine.id} className="rounded-xl border border-slate-200 p-4 space-y-3 hover:border-blue-300 transition-colors">
-                      {/* Medicine header */}
-                      <div className="flex items-start justify-between gap-3">
+                    <div key={medicine.id} className="rounded-xl border border-slate-200 p-4 space-y-3 hover:border-blue-300 transition-colors overflow-hidden">
+                      {/* Medicine header with image */}
+                      <div className="flex items-start gap-3 mb-3">
+                        {/* Medicine Image */}
+                        {medicine.image && (
+                          <div className="flex-shrink-0 h-20 w-20 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden">
+                            <img 
+                              src={medicine.image} 
+                              alt={medicine.name}
+                              className="h-full w-full object-contain p-1"
+                            />
+                          </div>
+                        )}
+                        
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-slate-900">{medicine.name}</h4>
                           <p className="text-sm text-slate-600 mt-0.5">{medicine.dosage}</p>
                         </div>
+
                         <button
                           onClick={() => setSavedMedicines(prev => 
                             prev.includes(medicine.id) 

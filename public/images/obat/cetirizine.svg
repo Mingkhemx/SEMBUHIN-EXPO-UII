@@ -1,0 +1,20 @@
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blister pack -->
+  <rect x="40" y="70" width="120" height="140" rx="10" fill="#F3E8FF" stroke="#E9D5FF" stroke-width="2"/>
+  
+  <!-- Pills -->
+  <circle cx="70" cy="100" r="18" fill="#EC4899" stroke="#BE185D" stroke-width="1.5"/>
+  <circle cx="130" cy="100" r="18" fill="#EC4899" stroke="#BE185D" stroke-width="1.5"/>
+  <circle cx="70" cy="160" r="18" fill="#EC4899" stroke="#BE185D" stroke-width="1.5"/>
+  <circle cx="130" cy="160" r="18" fill="#EC4899" stroke="#BE185D" stroke-width="1.5"/>
+  
+  <!-- Shine on pills -->
+  <circle cx="65" cy="95" r="6" fill="#FFFFFF" opacity="0.5"/>
+  <circle cx="125" cy="95" r="6" fill="#FFFFFF" opacity="0.5"/>
+  <circle cx="65" cy="155" r="6" fill="#FFFFFF" opacity="0.5"/>
+  <circle cx="125" cy="155" r="6" fill="#FFFFFF" opacity="0.5"/>
+  
+  <!-- Label -->
+  <text x="100" y="210" font-size="12" font-weight="bold" text-anchor="middle" fill="#831843">Cetirizine</text>
+  <text x="100" y="225" font-size="8" text-anchor="middle" fill="#BE185D">10mg x 4</text>
+</svg>

@@ -1,0 +1,27 @@
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Capsule package -->
+  <rect x="45" y="75" width="110" height="130" rx="12" fill="#FEE2E2" stroke="#FECACA" stroke-width="2"/>
+  
+  <!-- Capsules -->
+  <g>
+    <!-- Capsule 1 -->
+    <rect x="60" y="90" width="15" height="30" rx="7.5" fill="#DC2626"/>
+    <rect x="75" y="90" width="15" height="30" rx="7.5" fill="#FCA5A5"/>
+    
+    <!-- Capsule 2 -->
+    <rect x="105" y="90" width="15" height="30" rx="7.5" fill="#DC2626"/>
+    <rect x="120" y="90" width="15" height="30" rx="7.5" fill="#FCA5A5"/>
+    
+    <!-- Capsule 3 -->
+    <rect x="60" y="135" width="15" height="30" rx="7.5" fill="#DC2626"/>
+    <rect x="75" y="135" width="15" height="30" rx="7.5" fill="#FCA5A5"/>
+    
+    <!-- Capsule 4 -->
+    <rect x="105" y="135" width="15" height="30" rx="7.5" fill="#DC2626"/>
+    <rect x="120" y="135" width="15" height="30" rx="7.5" fill="#FCA5A5"/>
+  </g>
+  
+  <!-- Label -->
+  <text x="100" y="195" font-size="12" font-weight="bold" text-anchor="middle" fill="#7F1D1D">Amoxicillin</text>
+  <text x="100" y="210" font-size="8" text-anchor="middle" fill="#991B1B">500mg x 4</text>
+</svg>
