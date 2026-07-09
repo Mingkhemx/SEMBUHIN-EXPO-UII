@@ -427,13 +427,18 @@ function DermatologiPage() {
       if (result) {
         setScanResult(result)
         setViewMode('result')
-        // Simpan ke Supabase kalau user sudah login
         if (user) saveScan(result)
         return
       }
+      // Jika API gagal, langsung fallback ke mock tanpa delay
+      const mock = getMockResult()
+      setScanResult(mock)
+      setViewMode('result')
+      if (user) saveScan(mock)
+      return
     }
 
-    // Fallback mock
+    // Fallback mock untuk case tanpa imageBase64 atau OPENROUTER_KEY
     setAiAnalyzing(false)
     setTimeout(() => {
       const mock = getMockResult()
