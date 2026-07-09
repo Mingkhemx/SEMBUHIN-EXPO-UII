@@ -184,14 +184,7 @@ export function Header() {
                     >
                       {t("header.community_desc")}
                     </ListItem>
-                    <ListItem
-                      to="/rekam-medis"
-                      title={t("nav.medical_records")}
-                      icon={<FolderOpen className="h-4 w-4" />}
-                      color="teal"
-                    >
-                      {t("header.medical_records_desc")}
-                    </ListItem>
+
                     <ListItem
                       to="/dermatologi"
                       title={t("nav.dermatology")}
