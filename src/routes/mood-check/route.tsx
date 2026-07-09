@@ -122,6 +122,112 @@ const MOOD_RECOMMENDATIONS: Record<MoodLevel, string> = {
   tired:   'Tubuh Anda meminta istirahat. Dengarkan sinyal itu dan berikan waktu untuk pulih.',
 }
 
+/* ─── Per-mood rich recommendation content ──────────────────────── */
+interface MoodRecoDetail {
+  quote: string
+  quoteAuthor: string
+  context: string        // short label, e.g. "Yang perlu kamu lakukan sekarang"
+  accentColor: string    // tailwind bg class for the quote card
+  accentText: string     // tailwind text class
+  accentBorder: string   // tailwind border class
+  priorityLabel: string  // label for top activity
+  tips: string[]         // 2 quick tips shown as bullets
+}
+
+const MOOD_RECO_DETAIL: Record<MoodLevel, MoodRecoDetail> = {
+  happy: {
+    quote: 'Kebahagiaan bukan tujuan — ia adalah cara kita menjalani perjalanan.',
+    quoteAuthor: 'Margaret Lee Runbeck',
+    context: 'Pertahankan energi positifmu',
+    accentColor: 'bg-emerald-50',
+    accentText: 'text-emerald-800',
+    accentBorder: 'border-emerald-200',
+    priorityLabel: '✨ Rayakan momen ini',
+    tips: [
+      'Bagikan kebahagiaan kamu ke orang-orang terdekat',
+      'Catat hal baik hari ini agar bisa dikenang',
+    ],
+  },
+  calm: {
+    quote: 'Ketenangan pikiran adalah kebahagiaan yang sesungguhnya.',
+    quoteAuthor: 'Epictetus',
+    context: 'Manfaatkan ketenanganmu',
+    accentColor: 'bg-sky-50',
+    accentText: 'text-sky-800',
+    accentBorder: 'border-sky-200',
+    priorityLabel: '🎯 Waktu terbaik untuk fokus',
+    tips: [
+      'Gunakan kondisi ini untuk mengerjakan tugas penting',
+      'Meditasi singkat akan memperkuat ketenangan ini',
+    ],
+  },
+  neutral: {
+    quote: 'Setiap hari adalah kesempatan baru untuk menjadi lebih baik dari kemarin.',
+    quoteAuthor: 'Anonim',
+    context: 'Beri dirimu sedikit dorongan',
+    accentColor: 'bg-slate-50',
+    accentText: 'text-slate-800',
+    accentBorder: 'border-slate-200',
+    priorityLabel: '💡 Bangkitkan semangatmu',
+    tips: [
+      'Coba satu hal baru hari ini, sekecil apapun',
+      'Gerakan fisik ringan terbukti meningkatkan mood',
+    ],
+  },
+  anxious: {
+    quote: 'Kamu sudah melewati 100% hari-hari terberatmu. Itu rekor yang luar biasa.',
+    quoteAuthor: 'Anonim',
+    context: 'Prioritas utama: tenangkan dirimu dulu',
+    accentColor: 'bg-amber-50',
+    accentText: 'text-amber-800',
+    accentBorder: 'border-amber-200',
+    priorityLabel: '🫁 Mulai dari napas dulu',
+    tips: [
+      'Tarik napas dalam 4 detik, tahan 4, hembuskan 4 — ulangi 3x',
+      'Batasi paparan berita atau media sosial untuk sementara',
+    ],
+  },
+  sad: {
+    quote: 'Tidak apa-apa untuk tidak baik-baik saja. Kamu tidak harus kuat setiap saat.',
+    quoteAuthor: 'Anonim',
+    context: 'Peluk perasaanmu, jangan ditahan',
+    accentColor: 'bg-indigo-50',
+    accentText: 'text-indigo-800',
+    accentBorder: 'border-indigo-200',
+    priorityLabel: '💙 Yang kamu butuhkan sekarang',
+    tips: [
+      'Cerita ke orang yang kamu percaya — berbagi itu melegakan',
+      'Kesedihan itu normal. Beri dirimu izin untuk merasakannya',
+    ],
+  },
+  angry: {
+    quote: 'Kemarahan yang dikelola dengan bijak bisa menjadi bahan bakar perubahan.',
+    quoteAuthor: 'Anonim',
+    context: 'Salurkan energimu dengan tepat',
+    accentColor: 'bg-red-50',
+    accentText: 'text-red-800',
+    accentBorder: 'border-red-200',
+    priorityLabel: '🔥 Lepaskan dulu sebelum bicara',
+    tips: [
+      'Jangan buat keputusan penting saat masih marah',
+      'Gerak fisik adalah cara tercepat meredakan amarah',
+    ],
+  },
+  tired: {
+    quote: 'Istirahat bukan kelemahan. Istirahat adalah bagian dari perjuangan.',
+    quoteAuthor: 'Anonim',
+    context: 'Tubuhmu butuh pemulihan',
+    accentColor: 'bg-violet-50',
+    accentText: 'text-violet-800',
+    accentBorder: 'border-violet-200',
+    priorityLabel: '😴 Izinkan dirimu beristirahat',
+    tips: [
+      'Power nap 20 menit lebih efektif dari kafein',
+      'Jauhkan layar setidaknya 30 menit sebelum tidur',
+    ],
+  },
+}
+
 const fadeIn: Variants = {
   hidden:  { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
@@ -876,27 +982,118 @@ function MoodCheckPage() {
               </div>
 
               {/* Recommendations */}
-              <div className="rounded-2xl bg-white border border-white/60 shadow-lg p-6">
-                <p className="text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-cyan-500" /> Rekomendasi
-                </p>
-                <p className="text-sm text-slate-600 leading-relaxed mb-4">{moodResult.recommendation}</p>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {moodResult.activities.map(act => {
-                    const Icon = act.icon
-                    return (
-                      <div key={act.title} className="flex items-start gap-3 p-3 rounded-xl bg-cyan-50 border border-cyan-100">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white border border-cyan-200">
-                          <Icon className="h-4 w-4 text-cyan-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-800">{act.title}</p>
-                          <p className="text-[10px] text-slate-500 mt-0.5">{act.desc}</p>
-                          <p className="text-[10px] text-cyan-600 font-semibold mt-1">{act.duration}</p>
-                        </div>
+              <div className="rounded-2xl bg-white border border-white/60 shadow-lg overflow-hidden">
+                {/* Header */}
+                <div className={cn('px-6 pt-6 pb-4', MOOD_RECO_DETAIL[moodResult.primaryMood].accentColor)}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="h-4 w-4 text-current opacity-70" />
+                    <p className="text-sm font-bold text-slate-800">Rekomendasi untuk Kamu</p>
+                    <span className={cn('ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full border',
+                      MOOD_RECO_DETAIL[moodResult.primaryMood].accentText,
+                      MOOD_RECO_DETAIL[moodResult.primaryMood].accentBorder,
+                      MOOD_RECO_DETAIL[moodResult.primaryMood].accentColor,
+                    )}>
+                      {MOOD_CONFIG[moodResult.primaryMood].emoji} {MOOD_CONFIG[moodResult.primaryMood].label}
+                    </span>
+                  </div>
+
+                  {/* Quote card */}
+                  <div className={cn('rounded-xl border p-4 mb-3',
+                    MOOD_RECO_DETAIL[moodResult.primaryMood].accentBorder,
+                    'bg-white/70 backdrop-blur-sm'
+                  )}>
+                    <p className={cn('text-sm font-medium italic leading-relaxed',
+                      MOOD_RECO_DETAIL[moodResult.primaryMood].accentText
+                    )}>
+                      "{MOOD_RECO_DETAIL[moodResult.primaryMood].quote}"
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-1.5 text-right">
+                      — {MOOD_RECO_DETAIL[moodResult.primaryMood].quoteAuthor}
+                    </p>
+                  </div>
+
+                  {/* Context + recommendation text */}
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    {MOOD_RECO_DETAIL[moodResult.primaryMood].context}
+                  </p>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {moodResult.recommendation}
+                  </p>
+
+                  {/* Quick tips */}
+                  <div className="mt-3 space-y-1.5">
+                    {MOOD_RECO_DETAIL[moodResult.primaryMood].tips.map((tip, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <div className={cn('mt-1 h-1.5 w-1.5 rounded-full shrink-0',
+                          moodResult.primaryMood === 'happy'   ? 'bg-emerald-400' :
+                          moodResult.primaryMood === 'calm'    ? 'bg-sky-400' :
+                          moodResult.primaryMood === 'neutral' ? 'bg-slate-400' :
+                          moodResult.primaryMood === 'anxious' ? 'bg-amber-400' :
+                          moodResult.primaryMood === 'sad'     ? 'bg-indigo-400' :
+                          moodResult.primaryMood === 'angry'   ? 'bg-red-400' :
+                          'bg-violet-400'
+                        )} />
+                        <p className="text-xs text-slate-600 leading-relaxed">{tip}</p>
                       </div>
-                    )
-                  })}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Activity cards */}
+                <div className="px-6 pb-6 pt-4">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                    {MOOD_RECO_DETAIL[moodResult.primaryMood].priorityLabel}
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {moodResult.activities.map((act, i) => {
+                      const Icon = act.icon
+                      return (
+                        <motion.div
+                          key={act.title}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08 }}
+                          className={cn(
+                            'flex items-start gap-3 p-3 rounded-xl border transition-all hover:shadow-md',
+                            i === 0
+                              ? cn(MOOD_RECO_DETAIL[moodResult.primaryMood].accentColor, MOOD_RECO_DETAIL[moodResult.primaryMood].accentBorder)
+                              : 'bg-slate-50 border-slate-100 hover:bg-white'
+                          )}
+                        >
+                          <div className={cn(
+                            'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border',
+                            i === 0 ? 'bg-white border-white/80 shadow-sm' : 'bg-white border-slate-200'
+                          )}>
+                            <Icon className={cn('h-4 w-4',
+                              i === 0
+                                ? MOOD_RECO_DETAIL[moodResult.primaryMood].accentText
+                                : 'text-slate-500'
+                            )} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="text-xs font-bold text-slate-800">{act.title}</p>
+                              {i === 0 && (
+                                <span className={cn('text-[9px] font-bold px-1.5 py-0.5 rounded-full',
+                                  MOOD_RECO_DETAIL[moodResult.primaryMood].accentText,
+                                  MOOD_RECO_DETAIL[moodResult.primaryMood].accentBorder,
+                                  'border bg-white/60'
+                                )}>
+                                  #1
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">{act.desc}</p>
+                            <p className={cn('text-[10px] font-bold mt-1',
+                              i === 0 ? MOOD_RECO_DETAIL[moodResult.primaryMood].accentText : 'text-slate-400'
+                            )}>
+                              ⏱ {act.duration}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
 
