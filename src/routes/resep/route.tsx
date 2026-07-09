@@ -113,32 +113,34 @@ function ResepPage() {
         const doctorMap: Record<string, { name: string; specialty: string }> = {};
         
         if (doctorIds.length > 0) {
-          const { data: doctors } = await supabase
+          const { data: doctors, error: docError } = await supabase
             .from("doctors")
             .select("id, user_id, specialization")
             .in("id", doctorIds);
 
-          if (doctors && doctors.length > 0) {
+          if (!docError && doctors && doctors.length > 0) {
             const userIds = doctors.map(d => d.user_id).filter(Boolean);
             
-            const { data: profiles } = await supabase
-              .from("profiles")
-              .select("id, full_name")
-              .in("id", userIds);
+            if (userIds.length > 0) {
+              const { data: profiles, error: profError } = await supabase
+                .from("profiles")
+                .select("id, full_name")
+                .in("id", userIds);
 
-            const profileMap: Record<string, string> = {};
-            if (profiles) {
-              profiles.forEach(p => {
-                profileMap[p.id] = p.full_name || "Dokter";
+              const profileMap: Record<string, string> = {};
+              if (profiles) {
+                profiles.forEach(p => {
+                  profileMap[p.id] = p.full_name || "Dokter";
+                });
+              }
+
+              doctors.forEach(doc => {
+                doctorMap[doc.id] = {
+                  name: profileMap[doc.user_id] || "Dokter Anda",
+                  specialty: doc.specialization || "Umum"
+                };
               });
             }
-
-            doctors.forEach(doc => {
-              doctorMap[doc.id] = {
-                name: profileMap[doc.user_id] || "Dokter Anda",
-                specialty: doc.specialization || "Umum"
-              };
-            });
           }
         }
 
