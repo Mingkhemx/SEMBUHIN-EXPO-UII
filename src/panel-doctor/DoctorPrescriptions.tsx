@@ -277,27 +277,49 @@ export function DoctorPrescriptions() {
       const doctorId = await getDoctorId();
       if (!doctorId) return;
 
-      // Get patients from consultations
+      // Strategy 1: Get patients from consultations (preferred)
       const { data: consultations } = await supabase
         .from("consultations")
         .select("patient_id")
         .eq("doctor_id", doctorId)
         .neq("patient_id", null);
 
+      let patientIds: string[] = [];
       if (consultations && consultations.length > 0) {
-        const patientIds = [...new Set(consultations.map(c => c.patient_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .in("id", patientIds);
-
-        setPatients(
-          (profiles || []).map(p => ({
-            id: p.id,
-            full_name: p.full_name || "Pasien",
-          }))
-        );
+        patientIds = [...new Set(consultations.map(c => c.patient_id))];
       }
+
+      // Strategy 2: If no consultations, get all regular users (fallback)
+      if (patientIds.length === 0) {
+        const { data: allProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, role")
+          .in("role", ["user", "premium"])
+          .order("full_name");
+
+        if (allProfiles) {
+          setPatients(
+            allProfiles.map(p => ({
+              id: p.id,
+              full_name: p.full_name || "User",
+            }))
+          );
+        }
+        return;
+      }
+
+      // Fetch profiles for consultation patients
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", patientIds);
+
+      setPatients(
+        (profiles || []).map(p => ({
+          id: p.id,
+          full_name: p.full_name || "Pasien",
+        }))
+      );
     } catch (err) {
       console.error("Error fetching patients:", err);
     }
