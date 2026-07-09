@@ -393,11 +393,10 @@ function MoodCheckPage() {
     try {
       const { Human } = await import('@vladmandic/human')
       const h = new Human({
-        modelBasePath: `${window.location.origin}/node_modules/@vladmandic/human/models/`,
+        modelBasePath: `${window.location.origin}/models/human/`,
         debug: false,
-        // Try webgl first, fallback to cpu/wasm
         backend: 'webgl',
-        wasmPath: `${window.location.origin}/node_modules/@vladmandic/human/dist/`,
+        wasmPath: `${window.location.origin}/models/human/`,
         face: {
           enabled: true,
           detector:  { enabled: true,  maxDetected: 1, minConfidence: 0.4 },
@@ -424,7 +423,7 @@ function MoodCheckPage() {
       try {
         const { Human } = await import('@vladmandic/human')
         const h2 = new Human({
-          modelBasePath: `${window.location.origin}/node_modules/@vladmandic/human/models/`,
+          modelBasePath: `${window.location.origin}/models/human/`,
           debug: false,
           backend: 'cpu',
           face: {
