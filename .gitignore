@@ -50,3 +50,6 @@ ponytail/
 
 # Supabase edge functions (handled separately)
 supabase/functions/
+
+# Allow model JSON files in public/ (needed for Vercel deploy)
+!public/models/**/*.json
