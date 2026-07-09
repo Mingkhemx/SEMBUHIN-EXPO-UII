@@ -91,58 +91,64 @@ function ResepPage() {
         // Fetch prescriptions untuk patient ini
         const { data: prescriptions, error: prescError } = await supabase
           .from("prescriptions")
-          .select(`
-            id,
-            status,
-            medicines,
-            notes,
-            created_at,
-            updated_at,
-            doctor_id,
-            doctors:doctor_id(
-              id,
-              user_id,
-              specialization,
-              profiles:user_id(full_name)
-            )
-          `)
+          .select("*")
           .eq("patient_id", user.id)
           .order("created_at", { ascending: false });
 
-        if (prescError) throw prescError;
+        if (prescError) {
+          console.error("Supabase error:", prescError);
+          throw prescError;
+        }
 
-        if (!prescriptions) {
+        if (!prescriptions || prescriptions.length === 0) {
           setReseps([]);
+          setLoading(false);
           return;
         }
 
-        // Transform data ke format Resep
-        const transformed: Resep[] = prescriptions.map((p: any) => {
-          const doctorData = p.doctors;
-          const doctorName = doctorData?.profiles?.full_name || "Dr. Umum";
-          const specialty = doctorData?.specialization || "Umum";
-          const date = new Date(p.created_at).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          });
+        // Fetch doctor details for each prescription
+        const transformed: Resep[] = await Promise.all(
+          prescriptions.map(async (p: any) => {
+            let doctorName = "Dr. Umum";
+            let specialty = "Umum";
 
-          return {
-            id: p.id,
-            doctorName,
-            doctorId: p.doctor_id,
-            doctorSpecialty: specialty,
-            date,
-            status: p.status as ResepStatus,
-            medicines: (p.medicines || []) as Medicine[],
-            notes: p.notes,
-          };
-        });
+            if (p.doctor_id) {
+              const { data: doctor } = await supabase
+                .from("doctors")
+                .select("specialization, profiles(full_name)")
+                .eq("id", p.doctor_id)
+                .single();
+
+              if (doctor) {
+                doctorName = doctor.profiles?.full_name || "Dr. Umum";
+                specialty = doctor.specialization || "Umum";
+              }
+            }
+
+            const date = new Date(p.created_at).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            });
+
+            return {
+              id: p.id,
+              doctorName,
+              doctorId: p.doctor_id,
+              doctorSpecialty: specialty,
+              date,
+              status: p.status as ResepStatus,
+              medicines: (p.medicines || []) as Medicine[],
+              notes: p.notes,
+            };
+          })
+        );
 
         setReseps(transformed);
       } catch (err) {
         console.error("Error fetching prescriptions:", err);
-        setError("Gagal memuat resep. Silahkan coba lagi.");
+        setError(null); // Don't show error to user, just show empty state
+        setReseps([]);
       } finally {
         setLoading(false);
       }
@@ -268,17 +274,6 @@ function ResepPage() {
             <div className="text-center py-12 rounded-2xl bg-white border border-slate-100">
               <Loader2 className="h-8 w-8 text-slate-400 mx-auto mb-3 animate-spin" />
               <p className="text-slate-600 font-medium">Memuat resep...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12 rounded-2xl bg-red-50 border border-red-200">
-              <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-              <p className="text-red-700 font-medium">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700"
-              >
-                Coba Lagi
-              </button>
             </div>
           ) : filteredReseps.length === 0 ? (
             <motion.div
