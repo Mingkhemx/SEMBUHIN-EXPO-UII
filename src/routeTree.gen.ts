@@ -13,7 +13,6 @@ import { Route as VideoEdukasiRouteRouteImport } from './routes/video-edukasi/ro
 import { Route as TwinRouteRouteImport } from './routes/twin/route'
 import { Route as SymptomTriageRouteRouteImport } from './routes/symptom-triage/route'
 import { Route as ResepRouteRouteImport } from './routes/resep/route'
-import { Route as RekamMedisRouteRouteImport } from './routes/rekam-medis/route'
 import { Route as ProfilRouteRouteImport } from './routes/profil/route'
 import { Route as PaymentRouteRouteImport } from './routes/payment/route'
 import { Route as MoodCheckRouteRouteImport } from './routes/mood-check/route'
@@ -36,9 +35,11 @@ import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as ArtikelRouteRouteImport } from './routes/artikel/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResepIndexRouteImport } from './routes/resep/index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminApiUsageRouteImport } from './routes/admin/api-usage'
 import { Route as DoctorSettingsRouteRouteImport } from './routes/doctor/settings/route'
 import { Route as DoctorPrescriptionsRouteRouteImport } from './routes/doctor/prescriptions/route'
 import { Route as DoctorPatientsRouteRouteImport } from './routes/doctor/patients/route'
@@ -70,11 +71,6 @@ const SymptomTriageRouteRoute = SymptomTriageRouteRouteImport.update({
 const ResepRouteRoute = ResepRouteRouteImport.update({
   id: '/resep',
   path: '/resep',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RekamMedisRouteRoute = RekamMedisRouteRouteImport.update({
-  id: '/rekam-medis',
-  path: '/rekam-medis',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfilRouteRoute = ProfilRouteRouteImport.update({
@@ -187,6 +183,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResepIndexRoute = ResepIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ResepRouteRoute,
+} as any)
 const DoctorIndexRoute = DoctorIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -200,6 +201,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminApiUsageRoute = AdminApiUsageRouteImport.update({
+  id: '/api-usage',
+  path: '/api-usage',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const DoctorSettingsRouteRoute = DoctorSettingsRouteRouteImport.update({
@@ -289,8 +295,7 @@ export interface FileRoutesByFullPath {
   '/mood-check': typeof MoodCheckRouteRoute
   '/payment': typeof PaymentRouteRoute
   '/profil': typeof ProfilRouteRoute
-  '/rekam-medis': typeof RekamMedisRouteRoute
-  '/resep': typeof ResepRouteRoute
+  '/resep': typeof ResepRouteRouteWithChildren
   '/symptom-triage': typeof SymptomTriageRouteRoute
   '/twin': typeof TwinRouteRoute
   '/video-edukasi': typeof VideoEdukasiRouteRoute
@@ -306,9 +311,11 @@ export interface FileRoutesByFullPath {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/api-usage': typeof AdminApiUsageRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/doctor/': typeof DoctorIndexRoute
+  '/resep/': typeof ResepIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -331,8 +338,6 @@ export interface FileRoutesByTo {
   '/mood-check': typeof MoodCheckRouteRoute
   '/payment': typeof PaymentRouteRoute
   '/profil': typeof ProfilRouteRoute
-  '/rekam-medis': typeof RekamMedisRouteRoute
-  '/resep': typeof ResepRouteRoute
   '/symptom-triage': typeof SymptomTriageRouteRoute
   '/twin': typeof TwinRouteRoute
   '/video-edukasi': typeof VideoEdukasiRouteRoute
@@ -348,9 +353,11 @@ export interface FileRoutesByTo {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/api-usage': typeof AdminApiUsageRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
   '/doctor': typeof DoctorIndexRoute
+  '/resep': typeof ResepIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -376,8 +383,7 @@ export interface FileRoutesById {
   '/mood-check': typeof MoodCheckRouteRoute
   '/payment': typeof PaymentRouteRoute
   '/profil': typeof ProfilRouteRoute
-  '/rekam-medis': typeof RekamMedisRouteRoute
-  '/resep': typeof ResepRouteRoute
+  '/resep': typeof ResepRouteRouteWithChildren
   '/symptom-triage': typeof SymptomTriageRouteRoute
   '/twin': typeof TwinRouteRoute
   '/video-edukasi': typeof VideoEdukasiRouteRoute
@@ -393,9 +399,11 @@ export interface FileRoutesById {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/api-usage': typeof AdminApiUsageRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/doctor/': typeof DoctorIndexRoute
+  '/resep/': typeof ResepIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -422,7 +430,6 @@ export interface FileRouteTypes {
     | '/mood-check'
     | '/payment'
     | '/profil'
-    | '/rekam-medis'
     | '/resep'
     | '/symptom-triage'
     | '/twin'
@@ -439,9 +446,11 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/api-usage'
     | '/admin/login'
     | '/admin/'
     | '/doctor/'
+    | '/resep/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -464,8 +473,6 @@ export interface FileRouteTypes {
     | '/mood-check'
     | '/payment'
     | '/profil'
-    | '/rekam-medis'
-    | '/resep'
     | '/symptom-triage'
     | '/twin'
     | '/video-edukasi'
@@ -481,9 +488,11 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/api-usage'
     | '/admin/login'
     | '/admin'
     | '/doctor'
+    | '/resep'
   id:
     | '__root__'
     | '/'
@@ -508,7 +517,6 @@ export interface FileRouteTypes {
     | '/mood-check'
     | '/payment'
     | '/profil'
-    | '/rekam-medis'
     | '/resep'
     | '/symptom-triage'
     | '/twin'
@@ -525,9 +533,11 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/api-usage'
     | '/admin/login'
     | '/admin/'
     | '/doctor/'
+    | '/resep/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -553,8 +563,7 @@ export interface RootRouteChildren {
   MoodCheckRouteRoute: typeof MoodCheckRouteRoute
   PaymentRouteRoute: typeof PaymentRouteRoute
   ProfilRouteRoute: typeof ProfilRouteRoute
-  RekamMedisRouteRoute: typeof RekamMedisRouteRoute
-  ResepRouteRoute: typeof ResepRouteRoute
+  ResepRouteRoute: typeof ResepRouteRouteWithChildren
   SymptomTriageRouteRoute: typeof SymptomTriageRouteRoute
   TwinRouteRoute: typeof TwinRouteRoute
   VideoEdukasiRouteRoute: typeof VideoEdukasiRouteRoute
@@ -588,13 +597,6 @@ declare module '@tanstack/react-router' {
       path: '/resep'
       fullPath: '/resep'
       preLoaderRoute: typeof ResepRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rekam-medis': {
-      id: '/rekam-medis'
-      path: '/rekam-medis'
-      fullPath: '/rekam-medis'
-      preLoaderRoute: typeof RekamMedisRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profil': {
@@ -751,6 +753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resep/': {
+      id: '/resep/'
+      path: '/'
+      fullPath: '/resep/'
+      preLoaderRoute: typeof ResepIndexRouteImport
+      parentRoute: typeof ResepRouteRoute
+    }
     '/doctor/': {
       id: '/doctor/'
       path: '/'
@@ -770,6 +779,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/api-usage': {
+      id: '/admin/api-usage'
+      path: '/api-usage'
+      fullPath: '/admin/api-usage'
+      preLoaderRoute: typeof AdminApiUsageRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/doctor/settings': {
@@ -865,6 +881,7 @@ interface AdminRouteRouteChildren {
   AdminMarketplaceRouteRoute: typeof AdminMarketplaceRouteRoute
   AdminSettingsRouteRoute: typeof AdminSettingsRouteRoute
   AdminUsersRouteRoute: typeof AdminUsersRouteRoute
+  AdminApiUsageRoute: typeof AdminApiUsageRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -875,6 +892,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminMarketplaceRouteRoute: AdminMarketplaceRouteRoute,
   AdminSettingsRouteRoute: AdminSettingsRouteRoute,
   AdminUsersRouteRoute: AdminUsersRouteRoute,
+  AdminApiUsageRoute: AdminApiUsageRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -909,6 +927,18 @@ const DoctorRouteRouteWithChildren = DoctorRouteRoute._addFileChildren(
   DoctorRouteRouteChildren,
 )
 
+interface ResepRouteRouteChildren {
+  ResepIndexRoute: typeof ResepIndexRoute
+}
+
+const ResepRouteRouteChildren: ResepRouteRouteChildren = {
+  ResepIndexRoute: ResepIndexRoute,
+}
+
+const ResepRouteRouteWithChildren = ResepRouteRoute._addFileChildren(
+  ResepRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
@@ -932,8 +962,7 @@ const rootRouteChildren: RootRouteChildren = {
   MoodCheckRouteRoute: MoodCheckRouteRoute,
   PaymentRouteRoute: PaymentRouteRoute,
   ProfilRouteRoute: ProfilRouteRoute,
-  RekamMedisRouteRoute: RekamMedisRouteRoute,
-  ResepRouteRoute: ResepRouteRoute,
+  ResepRouteRoute: ResepRouteRouteWithChildren,
   SymptomTriageRouteRoute: SymptomTriageRouteRoute,
   TwinRouteRoute: TwinRouteRoute,
   VideoEdukasiRouteRoute: VideoEdukasiRouteRoute,
