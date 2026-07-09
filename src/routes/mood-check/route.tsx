@@ -596,21 +596,51 @@ function MoodCheckPage() {
   return (
     <PremiumGate>
       <div className="relative z-10 min-h-screen">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-8">
 
-          {/* Hero */}
-          <motion.header variants={fadeIn} initial="hidden" animate="visible" className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-100/80 border border-cyan-200/60 px-4 py-1.5 mb-5">
-              <Zap className="h-3.5 w-3.5 text-cyan-600" />
-              <span className="text-xs font-semibold text-cyan-700 tracking-wide uppercase">AI Mood Tracker</span>
+          {/* ── Hero Card with Image ─────────────────────────────── */}
+          <motion.div variants={fadeIn} initial="hidden" animate="visible"
+            className="relative overflow-hidden rounded-3xl shadow-2xl min-h-[280px] sm:min-h-[340px]"
+          >
+            {/* Background image */}
+            <img
+              src="/images/mood.jpg"
+              alt="Mood Check"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col justify-end h-full p-6 sm:p-10 min-h-[280px] sm:min-h-[340px]">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1.5 mb-4 w-fit">
+                <Zap className="h-3 w-3 text-cyan-300" />
+                <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">AI Mood Tracker</span>
+                <span className="h-3.5 w-px bg-white/30" />
+                <span className="text-[11px] font-semibold text-cyan-300">Sembuhin Vision 1.5</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-lg">
+                Cek Mood Via Kamera
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-white/75 leading-relaxed max-w-md">
+                AI menganalisis ekspresi wajah Anda secara real-time untuk mendeteksi kondisi emosional dan memberikan rekomendasi personal.
+              </p>
+              {/* Stats row */}
+              <div className="mt-5 flex flex-wrap items-center gap-4">
+                {[
+                  { val: '7', label: 'Emosi Terdeteksi' },
+                  { val: '~5s', label: 'Durasi Scan' },
+                  { val: '95%', label: 'Akurasi AI' },
+                ].map(stat => (
+                  <div key={stat.label} className="flex items-center gap-2">
+                    <span className="text-lg font-black text-cyan-300">{stat.val}</span>
+                    <span className="text-xs text-white/60">{stat.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
-              Cek Mood Via Kamera
-            </h1>
-            <p className="mt-3 text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg">
-              Sembuhin Vision menganalisis ekspresi wajah Anda secara real-time untuk mendeteksi kondisi emosional.
-            </p>
-          </motion.header>
+          </motion.div>
 
           {/* Navigation */}
           <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1 w-fit">
