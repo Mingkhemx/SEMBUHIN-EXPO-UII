@@ -153,16 +153,23 @@ function ResepPage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative w-full overflow-hidden rounded-3xl shadow-2xl flex flex-col justify-end min-h-[340px]"
         >
-          <img 
-            src="/images/resep.jpg" 
-            alt="Resep Obat" 
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            onError={(e) => (e.currentTarget.style.display = "none")}
-          />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
           
-          <div className="relative p-7 sm:p-10 lg:p-12">
+          {/* Background image display - right side */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/3 h-full flex items-center justify-center opacity-40 pointer-events-none">
+            <div className="w-full h-full flex items-center justify-center">
+              <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                {/* Large decorative bottle */}
+                <rect x="60" y="80" width="80" height="120" rx="8" fill="#FFFFFF" opacity="0.2"/>
+                <rect x="65" y="100" width="70" height="95" fill="#3B82F6" opacity="0.15"/>
+                <rect x="75" y="65" width="50" height="20" rx="3" fill="#374151" opacity="0.2"/>
+                <ellipse cx="100" cy="65" rx="25" ry="8" fill="#4B5563" opacity="0.15"/>
+              </svg>
+            </div>
+          </div>
+
+          <div className="relative p-7 sm:p-10 lg:p-12 z-10">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1.5 mb-5 w-fit">
               <Pill className="h-3 w-3 text-blue-300" />
               <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">Resep Obat</span>
