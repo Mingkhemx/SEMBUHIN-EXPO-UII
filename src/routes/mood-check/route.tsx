@@ -304,48 +304,43 @@ function MoodCheckPage() {
   return (
     <PremiumGate>
       <div className="relative z-10 min-h-screen">
-        <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
 
-          {/* ══ HERO CARD — STATIC, tidak pernah re-render ══ */}
-          <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl" style={{height:'380px'}}>
-            <img src="/images/mood.jpg" alt="Mood Check" className="absolute inset-0 w-full h-full object-cover object-center" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/40" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-end p-7 sm:p-10">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1.5 mb-5 w-fit">
-                <Zap className="h-3 w-3 text-cyan-300" />
-                <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">AI Mood Tracker</span>
-                <span className="h-3.5 w-px bg-white/30" />
-                <span className="text-[11px] font-semibold text-cyan-300">Sembuhin Vision 1.5</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-lg max-w-lg">
-                Cek Mood Via Kamera
-              </h1>
-              <p className="mt-3 text-sm sm:text-base text-white/70 leading-relaxed max-w-md">
-                AI menganalisis ekspresi wajah Anda untuk mendeteksi kondisi emosional dan memberikan rekomendasi personal.
-              </p>
-              {/* Tab navigation */}
-              <div className="mt-5 flex items-center gap-2">
-                {([
-                  { key:'camera',  label:'Cek Mood',     icon:Camera },
-                  { key:'history', label:'Riwayat Mood', icon:Clock  },
-                ] as const).map(({key,label,icon:Icon})=>(
-                  <button key={key}
-                    onClick={()=>{ if(key==='camera') resetAll(); else setViewMode(key) }}
-                    className={cn('flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all',
-                      viewMode===key ? 'bg-white/20 border-white/40 text-white backdrop-blur-sm shadow-md' : 'bg-white/10 border-white/20 text-white/60 hover:bg-white/15 hover:text-white/80 backdrop-blur-sm'
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />{label}
-                    {viewMode===key && <div className="h-1.5 w-1.5 rounded-full bg-cyan-400 ml-1" />}
-                  </button>
-                ))}
-              </div>
+          {/* ── Hero ──────────────────────────────────────────────── */}
+          <motion.header variants={fadeIn} initial="hidden" animate="visible" className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-100/80 border border-cyan-200/60 px-4 py-1.5 mb-5">
+              <Zap className="h-3.5 w-3.5 text-cyan-600" />
+              <span className="text-xs font-semibold text-cyan-700 tracking-wide uppercase">AI Mood Tracker</span>
+              <span className="h-3.5 w-px bg-cyan-200/60 mx-1" />
+              <span className="text-[11px] font-semibold text-cyan-600">Sembuhin Vision 1.5</span>
             </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
+              Cek Mood Via Kamera
+            </h1>
+            <p className="mt-3 text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg">
+              AI menganalisis ekspresi wajah Anda untuk mendeteksi kondisi emosional dan memberikan rekomendasi personal.
+            </p>
+          </motion.header>
+
+          {/* ── Navigation ───────────────────────────────────────── */}
+          <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1 w-fit">
+            {([
+              { key:'camera',  label:'Cek Mood',     icon:Camera },
+              { key:'history', label:'Riwayat Mood', icon:Clock  },
+            ] as const).map(({key,label,icon:Icon})=>(
+              <button key={key}
+                onClick={()=>{ if(key==='camera') resetAll(); else setViewMode(key) }}
+                className={cn('flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200',
+                  viewMode===key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />{label}
+              </button>
+            ))}
           </div>
 
           {/* ══ CONTENT PANEL — berubah sesuai tab ══ */}
-          <div className="mt-8">
+          <div>
 
             {/* ── CAMERA VIEW ── */}
             {viewMode === 'camera' && (
@@ -377,25 +372,30 @@ function MoodCheckPage() {
                 )}
 
                 {!cameraActive ? (
-                  /* CTA Card */
-                  <div className="rounded-2xl bg-gradient-to-br from-cyan-600 via-sky-700 to-blue-800 p-8 sm:p-12 text-center shadow-2xl">
-                    <div className="flex flex-col items-center gap-5">
-                      <div className="relative">
-                        <div className="absolute inset-0 rounded-full bg-cyan-400/20 animate-ping" />
-                        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/15 border-2 border-white/30">
-                          <Brain className="h-12 w-12 text-white" />
+                  /* ── Start Camera CTA ── */
+                  <div className="space-y-6">
+                    <div className="rounded-2xl glass-strong border border-slate-200/60 p-8 sm:p-10 shadow-xl">
+                      <div className="max-w-lg mx-auto text-center space-y-5">
+                        <div className="relative inline-flex mx-auto">
+                          <div className="absolute inset-0 rounded-full bg-cyan-500/10 animate-pulse" />
+                          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 to-sky-100 border border-cyan-200 shadow-lg">
+                            <Brain className="h-12 w-12 text-cyan-600" />
+                          </div>
                         </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-800">Siap Cek Mood?</h3>
+                          <p className="text-sm text-slate-600 mt-1 max-w-xs mx-auto">
+                            Nyalakan kamera dan hadap layar — scan dimulai otomatis dalam 3 detik.
+                          </p>
+                        </div>
+                        <button
+                          onClick={startCamera}
+                          className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-cyan-500/30 hover:scale-105 transition-all w-full max-w-xs mx-auto"
+                        >
+                          <Camera className="h-5 w-5" />
+                          Nyalakan Kamera
+                        </button>
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-white">Siap Cek Mood?</h3>
-                        <p className="text-sm text-cyan-100 mt-1 max-w-sm mx-auto">
-                          Nyalakan kamera dan hadap layar — scan dimulai otomatis dalam 3 detik.
-                        </p>
-                      </div>
-                      <button onClick={startCamera}
-                        className="flex items-center gap-2 rounded-xl bg-white text-cyan-700 px-8 py-4 text-base font-bold hover:bg-cyan-50 shadow-lg transition-all hover:scale-105">
-                        <Camera className="h-5 w-5" /> Nyalakan Kamera
-                      </button>
                     </div>
                   </div>
                 ) : (
