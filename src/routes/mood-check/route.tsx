@@ -601,7 +601,7 @@ function MoodCheckPage() {
           {/* ── Hero Card with Image ─────────────────────────────── */}
           <motion.div variants={fadeIn} initial="hidden" animate="visible"
             className="relative w-full overflow-hidden rounded-3xl shadow-2xl"
-            style={{ height: '380px', minHeight: '380px', flexShrink: 0 }}
+            style={{ height: '380px', minHeight: '380px', maxHeight: '380px', flexShrink: 0, flexGrow: 0 }}
           >
             {/* Background image */}
             <img
@@ -641,7 +641,7 @@ function MoodCheckPage() {
                       'flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all',
                       viewMode === key
                         ? 'bg-white/20 border-white/40 text-white backdrop-blur-sm shadow-md'
-                        : 'bg-white/8 border-white/20 text-white/60 hover:bg-white/15 hover:text-white/80 backdrop-blur-sm'
+                        : 'bg-white/10 border-white/20 text-white/60 hover:bg-white/15 hover:text-white/80 backdrop-blur-sm'
                     )}
                   >
                     <Icon className="h-3.5 w-3.5" />
