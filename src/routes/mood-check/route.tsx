@@ -600,7 +600,8 @@ function MoodCheckPage() {
 
           {/* ── Hero Card with Image ─────────────────────────────── */}
           <motion.div variants={fadeIn} initial="hidden" animate="visible"
-            className="relative overflow-hidden rounded-3xl shadow-2xl h-[320px] sm:h-[380px]"
+            className="relative overflow-hidden rounded-3xl shadow-2xl"
+            style={{ height: '380px' }}
           >
             {/* Background image */}
             <img
@@ -609,25 +610,25 @@ function MoodCheckPage() {
               className="absolute inset-0 w-full h-full object-cover object-center"
             />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/50" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
 
-            {/* Content: full-left layout, foto kanan terlihat bebas */}
-            <div className="relative z-10 flex flex-col justify-end h-full p-7 sm:p-10 max-w-lg">
+            {/* Content */}
+            <div className="absolute inset-0 flex flex-col justify-end p-7 sm:p-10">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1.5 mb-5 w-fit">
                 <Zap className="h-3 w-3 text-cyan-300" />
                 <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">AI Mood Tracker</span>
                 <span className="h-3.5 w-px bg-white/30" />
                 <span className="text-[11px] font-semibold text-cyan-300">Sembuhin Vision 1.5</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-lg">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-lg max-w-lg">
                 Cek Mood Via Kamera
               </h1>
-              <p className="mt-3 text-sm sm:text-base text-white/70 leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-white/70 leading-relaxed max-w-md">
                 AI menganalisis ekspresi wajah Anda untuk mendeteksi kondisi emosional dan memberikan rekomendasi personal.
               </p>
 
-              {/* Nav tabs — di bawah deskripsi */}
+              {/* Nav tabs */}
               <div className="mt-5 flex items-center gap-2">
                 {([
                   { key: 'camera',  label: 'Cek Mood',     icon: Camera },
