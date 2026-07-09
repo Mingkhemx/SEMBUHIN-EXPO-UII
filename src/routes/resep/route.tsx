@@ -106,21 +106,21 @@ function ResepPage() {
           return;
         }
 
-        // Fetch doctor details for each prescription
+        // Fetch doctor details untuk each prescription
         const transformed: Resep[] = await Promise.all(
           prescriptions.map(async (p: any) => {
-            let doctorName = "Dr. Umum";
+            let doctorName = "Dokter Anda";
             let specialty = "Umum";
 
             if (p.doctor_id) {
-              const { data: doctor } = await supabase
+              const { data: doctor, error: docError } = await supabase
                 .from("doctors")
-                .select("specialization, profiles(full_name)")
+                .select("id, specialization, profiles!inner(full_name)")
                 .eq("id", p.doctor_id)
                 .single();
 
-              if (doctor) {
-                doctorName = doctor.profiles?.full_name || "Dr. Umum";
+              if (!docError && doctor) {
+                doctorName = doctor.profiles?.[0]?.full_name || "Dokter Anda";
                 specialty = doctor.specialization || "Umum";
               }
             }
