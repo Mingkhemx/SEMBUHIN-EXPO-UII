@@ -285,105 +285,173 @@ def execute_sql():
 @app.route('/api/payment/membership', methods=['POST'])
 def create_membership_payment():
     try:
-        # Tambahkan delay sedikit agar terasa seperti "proses real"
-        time.sleep(1)
-        
         data = request.json
         user_id = data.get('user_id', 'unknown')
         user_email = data.get('email', 'user@example.com')
         user_name = data.get('name', 'User Sembuhin')
         amount = int(data.get('amount', 49000))
-        
+
         server_key = os.getenv('MIDTRANS_SERVER_KEY', '').strip()
+        is_production = os.getenv('MIDTRANS_ENV', 'sandbox').lower() == 'production'
+        base_url = "https://app.midtrans.com" if is_production else "https://app.sandbox.midtrans.com"
+
         if not server_key:
-            # Fallback for demo if no key provided (simulasi sukses langsung)
-            return jsonify({
-                'success': True,
-                'is_mock': True,
-                'message': 'Midtrans key not configured, returning mock success.'
-            })
+            return jsonify({'success': True, 'is_mock': True})
 
-        # Midtrans order_id max 50 characters.
-        # Use a simpler unique ID to avoid any character length issues.
-        order_id = f"MS-{str(uuid.uuid4())[:20]}"
-        
-        # HARDCODED KEYS FOR DEBUGGING (Bypass .env)
-        # Sesuai screenshot dashboard sandbox user
-        effective_server_key = "SB-Mid-server-aHxpTPKSbVI5pxObHALxKThU"
-        
-        # Determine environment
-        is_production = False # Force Sandbox
-        base_url = "https://app.sandbox.midtrans.com"
-        
-        print(f"💳 [DEBUG] Requesting Midtrans Token:")
-        print(f"   - Order ID: {order_id}")
-        print(f"   - Env: Sandbox (Forced)")
-        print(f"   - Base URL: {base_url}")
-        print(f"   - Key: {effective_server_key[:15]}...")
+        order_id = f"SMBH-{str(uuid.uuid4())[:16]}"
 
-        auth_str = base64.b64encode(f"{effective_server_key}:".encode()).decode()
+        # Simpan order_id → user_id mapping agar webhook bisa identifikasi user
+        if supabase:
+            try:
+                supabase.table('payment_orders').upsert({
+                    'order_id': order_id,
+                    'user_id': user_id,
+                    'amount': amount,
+                    'status': 'pending'
+                }).execute()
+            except Exception:
+                pass  # tabel belum ada, tidak apa-apa
+
+        backend_url = os.getenv('BACKEND_URL', 'https://sembuhin-expo-uii-production.up.railway.app')
+
+        auth_str = base64.b64encode(f"{server_key}:".encode()).decode()
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": f"Basic {auth_str}"
         }
-        
         payload = {
-            "transaction_details": {
-                "order_id": order_id,
-                "gross_amount": amount
-            },
-            "credit_card": {
-                "secure": True
-            },
-            "customer_details": {
-                "first_name": user_name,
-                "email": user_email
+            "transaction_details": {"order_id": order_id, "gross_amount": amount},
+            "credit_card": {"secure": True},
+            "customer_details": {"first_name": user_name, "email": user_email},
+            "callbacks": {
+                "finish": f"{backend_url}/api/payment/finish"
             }
         }
-        
-        response = requests.post(
-            f"{base_url}/snap/v1/transactions", 
-            json=payload, 
-            headers=headers
-        )
-        
+
+        response = requests.post(f"{base_url}/snap/v1/transactions", json=payload, headers=headers)
+
         if response.status_code != 201:
-            error_text = response.text
-            print(f"❌ Midtrans API Error ({response.status_code}): {error_text}")
-            print(f"   - URL used: {base_url}/snap/v1/transactions")
-            print(f"   - Auth Header (first 20 chars): {headers['Authorization'][:20]}...")
-            
-            # Try to extract a more friendly error message
             try:
                 error_json = response.json()
-                error_msg = ", ".join(error_json.get('error_messages', [error_text]))
-            except:
-                error_msg = error_text
+                error_msg = ", ".join(error_json.get('error_messages', [response.text]))
+            except Exception:
+                error_msg = response.text
+            return jsonify({'error': f"Midtrans Error: {error_msg}"}), 400
 
-            return jsonify({
-                'error': f"Midtrans Error: {error_msg}",
-                'details': error_text,
-                'status_code': response.status_code,
-                'debug_info': {
-                    'env': 'production' if is_production else 'sandbox',
-                    'key_prefix_used': effective_server_key[:7]
-                }
-            }), 400
-            
         token = response.json().get('token')
-        print(f"✅ Midtrans Token Created: {token}")
-        
+        print(f"✅ Midtrans Token: {token} | Order: {order_id}")
+
         return jsonify({
             'success': True,
             'token': token,
             'order_id': order_id,
             'is_production': is_production
         })
-        
+
     except Exception as e:
-        print('🔥 Error creating payment:', str(e))
+        print(f'🔥 Payment error: {e}')
         return jsonify({'error': str(e)}), 500
+
+
+# 7. Midtrans Webhook — aktivasi premium setelah pembayaran berhasil
+@app.route('/api/payment/webhook', methods=['POST'])
+def midtrans_webhook():
+    """
+    Midtrans mengirim notifikasi ke sini setelah transaksi berhasil/gagal.
+    Endpoint ini mengaktifkan premium di database jika payment sukses.
+    """
+    try:
+        if not supabase:
+            return jsonify({'error': 'Supabase not configured'}), 500
+
+        notif = request.json
+        print(f"🔔 Midtrans Webhook: {notif}")
+
+        order_id = notif.get('order_id', '')
+        transaction_status = notif.get('transaction_status', '')
+        fraud_status = notif.get('fraud_status', '')
+        gross_amount = notif.get('gross_amount', '0')
+
+        # Verifikasi signature (opsional tapi direkomendasikan)
+        server_key = os.getenv('MIDTRANS_SERVER_KEY', '')
+        if server_key:
+            import hashlib
+            status_code = notif.get('status_code', '')
+            signature_raw = f"{order_id}{status_code}{gross_amount}{server_key}"
+            expected_sig = hashlib.sha512(signature_raw.encode()).hexdigest()
+            received_sig = notif.get('signature_key', '')
+            if received_sig and received_sig != expected_sig:
+                print("❌ Signature mismatch")
+                return jsonify({'error': 'Invalid signature'}), 403
+
+        # Tentukan apakah pembayaran berhasil
+        is_success = (
+            transaction_status == 'capture' and fraud_status == 'accept'
+        ) or transaction_status == 'settlement'
+
+        if not is_success:
+            print(f"⏭ Skipping — status: {transaction_status}, fraud: {fraud_status}")
+            return jsonify({'status': 'ignored'}), 200
+
+        # Cari user dari order_id
+        user_id = None
+
+        # Coba dari tabel payment_orders dulu
+        try:
+            order_res = supabase.table('payment_orders').select('user_id').eq('order_id', order_id).maybe_single().execute()
+            if order_res.data:
+                user_id = order_res.data.get('user_id')
+                # Update status order
+                supabase.table('payment_orders').update({'status': 'paid'}).eq('order_id', order_id).execute()
+        except Exception:
+            pass
+
+        # Fallback: extract user_id dari custom field Midtrans
+        if not user_id:
+            custom_field = notif.get('custom_field1', '')
+            if custom_field:
+                user_id = custom_field
+
+        if not user_id:
+            print(f"❌ Tidak bisa identifikasi user untuk order {order_id}")
+            return jsonify({'error': 'User not found'}), 404
+
+        print(f"✅ Aktivasi premium untuk user: {user_id}")
+
+        # Upsert ke tabel memberships
+        existing = supabase.table('memberships').select('id').eq('user_id', user_id).maybe_single().execute()
+        if existing.data:
+            supabase.table('memberships').update({
+                'plan': 'premium',
+                'is_active': True,
+                'updated_at': 'now()'
+            }).eq('user_id', user_id).execute()
+        else:
+            supabase.table('memberships').insert({
+                'user_id': user_id,
+                'plan': 'premium',
+                'is_active': True
+            }).execute()
+
+        # Juga update profiles.is_premium jika kolom ada
+        try:
+            supabase.table('profiles').update({'is_premium': True}).eq('id', user_id).execute()
+        except Exception:
+            pass
+
+        print(f"🎉 Premium aktif untuk user {user_id}")
+        return jsonify({'status': 'success'}), 200
+
+    except Exception as e:
+        print(f'🔥 Webhook error: {e}')
+        return jsonify({'error': str(e)}), 500
+
+
+# 8. Midtrans finish redirect (opsional, untuk redirect setelah bayar)
+@app.route('/api/payment/finish', methods=['GET', 'POST'])
+def payment_finish():
+    return jsonify({'status': 'ok', 'message': 'Payment processed'})
 
 # --- Admin User Management ---
 
