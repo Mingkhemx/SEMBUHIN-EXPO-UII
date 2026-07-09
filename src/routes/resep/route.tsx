@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Pill, ShoppingCart, Store, MapPin, Calendar, Clock,
   ChevronRight, ChevronDown, Star, Package, Truck, AlertCircle,
-  Search, Filter, X, Check, Heart, Loader2,
+  Search, Filter, X, Check, Heart, Loader2, Stethoscope,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -281,11 +281,38 @@ function ResepPage() {
               </button>
             </div>
           ) : filteredReseps.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl bg-white border border-slate-100">
-              <Pill className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-600 font-medium">Belum ada resep</p>
-              <p className="text-sm text-slate-500 mt-1">Resep obat dari dokter Anda akan muncul di sini</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-16 px-6 rounded-3xl bg-gradient-to-br from-blue-50 via-slate-50 to-blue-50 border border-blue-100 shadow-sm"
+            >
+              <div className="flex justify-center mb-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                  <Pill className="h-8 w-8 text-blue-600" />
+                </div>
+              </div>
+              
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Belum Ada Resep</h3>
+              <p className="text-slate-600 max-w-sm mx-auto mb-6">
+                Anda belum menerima resep dari dokter. Resep obat akan ditampilkan di sini setelah berkonsultasi dengan dokter.
+              </p>
+              
+              <div className="space-y-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate({ to: "/dokter" })}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+                >
+                  <Stethoscope className="h-4 w-4" />
+                  Konsultasi dengan Dokter
+                </motion.button>
+                
+                <p className="text-xs text-slate-500 mt-4">
+                  💡 Tips: Setelah berkonsultasi, dokter akan memberikan resep yang langsung tersedia di halaman ini
+                </p>
+              </div>
+            </motion.div>
           ) : (
             filteredReseps.map((resep, idx) => (
               <motion.div
