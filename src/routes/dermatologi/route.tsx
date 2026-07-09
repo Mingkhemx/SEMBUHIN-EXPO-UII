@@ -963,8 +963,19 @@ function DermatologiPage() {
 
         {/* ═══════════════════ HISTORY ═══════════════════ */}
         {viewMode === 'history' && (
-          <motion.div key="history" variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
-            <h2 className="text-lg font-semibold text-slate-800">Riwayat Scan</h2>
+          <motion.div key="history" initial={{opacity:0}} animate={{opacity:1}} className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100">
+                  <Clock className="h-4 w-4 text-pink-600" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-800">Riwayat Scan</h2>
+                  <p className="text-[11px] text-slate-400">{pastScans.length>0?`${pastScans.length} scan tercatat`:'Belum ada scan'}</p>
+                </div>
+              </div>
+              {pastScans.length>0 && <span className="text-[10px] font-semibold text-pink-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full">Sembuhin AI 1.2</span>}
+            </div>
 
             {/* Login gate */}
             {!user ? (
