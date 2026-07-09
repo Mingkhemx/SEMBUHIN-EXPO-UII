@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from "react";
-import { ArrowRight, Sparkles, ShoppingBag, Stethoscope, User2, FileText, Activity, Heart, Shield, Brain } from "lucide-react";
+import { ArrowRight, Sparkles, ShoppingBag, Stethoscope, User2, FileText, Activity, Heart, Shield, Brain, Pill } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SpotlightCard } from "./-SpotlightCard";
 import { HospitalCarousel } from "./-HospitalCarousel";
@@ -146,6 +146,21 @@ function Index() {
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
                 <span className="text-xs font-semibold uppercase tracking-wider text-amber-500/70 group-hover:text-amber-600 transition-colors">{t("home.cards.triage_badge")}</span>
                 <ArrowRight className="h-4 w-4 text-amber-500 transition-transform duration-300 group-hover:translate-x-1" />
+              </div>
+            </div>
+          </SpotlightCard>
+
+          {/* Resep Obat */}
+          <SpotlightCard to="/resep" glowColor="#3b82f6">
+            <div className="flex flex-col h-full">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 mb-4">
+                <Pill className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-blue-600">{t("home.cards.prescription") || "Resep Obat"}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-auto">{t("home.cards.prescription_desc") || "Kelola resep dari dokter dan beli obat di apotek atau marketplace."}</p>
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                <span className="text-xs font-semibold uppercase tracking-wider text-blue-500/70 group-hover:text-blue-600 transition-colors">{t("home.cards.prescription_badge") || "Mudah"}</span>
+                <ArrowRight className="h-4 w-4 text-blue-500 transition-transform duration-300 group-hover:translate-x-1" />
               </div>
             </div>
           </SpotlightCard>
