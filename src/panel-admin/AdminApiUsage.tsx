@@ -25,7 +25,6 @@ export function AdminApiUsage() {
     total: { count: 0, limit: 3000, percentage: 0 },
     lastUpdated: new Date().toISOString(),
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setTitle('API Usage Monitor');
@@ -33,26 +32,38 @@ export function AdminApiUsage() {
   }, [setTitle, setSubtitle]);
 
   useEffect(() => {
-    loadUsageStats();
-    const interval = setInterval(loadUsageStats, 30000); // Refresh setiap 30 detik
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadUsageStats = async () => {
+    // Load initial stats
     try {
-      // In production, fetch dari database atau API gateway
-      // For now, load dari localStorage cache jika ada
       const cached = localStorage.getItem('api_usage_stats');
       if (cached) {
         const data = JSON.parse(cached);
         setStats(data);
+      } else {
+        // Set default stats jika belum ada cache
+        setStats(prev => ({
+          ...prev,
+          lastUpdated: new Date().toISOString(),
+        }));
       }
-      setLoading(false);
     } catch (err) {
       console.error('Failed to load usage stats:', err);
-      setLoading(false);
     }
-  };
+
+    // Polling setiap 30 detik
+    const interval = setInterval(() => {
+      try {
+        const cached = localStorage.getItem('api_usage_stats');
+        if (cached) {
+          const data = JSON.parse(cached);
+          setStats(data);
+        }
+      } catch (err) {
+        console.error('Failed to refresh usage stats:', err);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getStatusColor = (percentage: number) => {
     if (percentage >= 90) return 'bg-red-500';
