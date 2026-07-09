@@ -596,12 +596,12 @@ function MoodCheckPage() {
   return (
     <PremiumGate>
       <div className="relative z-10 min-h-screen">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-8">
+        <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 flex flex-col gap-8">
 
           {/* ── Hero Card with Image ─────────────────────────────── */}
           <motion.div variants={fadeIn} initial="hidden" animate="visible"
-            className="relative overflow-hidden rounded-3xl shadow-2xl"
-            style={{ height: '380px' }}
+            className="relative w-full overflow-hidden rounded-3xl shadow-2xl"
+            style={{ height: '380px', minHeight: '380px', flexShrink: 0 }}
           >
             {/* Background image */}
             <img
@@ -655,7 +655,7 @@ function MoodCheckPage() {
 
           {/* ══════ CAMERA VIEW ══════ */}
           {viewMode === 'camera' && (
-            <motion.div key="camera" variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
+            <motion.div key="camera" variants={fadeIn} initial="hidden" animate="visible" className="w-full space-y-6">
 
               {error && (
                 <motion.div
@@ -1144,7 +1144,7 @@ function MoodCheckPage() {
 
           {/* ══════ HISTORY VIEW ══════ */}
           {viewMode === 'history' && (
-            <motion.div key="history" variants={fadeIn} initial="hidden" animate="visible" className="space-y-4">
+            <motion.div key="history" variants={fadeIn} initial="hidden" animate="visible" className="w-full space-y-4">
 
               {/* Header bar — sama dengan section header di camera view */}
               <div className="flex items-center justify-between">
