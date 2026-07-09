@@ -390,80 +390,66 @@ function MoodCheckPage() {
   const loadHuman = useCallback(async () => {
     if (humanRef.current) return   // already loaded
     setModelLoading(true)
-    try {
-      const { Human } = await import('@vladmandic/human')
-      const h = new Human({
-        modelBasePath: `${window.location.origin}/models/human/`,
-        debug: false,
-        backend: 'webgl',
-        wasmPath: `${window.location.origin}/models/human/`,
-        face: {
-          enabled: true,
-          detector:  { enabled: true,  maxDetected: 1, minConfidence: 0.4 },
-          mesh:      { enabled: true },
-          emotion:   { enabled: true,  minConfidence: 0.1 },
-          description: { enabled: false },
-          iris:      { enabled: false },
-          liveness:  { enabled: false },
-          antispoof: { enabled: false },
-        },
-        body:   { enabled: false },
-        hand:   { enabled: false },
-        object: { enabled: false },
-        gesture:{ enabled: false },
-        segmentation: { enabled: false },
-      })
-      await h.load()
-      await h.warmup()
-      humanRef.current = h
-      setModelReady(true)
-    } catch (err) {
-      console.error('Human.js load error:', err)
-      // Try again with cpu backend as fallback
-      try {
-        const { Human } = await import('@vladmandic/human')
-        const h2 = new Human({
-          modelBasePath: `${window.location.origin}/models/human/`,
-          debug: false,
-          backend: 'cpu',
-          face: {
-            enabled: true,
-            detector:  { enabled: true,  maxDetected: 1, minConfidence: 0.4 },
-            mesh:      { enabled: true },
-            emotion:   { enabled: true,  minConfidence: 0.1 },
-            description: { enabled: false },
-            iris:      { enabled: false },
-            liveness:  { enabled: false },
-            antispoof: { enabled: false },
-          },
-          body:   { enabled: false },
-          hand:   { enabled: false },
-          object: { enabled: false },
-          gesture:{ enabled: false },
-          segmentation: { enabled: false },
-        })
-        await h2.load()
-        await h2.warmup()
-        humanRef.current = h2
-        setModelReady(true)
-        console.log('Human.js loaded with CPU backend fallback')
-      } catch (err2) {
-        console.error('Human.js CPU fallback also failed:', err2)
-      }
-    } finally {
-      setModelLoading(false)
+
+    const faceConfig = {
+      enabled: true,
+      detector:    { enabled: true, maxDetected: 1, minConfidence: 0.35 },
+      mesh:        { enabled: true },
+      emotion:     { enabled: true, minConfidence: 0.05 },
+      description: { enabled: false },
+      iris:        { enabled: false },
+      liveness:    { enabled: false },
+      antispoof:   { enabled: false },
     }
+    const baseConfig = {
+      modelBasePath: `${window.location.origin}/models/human/`,
+      debug: false,
+      face: faceConfig,
+      body:        { enabled: false },
+      hand:        { enabled: false },
+      object:      { enabled: false },
+      gesture:     { enabled: false },
+      segmentation:{ enabled: false },
+    }
+
+    // Try backends in order: webgl → cpu → tfjs (pure JS, most compatible)
+    const backends: string[] = ['webgl', 'cpu', 'tfjs']
+    let loaded = false
+
+    for (const backend of backends) {
+      try {
+        console.log(`[Human.js] trying backend: ${backend}`)
+        const { Human } = await import('@vladmandic/human')
+        const h = new Human({ ...baseConfig, backend } as any)
+        await h.load()
+        await h.warmup()
+        humanRef.current = h
+        setModelReady(true)
+        loaded = true
+        console.log(`[Human.js] loaded OK with backend: ${backend}`)
+        break
+      } catch (err) {
+        console.warn(`[Human.js] backend '${backend}' failed:`, err)
+      }
+    }
+
+    if (!loaded) {
+      console.error('[Human.js] all backends failed — face detection unavailable')
+    }
+    setModelLoading(false)
   }, [])
 
   /* ── Detection loop ─────────────────────────────────────── */
   const runDetectionLoop = useCallback(() => {
-    const human  = humanRef.current
     const video  = videoRef.current
     const canvas = canvasRef.current
-    if (!human || !video || !isScanningRef.current) return
+    // Use getter in the loop so we always pick up the latest ref
+    if (!humanRef.current || !video || !isScanningRef.current) return
 
     const detect = async () => {
       if (!isScanningRef.current) return
+      const human = humanRef.current
+      if (!human) return
       try {
         const result = await human.detect(video)
         const face   = result.face?.[0]
@@ -579,7 +565,7 @@ function MoodCheckPage() {
           setFaceFound(false)
         }
       } catch (e) {
-        // silently continue on frame error
+        console.error('[detect loop error]', e)
       }
 
       if (isScanningRef.current) {
