@@ -1002,27 +1002,31 @@ function DermatologiPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {pastScans.map((scan) => (
-                  <div key={scan.id} className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-2xl">
-                        {scan.thumbnail}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border', SEVERITY_CONFIG[scan.severity].bgColor, SEVERITY_CONFIG[scan.severity].color)}>
-                            {SEVERITY_CONFIG[scan.severity].label}
-                          </span>
-                        </div>
-                        <h3 className="text-sm font-bold text-slate-800">{scan.condition}</h3>
-                        <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-400">
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {scan.date}</span>
-                          <span>Akurasi {scan.confidence}%</span>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-slate-300 shrink-0" />
+                {pastScans.map((scan, i) => (
+                  <motion.div key={scan.id} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}}
+                    className="w-full rounded-2xl bg-white border border-white/60 shadow-lg p-5 flex items-center gap-4 hover:shadow-xl transition-all">
+                    <div className="relative shrink-0">
+                      <div className="text-3xl leading-none">{scan.thumbnail}</div>
                     </div>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className={cn('text-sm font-bold',SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
+                        <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border',SEVERITY_CONFIG[scan.severity].bgColor,SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
+                      </div>
+                      <p className="text-xs text-slate-400 flex items-center gap-1">
+                        <Clock className="h-3 w-3 shrink-0" />{scan.date}
+                      </p>
+                    </div>
+                    <div className="hidden sm:flex flex-col items-end gap-1 shrink-0 w-24">
+                      <span className="text-[10px] text-slate-400">Akurasi</span>
+                      <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div className={cn('h-full rounded-full',
+                          scan.severity==='ringan'?'bg-emerald-400':scan.severity==='sedang'?'bg-amber-400':'bg-red-400'
+                        )} style={{width:`${scan.confidence}%`}} />
+                      </div>
+                      <span className={cn('text-xs font-bold',SEVERITY_CONFIG[scan.severity].color)}>{scan.confidence}%</span>
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             )}
