@@ -106,55 +106,64 @@ function ResepPage() {
           return;
         }
 
-        // Fetch doctor details untuk each prescription
-        const transformed: Resep[] = await Promise.all(
-          prescriptions.map(async (p: any) => {
-            let doctorName = "Dokter Anda";
-            let specialty = "Umum";
+        // Fetch all doctor IDs
+        const doctorIds = [...new Set(prescriptions.map(p => p.doctor_id).filter(Boolean))];
+        
+        // Fetch doctor details in batch
+        const doctorMap: Record<string, { name: string; specialty: string }> = {};
+        
+        if (doctorIds.length > 0) {
+          const { data: doctors } = await supabase
+            .from("doctors")
+            .select("id, user_id, specialization")
+            .in("id", doctorIds);
 
-            if (p.doctor_id) {
-              // Get doctor info with user profile
-              const { data: doctor, error: docError } = await supabase
-                .from("doctors")
-                .select(`
-                  id,
-                  specialization,
-                  user_id,
-                  profiles:user_id(full_name)
-                `)
-                .eq("id", p.doctor_id)
-                .single();
+          if (doctors && doctors.length > 0) {
+            const userIds = doctors.map(d => d.user_id).filter(Boolean);
+            
+            const { data: profiles } = await supabase
+              .from("profiles")
+              .select("id, full_name")
+              .in("id", userIds);
 
-              if (!docError && doctor) {
-                // Handle the nested relationship
-                if (Array.isArray(doctor.profiles)) {
-                  doctorName = doctor.profiles?.[0]?.full_name || "Dokter Anda";
-                } else if (doctor.profiles?.full_name) {
-                  doctorName = doctor.profiles.full_name;
-                }
-                specialty = doctor.specialization || "Umum";
-              }
+            const profileMap: Record<string, string> = {};
+            if (profiles) {
+              profiles.forEach(p => {
+                profileMap[p.id] = p.full_name || "Dokter";
+              });
             }
 
-            const date = new Date(p.created_at).toLocaleDateString("id-ID", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
+            doctors.forEach(doc => {
+              doctorMap[doc.id] = {
+                name: profileMap[doc.user_id] || "Dokter Anda",
+                specialty: doc.specialization || "Umum"
+              };
             });
+          }
+        }
 
-            return {
-              id: p.id,
-              doctorName,
-              doctorId: p.doctor_id,
-              doctorSpecialty: specialty,
-              date,
-              status: p.status as ResepStatus,
-              medicines: (p.medicines || []) as Medicine[],
-              notes: p.notes,
-              diagnosis: p.diagnosis,
-            };
-          })
-        );
+        // Transform prescriptions
+        const transformed: Resep[] = prescriptions.map((p: any) => {
+          const doctorInfo = doctorMap[p.doctor_id] || { name: "Dokter Anda", specialty: "Umum" };
+          
+          const date = new Date(p.created_at).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+
+          return {
+            id: p.id,
+            doctorName: doctorInfo.name,
+            doctorId: p.doctor_id,
+            doctorSpecialty: doctorInfo.specialty,
+            date,
+            status: p.status as ResepStatus,
+            medicines: (p.medicines || []) as Medicine[],
+            notes: p.notes,
+            diagnosis: p.diagnosis,
+          };
+        });
 
         setReseps(transformed);
       } catch (err) {

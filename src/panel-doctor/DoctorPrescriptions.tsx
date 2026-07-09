@@ -226,7 +226,7 @@ export function DoctorPrescriptions() {
 
       if (prescError) throw prescError;
 
-      // Fetch patient details
+      // Fetch patient details in batch
       if (prescData && prescData.length > 0) {
         const patientIds = [...new Set(prescData.map(p => p.patient_id))];
         const { data: profilesData } = await supabase
@@ -234,9 +234,15 @@ export function DoctorPrescriptions() {
           .select("id, full_name, email")
           .in("id", patientIds);
 
-        const profileMap = Object.fromEntries(
-          (profilesData || []).map(p => [p.id, p])
-        );
+        const profileMap: Record<string, { full_name: string; email?: string }> = {};
+        if (profilesData) {
+          profilesData.forEach(p => {
+            profileMap[p.id] = {
+              full_name: p.full_name || "Pasien",
+              email: p.email
+            };
+          });
+        }
 
         const transformed: Prescription[] = prescData.map(p => ({
           id: p.id,
