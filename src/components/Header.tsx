@@ -294,8 +294,8 @@ export function Header() {
           </NavigationMenu>
         </nav>
 
-        {/* Quick Links (Chatbot + Membership) */}
-        <div className="hidden md:flex items-center gap-2 mr-4">
+        {/* Right Actions: Icons + Divider + Language + User/Login */}
+        <div className="hidden md:flex items-center gap-2">
           {/* Chat Dokter Circle Link */}
           <Link
             to="/chat"
@@ -311,7 +311,7 @@ export function Header() {
           </Link>
 
           {/* Membership Link */}
-          <Link to="/membership" className="flex items-center gap-2">
+          <Link to="/membership">
             {isPremium ? (
               <span className="flex items-center justify-center h-8 w-8 rounded-full bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-all">
                 <Crown className="h-4 w-4 text-amber-600" />
@@ -322,12 +322,9 @@ export function Header() {
               </span>
             )}
           </Link>
-        </div>
 
-        {/* Right Actions: Language + Divider + User/Login */}
-        <div className="hidden md:flex items-center gap-3">
           {/* Vertical Divider */}
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="h-6 w-px bg-slate-200 mx-1" />
 
           {/* Language Selector */}
           <div className="relative" ref={langRef}>
