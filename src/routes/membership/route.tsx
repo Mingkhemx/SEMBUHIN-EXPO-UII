@@ -238,8 +238,8 @@ function MembershipPage() {
                 <span className="font-semibold text-white/75">Rp 49.000/bulan</span>.
               </p>
 
-              {/* Stat chips + billing toggle row */}
-              <div className="flex items-center gap-2.5 flex-wrap">
+              {/* Stat chips row */}
+              <div className="flex items-center gap-2 flex-wrap mb-3">
                 {[
                   { label: "Total",      value: stats.total,      dot: "bg-sky-400"     },
                   { label: "Konsultasi", value: stats.konsultasi, dot: "bg-emerald-400" },
@@ -251,27 +251,32 @@ function MembershipPage() {
                     <span className="text-[11px] text-white/40">{s.label}</span>
                   </div>
                 ))}
+              </div>
 
-                {/* Billing toggle */}
-                <div className="ml-auto inline-flex items-center bg-white/10 border border-white/15 rounded-lg p-0.5 gap-0.5">
-                  {(["monthly", "yearly"] as const).map((b) => (
-                    <button
-                      key={b}
-                      onClick={() => setBilling(b)}
-                      className={cn(
-                        "px-3.5 py-1.5 rounded-md text-[12px] font-semibold transition-all flex items-center gap-1.5",
-                        billing === b ? "bg-white text-slate-900 shadow-sm" : "text-white/50 hover:text-white/70"
-                      )}
-                    >
-                      {b === "monthly" ? "Bulanan" : "Tahunan"}
-                      {b === "yearly" && (
-                        <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded", billing === "yearly" ? "bg-emerald-500 text-white" : "bg-emerald-500/20 text-emerald-400")}>
-                          -25%
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
+              {/* Billing toggle */}
+              <div className="inline-flex items-center bg-black/30 border border-white/20 backdrop-blur-sm rounded-full p-1 gap-0.5">
+                {(["monthly", "yearly"] as const).map((b) => (
+                  <button
+                    key={b}
+                    onClick={() => setBilling(b)}
+                    className={cn(
+                      "px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5",
+                      billing === b
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-white/60 hover:text-white/80"
+                    )}
+                  >
+                    {b === "monthly" ? "Bulanan" : "Tahunan"}
+                    {b === "yearly" && (
+                      <span className={cn(
+                        "text-[9px] font-bold px-1.5 py-0.5 rounded-full",
+                        billing === "yearly" ? "bg-emerald-500 text-white" : "bg-white/15 text-emerald-300"
+                      )}>
+                        -25%
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
