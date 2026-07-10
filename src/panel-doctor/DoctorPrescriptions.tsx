@@ -365,6 +365,9 @@ export function DoctorPrescriptions() {
         diagnosis: diagnosis || null,
         notes: newNotes || null,
         status: "Pending",
+        // Auto-populate doctor info saat buat resep
+        doctor_name: doctorName,
+        doctor_specialty: "Umum", // TODO: get from doctor profile
       };
 
       const { error } = await supabase

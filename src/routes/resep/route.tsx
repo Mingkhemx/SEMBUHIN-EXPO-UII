@@ -108,28 +108,8 @@ function ResepPage() {
           return;
         }
 
-        // Fetch doctor names in simple way
-        const doctorIds = [...new Set(prescriptions.map(p => p.doctor_id).filter(Boolean))];
-        
-        const { data: doctors } = await supabase
-          .from("doctors")
-          .select("id, user_id, specialization")
-          .in("id", doctorIds);
-
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .in("id", doctors?.map(d => d.user_id) || []);
-
-        // Build maps
-        const profileMap = Object.fromEntries((profiles || []).map(p => [p.id, p.full_name]));
-        const doctorMap = Object.fromEntries(
-          (doctors || []).map(d => [d.id, { name: profileMap[d.user_id] || "Dokter Anda", specialty: d.specialization || "Umum" }])
-        );
-
-        // Transform
+        // Transform - use doctor_name column directly from prescription
         const transformed: Resep[] = prescriptions.map((p: any) => {
-          const doc = doctorMap[p.doctor_id] || { name: "Dokter Anda", specialty: "Umum" };
           const date = new Date(p.created_at).toLocaleDateString("id-ID", {
             day: "numeric",
             month: "short",
@@ -138,9 +118,11 @@ function ResepPage() {
 
           return {
             id: p.id,
-            doctorName: doc.name,
+            // Use doctor_name from prescription if available, fallback to doctor_anda
+            doctorName: p.doctor_name || "Dokter Anda",
             doctorId: p.doctor_id,
-            doctorSpecialty: doc.specialty,
+            // Use doctor_specialty from prescription if available
+            doctorSpecialty: p.doctor_specialty || "Umum",
             date,
             status: p.status as ResepStatus,
             medicines: (p.medicines || []) as Medicine[],
