@@ -84,52 +84,52 @@ function ResepPage() {
         return;
       }
 
-        // Simple approach: fetch prescriptions + get doctor names directly
-        console.log("🔍 Fetching prescriptions for patient:", user.id);
+      try {
+        setLoading(true);
+        setError(null);
 
+        // Fetch prescriptions untuk patient ini
         const { data: prescriptions, error: prescError } = await supabase
           .from("prescriptions")
-          .select("*, doctors(id, specialization, profiles(full_name))")
+          .select("*")
           .eq("patient_id", user.id)
           .order("created_at", { ascending: false });
 
         if (prescError) {
-          console.error("❌ Error:", prescError.message);
+          console.error("Error:", prescError);
           setReseps([]);
           setLoading(false);
           return;
         }
 
         if (!prescriptions || prescriptions.length === 0) {
-          console.log("✅ No prescriptions");
           setReseps([]);
           setLoading(false);
           return;
         }
 
-        console.log("✅ Prescriptions:", prescriptions);
+        // Fetch doctor names in simple way
+        const doctorIds = [...new Set(prescriptions.map(p => p.doctor_id).filter(Boolean))];
+        
+        const { data: doctors } = await supabase
+          .from("doctors")
+          .select("id, user_id, specialization")
+          .in("id", doctorIds);
 
-        // Transform with better null handling
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", doctors?.map(d => d.user_id) || []);
+
+        // Build maps
+        const profileMap = Object.fromEntries((profiles || []).map(p => [p.id, p.full_name]));
+        const doctorMap = Object.fromEntries(
+          (doctors || []).map(d => [d.id, { name: profileMap[d.user_id] || "Dokter Anda", specialty: d.specialization || "Umum" }])
+        );
+
+        // Transform
         const transformed: Resep[] = prescriptions.map((p: any) => {
-          let doctorName = "Dokter Anda";
-          let specialty = "Umum";
-
-          // Try to get doctor info from nested data
-          if (p.doctors) {
-            specialty = p.doctors.specialization || "Umum";
-            
-            // Get doctor name - handle both direct and nested profile
-            if (p.doctors.profiles) {
-              if (Array.isArray(p.doctors.profiles)) {
-                doctorName = p.doctors.profiles[0]?.full_name || "Dokter Anda";
-              } else {
-                doctorName = p.doctors.profiles.full_name || "Dokter Anda";
-              }
-            }
-          }
-
-          console.log(`📋 Prescription ${p.id}: Doctor="${doctorName}"`);
-
+          const doc = doctorMap[p.doctor_id] || { name: "Dokter Anda", specialty: "Umum" };
           const date = new Date(p.created_at).toLocaleDateString("id-ID", {
             day: "numeric",
             month: "short",
@@ -138,9 +138,9 @@ function ResepPage() {
 
           return {
             id: p.id,
-            doctorName,
+            doctorName: doc.name,
             doctorId: p.doctor_id,
-            doctorSpecialty: specialty,
+            doctorSpecialty: doc.specialty,
             date,
             status: p.status as ResepStatus,
             medicines: (p.medicines || []) as Medicine[],
@@ -149,8 +149,13 @@ function ResepPage() {
           };
         });
 
-        console.log("✅ Final data:", transformed);
         setReseps(transformed);
+      } catch (err) {
+        console.error("Error:", err);
+        setReseps([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPrescriptions();
