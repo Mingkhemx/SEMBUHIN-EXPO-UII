@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { Users, Search, UserCheck, UserX, Eye, TrendingUp, Activity, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Users, Search, UserCheck, UserX, Eye, TrendingUp, Activity, Loader2, X, Mail, Phone, MapPin, Calendar, Heart } from "lucide-react";
 import { DoctorLayout } from "@/panel-doctor/DoctorLayout";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,8 +13,14 @@ import { id as idLocale } from "date-fns/locale";
 interface PatientData {
   id: string;
   name: string;
+  email?: string;
+  phone?: string;
   age: number | string;
   gender: string;
+  address?: string;
+  dateOfBirth?: string;
+  bloodType?: string;
+  allergies?: string;
   lastDiagnosis: string;
   lastVisit: string;
   status: string;
@@ -138,6 +144,8 @@ export function DoctorPatients() {
     active: 0,
     avgAge: 0
   });
+  const [selectedPatient, setSelectedPatient] = useState<PatientData | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -197,8 +205,14 @@ export function DoctorPatients() {
           return {
             id: u.id,
             name: u.full_name || u.email || "User",
+            email: u.email || "-",
+            phone: u.phone || "-",
             age: age,
             gender: u.gender === 'female' ? 'Perempuan' : u.gender === 'male' ? 'Laki-laki' : 'Tidak disebutkan',
+            address: u.address || "-",
+            dateOfBirth: u.date_of_birth ? format(new Date(u.date_of_birth), "dd MMMM yyyy", { locale: idLocale }) : "-",
+            bloodType: u.blood_type || "-",
+            allergies: u.allergies || "-",
             lastDiagnosis: "Pasien Terdaftar", 
             lastVisit: format(joinDate, "dd MMM yyyy", { locale: idLocale }),
             status: 'Aktif'
@@ -413,7 +427,10 @@ export function DoctorPatients() {
                     {/* Aksi */}
                     <td className="py-4 px-4 text-right">
                       <button
-                        onClick={() => navigate({ to: "/doctor/patients" })}
+                        onClick={() => {
+                          setSelectedPatient(patient);
+                          setShowDetailModal(true);
+                        }}
                         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 border border-sky-100 text-sm font-medium hover:bg-sky-100 transition-all"
                       >
                         <Eye className="h-3.5 w-3.5" />
@@ -441,6 +458,176 @@ export function DoctorPatients() {
           </div>
         </motion.div>
       </div>
+
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {showDetailModal && selectedPatient && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDetailModal(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            />
+            
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            >
+              <div 
+                className="pointer-events-auto w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="bg-gradient-to-r from-sky-500 to-sky-600 px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Users className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{selectedPatient.name}</h3>
+                      <p className="text-xs text-sky-100">Detail Informasi Pasien</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowDetailModal(false)}
+                    className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                  >
+                    <X className="h-5 w-5 text-white" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+                  {/* Personal Info */}
+                  <div className="space-y-4 mb-6">
+                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                      <Users className="h-4 w-4 text-sky-600" />
+                      Informasi Pribadi
+                    </h4>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Mail className="h-4 w-4 text-slate-400" />
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Email</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900 truncate">{selectedPatient.email}</p>
+                      </div>
+
+                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Phone className="h-4 w-4 text-slate-400" />
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">No. Telepon</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.phone}</p>
+                      </div>
+
+                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Calendar className="h-4 w-4 text-slate-400" />
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tanggal Lahir</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.dateOfBirth}</p>
+                        <p className="text-xs text-slate-500 mt-1">{selectedPatient.age} tahun</p>
+                      </div>
+
+                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Activity className="h-4 w-4 text-slate-400" />
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Jenis Kelamin</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.gender}</p>
+                      </div>
+
+                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 col-span-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <MapPin className="h-4 w-4 text-slate-400" />
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Alamat</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.address}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Medical Info */}
+                  <div className="space-y-4 mb-6">
+                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-rose-600" />
+                      Informasi Medis
+                    </h4>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-rose-50 rounded-lg p-4 border border-rose-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Activity className="h-4 w-4 text-rose-600" />
+                          <p className="text-xs font-medium text-rose-700 uppercase tracking-wider">Golongan Darah</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.bloodType}</p>
+                      </div>
+
+                      <div className="bg-rose-50 rounded-lg p-4 border border-rose-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Heart className="h-4 w-4 text-rose-600" />
+                          <p className="text-xs font-medium text-rose-700 uppercase tracking-wider">Alergi</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.allergies}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Info */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-emerald-600" />
+                      Status Pasien
+                    </h4>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                        <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-2">Status</p>
+                        <div className="flex items-center gap-2">
+                          <UserCheck className="h-4 w-4 text-emerald-600" />
+                          <p className="text-sm font-semibold text-slate-900">{selectedPatient.status}</p>
+                        </div>
+                      </div>
+
+                      <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                        <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-2">Terakhir Kunjungan</p>
+                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.lastVisit}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowDetailModal(false)}
+                    className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-all"
+                  >
+                    Tutup
+                  </button>
+                  <button
+                    onClick={() => {
+                      // TODO: Implement create prescription for this patient
+                      console.log("Create prescription for:", selectedPatient.id);
+                    }}
+                    className="px-4 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-all shadow-md shadow-sky-500/20"
+                  >
+                    Buat Resep
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </DoctorLayout>
   );
 }
