@@ -20,6 +20,8 @@ import {
   Sparkles,
   Users,
   Loader2,
+  X,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -142,9 +144,6 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const [sending, setSending] = useState(false);
-  const [mobileView, setMobileView] = useState<"list" | "chat">(
-    searchParams.consultationId ? "chat" : "list"
-  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -312,7 +311,6 @@ function ChatPage() {
 
   const openChat = (consultationId: string) => {
     setSelectedConsultationId(consultationId);
-    setMobileView("chat");
     setTimeout(() => inputRef.current?.focus(), 150);
   };
 
@@ -350,17 +348,436 @@ function ChatPage() {
     );
   }
 
+  if (!user && !authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <div className="h-20 w-20 rounded-3xl bg-sky-50 flex items-center justify-center border border-sky-100">
+          <MessageCircle className="h-10 w-10 text-sky-400" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-700">Login untuk Chat</h3>
+        <p className="text-sm text-slate-500">Silakan login untuk melihat dan membalas pesan konsultasi.</p>
+        <button
+          onClick={() => navigate({ to: "/auth" })}
+          className="px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 transition-all"
+        >
+          Login / Register
+        </button>
+      </div>
+    );
+  }
+
+  // Overlay window animation variants
+  const windowVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+    exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2 } },
+  };
+
   return (
-    <div className="px-6 pt-24 pb-4">
-      <div className="relative z-10 flex h-[calc(100vh-8.5rem)] overflow-hidden rounded-2xl border border-slate-200/80 shadow-xl bg-white max-w-6xl mx-auto">
-      {/* ── LEFT SIDEBAR ────────────────────────────────────────────── */}
-      <div
-        className={cn(
-          "flex flex-col w-full md:w-[340px] lg:w-[400px] flex-shrink-0 border-r border-slate-100",
-          mobileView === "chat" ? "hidden md:flex" : "flex",
-        )}
-      >
-        {/* Sidebar Header */}
+    <AnimatePresence>
+      {!selectedConsultationId ? (
+        // Doctor list overlay view
+        <motion.div
+          variants={windowVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="fixed inset-0 z-50 flex items-end justify-end p-6"
+        >
+          <div className="w-full max-w-[420px] rounded-3xl overflow-hidden border border-white/60 shadow-2xl" 
+            style={{
+              background: "rgba(255,255,255,0.92)",
+              backdropFilter: "blur(24px) saturate(160%)",
+            }}>
+            {/* Header */}
+            <div className="relative overflow-hidden px-5 py-4"
+              style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)" }}>
+              <div className="absolute inset-0 opacity-[0.07]"
+                style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
+              <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+              <div className="absolute bottom-0 left-8 w-20 h-12 rounded-full bg-sky-300/20 blur-xl pointer-events-none" />
+
+              <div className="relative flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 border border-white/30 backdrop-blur-md">
+                    <MessageCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-white text-sm leading-tight">Konsultasi Dokter</span>
+                    </div>
+                    <span className="text-[11px] text-white/75">
+                      {filteredDoctors.length} dokter tersedia
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => navigate({ to: "/" })}
+                  className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-white/15 transition-colors text-white/80 hover:text-white"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Doctor list */}
+            <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 200px)", minHeight: 300 }}>
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-sky-400" />
+                  <p className="text-sm text-slate-400">Memuat konsultasi...</p>
+                </div>
+              ) : error ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-3 px-6 text-center">
+                  <p className="text-sm text-rose-500">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-xs px-4 py-2 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
+                  >
+                    Coba Lagi
+                  </button>
+                </div>
+              ) : filteredDoctors.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2 text-slate-400 px-6">
+                  <Search className="h-8 w-8 opacity-40" />
+                  <p className="text-sm">Belum ada konsultasi yang dibayar</p>
+                  <button
+                    onClick={() => navigate({ to: "/dokter" })}
+                    className="text-xs px-4 py-2 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors mt-2"
+                  >
+                    Pilih Dokter →
+                  </button>
+                </div>
+              ) : (
+                <div className="px-3 py-2 space-y-1">
+                  {/* Search bar */}
+                  <div className="px-2 py-2 mb-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Cari dokter..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 text-sm bg-sky-50/50 border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400/30 focus:border-sky-400 transition-all placeholder-slate-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Doctor list items */}
+                  {filteredDoctors.map((item) => {
+                    const { consultation: c, unreadCount } = item;
+                    const doctorAvatar = c.doctor_avatar_url;
+
+                    return (
+                      <motion.button
+                        key={c.id}
+                        onClick={() => openChat(c.id)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl text-left hover:bg-sky-50 transition-colors group"
+                      >
+                        {/* Avatar */}
+                        <div className="relative flex-shrink-0">
+                          {doctorAvatar ? (
+                            <img
+                              src={doctorAvatar}
+                              alt={c.doctor_name}
+                              className="h-10 w-10 rounded-full object-cover border-2 border-sky-100 shadow-sm group-hover:shadow-md transition-shadow"
+                            />
+                          ) : (
+                            <div
+                              className={cn(
+                                "h-10 w-10 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-xs shadow-sm group-hover:shadow-md transition-shadow",
+                                defaultAvatar(c.doctor_name)
+                              )}
+                            >
+                              {c.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-400 border-2 border-white" />
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold truncate text-slate-800 group-hover:text-sky-700 transition-colors">
+                              {c.doctor_name}
+                            </span>
+                            {unreadCount > 0 && (
+                              <span className="flex-shrink-0 h-5 min-w-[20px] px-1 rounded-full bg-sky-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                {unreadCount}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 truncate">
+                            {c.doctor_specialty || "Dokter Spesialis"}
+                          </p>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="px-4 py-3 border-t border-sky-100/80 bg-sky-50/50 text-center">
+              <p className="text-[10px] text-slate-600">
+                💬 Pilih dokter untuk mulai chat
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        // Chat window view
+        <motion.div
+          variants={windowVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="fixed inset-0 z-50 flex items-end justify-end p-6"
+        >
+          <div className="w-full max-w-[420px] h-[600px] rounded-3xl overflow-hidden border border-white/60 flex flex-col"
+            style={{
+              background: "rgba(255,255,255,0.92)",
+              backdropFilter: "blur(24px) saturate(160%)",
+              boxShadow: "0 32px 80px -12px rgba(14, 165, 233, 0.22), 0 8px 32px -8px rgba(0,0,0,0.12)",
+            }}>
+            {selectedConsultation && (
+              <>
+                {/* Chat Header */}
+                <div className="relative overflow-hidden px-5 py-4"
+                  style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)" }}>
+                  <div className="absolute inset-0 opacity-[0.07]"
+                    style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
+                  <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+                  <div className="absolute bottom-0 left-8 w-20 h-12 rounded-full bg-sky-300/20 blur-xl pointer-events-none" />
+
+                  <div className="relative flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex-shrink-0">
+                        {selectedConsultation.doctor_avatar_url ? (
+                          <img
+                            src={selectedConsultation.doctor_avatar_url}
+                            alt={selectedConsultation.doctor_name}
+                            className="h-11 w-11 rounded-2xl object-cover border-2 border-white/30 shadow-sm"
+                          />
+                        ) : (
+                          <div
+                            className={cn(
+                              "h-11 w-11 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm border-2 border-white/30",
+                              defaultAvatar(selectedConsultation.doctor_name)
+                            )}
+                          >
+                            {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 1)}
+                          </div>
+                        )}
+                        <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-400 border-2 border-white">
+                          <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                        </span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-white text-sm leading-tight">{selectedConsultation.doctor_name}</span>
+                          <Shield className="h-3 w-3 text-white/80" />
+                        </div>
+                        <span className="text-[11px] text-white/75">
+                          Online • {selectedConsultation.doctor_specialty || "Dokter"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedConsultationId(null)}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-white/15 transition-colors text-white/80 hover:text-white flex-shrink-0"
+                      aria-label="Back to list"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Messages Area */}
+                <div
+                  ref={scrollRef}
+                  className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-gradient-to-b from-slate-50/80 to-sky-50/20"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle at 20% 50%, rgba(186,230,253,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(165,243,252,0.06) 0%, transparent 50%)",
+                  }}
+                >
+                  {currentMessages.length === 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-col items-center justify-center py-8 gap-4"
+                    >
+                      <div className="h-16 w-16 rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 flex items-center justify-center shadow-inner border border-sky-200/50">
+                        <Stethoscope className="h-8 w-8 text-sky-400" />
+                      </div>
+                      <div className="text-center">
+                        <p className="font-bold text-slate-700 text-sm">{selectedConsultation.doctor_name}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{selectedConsultation.doctor_specialty || "Dokter Spesialis"}</p>
+                      </div>
+                      <p className="text-[11px] text-slate-500 text-center px-4">
+                        👋 Mulai konsultasi dengan mengirim pesan pertamamu
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Grouped Messages */}
+                  {groupedMessages.map((group) => (
+                    <div key={group.date}>
+                      <div className="flex justify-center my-3">
+                        <span className="text-[10px] text-slate-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-100 shadow-sm">
+                          {formatDayLabel(group.messages[0].created_at)}
+                        </span>
+                      </div>
+
+                      <AnimatePresence initial={false}>
+                        {group.messages.map((msg, i) => {
+                          const isUser = msg.sender_type === "patient";
+                          const prevMsg = group.messages[i - 1];
+                          const showAvatar = !isUser && (!prevMsg || prevMsg.sender_type !== "doctor");
+
+                          return (
+                            <motion.div
+                              key={msg.id}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.18, ease: "easeOut" }}
+                              className={cn(
+                                "flex items-end gap-2 mb-1",
+                                isUser ? "justify-end" : "justify-start",
+                              )}
+                            >
+                              {!isUser && (
+                                <div className="flex-shrink-0 mb-0.5">
+                                  {showAvatar ? (
+                                    selectedConsultation.doctor_avatar_url ? (
+                                      <img
+                                        src={selectedConsultation.doctor_avatar_url}
+                                        alt=""
+                                        className="h-6 w-6 rounded-lg object-cover border border-sky-100 shadow-sm"
+                                      />
+                                    ) : (
+                                      <div
+                                        className={cn(
+                                          "h-6 w-6 rounded-lg bg-gradient-to-br flex items-center justify-center text-white text-[8px] font-bold border border-sky-100",
+                                          defaultAvatar(selectedConsultation.doctor_name)
+                                        )}
+                                      >
+                                        {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 1)}
+                                      </div>
+                                    )
+                                  ) : (
+                                    <div className="h-6 w-6" />
+                                  )}
+                                </div>
+                              )}
+
+                              <div
+                                className={cn(
+                                  "flex flex-col gap-0.5 max-w-[75%]",
+                                  isUser ? "items-end" : "items-start",
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    "px-3.5 py-2 rounded-2xl text-sm leading-relaxed shadow-sm",
+                                    isUser
+                                      ? "bg-sky-500 text-white rounded-br-md shadow-md shadow-sky-500/20"
+                                      : "bg-white border border-sky-100 text-slate-700 rounded-bl-md",
+                                  )}
+                                >
+                                  {msg.message_text}
+                                </div>
+
+                                <div
+                                  className={cn(
+                                    "flex items-center gap-1 px-1 text-[10px] text-slate-400",
+                                    isUser ? "flex-row" : "flex-row-reverse",
+                                  )}
+                                >
+                                  {isUser &&
+                                    (msg.read_at ? (
+                                      <CheckCheck className="h-3 w-3 text-sky-400" />
+                                    ) : (
+                                      <Check className="h-3 w-3 text-slate-300" />
+                                    ))}
+                                  <span>{formatTime(msg.created_at)}</span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+
+                  {sending && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-2 items-end justify-end mt-1"
+                    >
+                      <div className="bg-sky-500/20 text-sky-700 rounded-2xl rounded-br-md px-3.5 py-2.5 shadow-sm flex items-center gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span className="text-xs">Mengirim...</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Input Bar */}
+                <div className="px-4 py-3 border-t border-sky-100/80 bg-white">
+                  <div className="flex items-center gap-2 bg-sky-50/50 border border-sky-200 rounded-2xl px-3 py-2 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-400/20 transition-all">
+                    <button className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0">
+                      <Smile className="h-4 w-4" />
+                    </button>
+
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={`Tanya ${selectedConsultation.doctor_name.split(" ").slice(1).join(" ")}...`}
+                      className="flex-1 bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none py-1 min-w-0"
+                    />
+
+                    <button className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0">
+                      <Paperclip className="h-4 w-4" />
+                    </button>
+
+                    <motion.button
+                      onClick={sendMessage}
+                      disabled={!input.trim() || sending}
+                      whileTap={input.trim() && !sending ? { scale: 0.9 } : undefined}
+                      className={cn(
+                        "flex-shrink-0 h-8 w-8 rounded-xl flex items-center justify-center transition-all",
+                        input.trim() && !sending
+                          ? "bg-sky-500 text-white hover:bg-sky-600 shadow-md shadow-sky-500/25"
+                          : "bg-slate-200 text-slate-400 cursor-not-allowed",
+                      )}
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </motion.button>
+                  </div>
+                  <p className="mt-2 text-center text-[10px] text-slate-500 select-none">
+                    🔒 Terhubung langsung dengan dokter
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
         <div className="px-5 pt-5 pb-4 bg-gradient-to-br from-sky-50 via-cyan-50 to-white border-b border-slate-100">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-xl font-bold text-slate-800">Pesan</h2>

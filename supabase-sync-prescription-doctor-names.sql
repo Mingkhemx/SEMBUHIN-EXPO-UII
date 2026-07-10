@@ -13,7 +13,7 @@ alter table public.prescriptions
 update public.prescriptions p
 set 
   doctor_name = coalesce(pr.full_name, 'Dokter Anda'),
-  doctor_specialty = coalesce(d.specialization, 'Umum')
+  doctor_specialty = 'Umum'
 from public.doctors d
 left join public.profiles pr on d.user_id = pr.id
 where p.doctor_id = d.id

@@ -358,6 +358,13 @@ export function DoctorPrescriptions() {
       const doctorId = await getDoctorId();
       if (!doctorId) throw new Error("Doctor not found");
 
+      // Get doctor specialty from first doctor fetch
+      const { data: doctorData } = await supabase
+        .from("doctors")
+        .select("id, specialization")
+        .eq("id", doctorId)
+        .single();
+
       const prescriptionData = {
         doctor_id: doctorId,
         patient_id: selectedPatientId,
@@ -367,7 +374,7 @@ export function DoctorPrescriptions() {
         status: "Pending",
         // Auto-populate doctor info saat buat resep
         doctor_name: doctorName,
-        doctor_specialty: "Umum", // TODO: get from doctor profile
+        doctor_specialty: doctorData?.specialization || "Umum",
       };
 
       const { error } = await supabase
