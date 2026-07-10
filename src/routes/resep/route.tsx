@@ -330,7 +330,7 @@ function ResepPage() {
                         </span>
                       </div>
                       <h3 className="text-lg font-bold text-slate-900 truncate">
-                        {resep.doctorName}
+                        Dr. {resep.doctorName}
                       </h3>
                       <p className="text-sm text-slate-600 mt-0.5">
                         {resep.doctorSpecialty}
