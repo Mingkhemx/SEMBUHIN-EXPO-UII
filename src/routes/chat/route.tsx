@@ -360,15 +360,21 @@ function ChatPage() {
         )}
       >
         {/* Sidebar Header */}
-        <div className="px-5 pt-5 pb-4 bg-gradient-to-br from-sky-50 via-cyan-50 to-white border-b border-slate-100">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-xl font-bold text-slate-800">Pesan</h2>
-            <span className="text-xs font-medium text-sky-600 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full">
-              {filteredDoctors.length} konsultasi
+        <div className="relative overflow-hidden px-5 py-4"
+          style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)" }}>
+          <div className="absolute inset-0 opacity-[0.07]"
+            style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-8 w-20 h-12 rounded-full bg-sky-300/20 blur-xl pointer-events-none" />
+
+          <div className="relative flex items-center justify-between mb-1">
+            <h2 className="text-xl font-bold text-white">Konsultasi</h2>
+            <span className="text-xs font-medium text-sky-100 bg-white/20 border border-white/30 px-2.5 py-1 rounded-full">
+              {filteredDoctors.length}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mb-4">
-            Chat langsung dengan dokter setelah pembayaran
+          <p className="text-xs text-sky-100 mb-4">
+            Chat dengan dokter Anda
           </p>
           {/* Search */}
           <div className="relative">
@@ -494,44 +500,57 @@ function ChatPage() {
         {selectedConsultation ? (
           <>
             {/* Chat Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 bg-white shadow-sm z-10">
-              {/* Back button (mobile) */}
-              <button
-                onClick={() => setMobileView("list")}
-                className="md:hidden p-2 -ml-1 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors flex-shrink-0"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
+            <div className="relative overflow-hidden px-5 py-4"
+              style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)" }}>
+              <div className="absolute inset-0 opacity-[0.07]"
+                style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
+              <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+              <div className="absolute bottom-0 left-8 w-20 h-12 rounded-full bg-sky-300/20 blur-xl pointer-events-none" />
 
-              {selectedConsultation.doctor_avatar_url ? (
-                <img
-                  src={selectedConsultation.doctor_avatar_url}
-                  alt={selectedConsultation.doctor_name}
-                  className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
-                />
-              ) : (
-                <div
-                  className={cn(
-                    "h-10 w-10 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0",
-                    defaultAvatar(selectedConsultation.doctor_name)
-                  )}
-                >
-                  {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 2).toUpperCase()}
+              <div className="relative flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-shrink-0">
+                    {selectedConsultation.doctor_avatar_url ? (
+                      <img
+                        src={selectedConsultation.doctor_avatar_url}
+                        alt={selectedConsultation.doctor_name}
+                        className="h-11 w-11 rounded-2xl object-cover border-2 border-white/30 shadow-sm"
+                      />
+                    ) : (
+                      <div
+                        className={cn(
+                          "h-11 w-11 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm border-2 border-white/30",
+                          defaultAvatar(selectedConsultation.doctor_name)
+                        )}
+                      >
+                        {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 1)}
+                      </div>
+                    )}
+                    <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-400 border-2 border-white">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                    </span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-white text-sm leading-tight">{selectedConsultation.doctor_name}</span>
+                    </div>
+                    <span className="text-[11px] text-white/75">
+                      Online • {selectedConsultation.doctor_specialty || "Dokter"}
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-slate-800 truncate">{selectedConsultation.doctor_name}</h3>
-                <p className="text-xs truncate">
-                  <span className="text-emerald-600 font-medium">● Online</span>
-                  <span className="text-slate-400"> · {selectedConsultation.doctor_specialty || "Dokter"}</span>
-                </p>
-              </div>
-
-              <div className="flex items-center gap-1 flex-shrink-0">
                 <button
-                  className="p-2 rounded-xl hover:bg-sky-50 text-slate-500 hover:text-sky-600 transition-colors"
-                  title="Telepon"
+                  onClick={() => setMobileView("list")}
+                  className="md:hidden flex h-8 w-8 items-center justify-center rounded-xl hover:bg-white/15 transition-colors text-white/80 hover:text-white flex-shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+
+                <div className="hidden md:flex items-center gap-1 flex-shrink-0">
+                  <button
+                    className="p-2 rounded-xl hover:bg-white/15 text-white/80 hover:text-white transition-colors"
+                    title="Telepon"
                 >
                   <Phone className="h-4 w-4" />
                 </button>
