@@ -197,11 +197,11 @@ export function Header() {
                     </ListItem>
                     <ListItem
                       to="/resep"
-                      title={t("nav.prescription") || "Resep Obat"}
+                      title={t("nav.prescription")}
                       icon={<Pill className="h-4 w-4" />}
                       color="blue"
                     >
-                      {t("header.prescription_desc") || "Kelola resep dari dokter"}
+                      {t("header.prescription_desc")}
                     </ListItem>
                     <ListItem
                       to="/mood-check"
