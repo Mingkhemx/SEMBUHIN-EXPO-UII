@@ -143,102 +143,115 @@ export function DoctorPatients() {
   const { user } = useAuth();
 
   useEffect(() => {
-    async function fetchStats() {
-      if (!user) return;
-      try {
-        // Resolve doctor ID first
-        const { data: doc } = await supabase
-          .from("doctors")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
-        
-        if (!doc) return;
-
-        const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/stats?doctor_id=${doc.id}`);
-        const data = await response.json();
-        if (data.success) {
-          setStats({
-            total: data.stats.total_patients,
-            newThisMonth: data.stats.new_this_month,
-            active: data.stats.active_patients,
-            avgAge: data.stats.avg_age
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching doctor stats:", err);
-      }
-    }
-
-    async function fetchPatients() {
+    async function fetchPatientsFromSupabase() {
       if (!user) return;
       
       try {
         setLoading(true);
         
-        // Resolve doctor ID first
-        const { data: doc } = await supabase
-          .from("doctors")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
-        
-        if (!doc) {
+        // Query profiles table - hanya ambil user dengan role 'user' (bukan admin/doctor)
+        let query = supabase
+          .from("profiles")
+          .select("*", { count: "exact" })
+          .eq("role", "user") // Filter hanya role user
+          .order("created_at", { ascending: false });
+
+        // Apply search filter if there's a search query
+        if (searchQuery.trim()) {
+          query = query.ilike("full_name", `%${searchQuery}%`);
+        }
+
+        // Pagination
+        const from = (page - 1) * 10;
+        const to = from + 9;
+        query = query.range(from, to);
+
+        const { data: profilesData, error, count } = await query;
+
+        if (error) {
+          console.error("Error fetching patients:", error);
           setLoading(false);
           return;
         }
 
-        // Gunakan backend API untuk mengambil data pasien yang pernah konsul dengan dokter ini
-        const params = new URLSearchParams({
-          doctor_id: doc.id,
-          search: searchQuery,
-          page: page.toString(),
-          per_page: "10"
+        if (!profilesData) {
+          setPatients([]);
+          setTotalItems(0);
+          setLoading(false);
+          return;
+        }
+
+        // Format data for display
+        const formattedPatients: PatientData[] = profilesData.map((u: any) => {
+          // Calculate age if date_of_birth exists
+          let age: number | string = "-";
+          if (u.date_of_birth) {
+            const dob = new Date(u.date_of_birth);
+            const ageDiffMs = Date.now() - dob.getTime();
+            const ageDate = new Date(ageDiffMs);
+            age = Math.abs(ageDate.getUTCFullYear() - 1970);
+          }
+
+          const joinDate = new Date(u.created_at);
+
+          return {
+            id: u.id,
+            name: u.full_name || u.email || "User",
+            age: age,
+            gender: u.gender === 'female' ? 'Perempuan' : u.gender === 'male' ? 'Laki-laki' : 'Tidak disebutkan',
+            lastDiagnosis: "Pasien Terdaftar", 
+            lastVisit: format(joinDate, "dd MMM yyyy", { locale: idLocale }),
+            status: 'Aktif'
+          };
         });
-        
-        const response = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?${params}`);
-        const data = await response.json();
-        
-        if (data.success) {
-          const formattedPatients: PatientData[] = data.data.map((u: any) => {
-            // Calculate age if date_of_birth exists
-            let age: number | string = "-";
-            if (u.date_of_birth) {
+
+        setPatients(formattedPatients);
+        setTotalItems(count || 0);
+
+        // Calculate stats from all users with role 'user'
+        const { data: allUsers, error: statsError } = await supabase
+          .from("profiles")
+          .select("id, created_at, date_of_birth")
+          .eq("role", "user");
+
+        if (!statsError && allUsers) {
+          const total = allUsers.length;
+          
+          // Count new patients this month
+          const now = new Date();
+          const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          const newThisMonth = allUsers.filter(
+            (u) => new Date(u.created_at) >= thisMonthStart
+          ).length;
+
+          // Calculate average age
+          const ages = allUsers
+            .filter((u) => u.date_of_birth)
+            .map((u) => {
               const dob = new Date(u.date_of_birth);
               const ageDiffMs = Date.now() - dob.getTime();
               const ageDate = new Date(ageDiffMs);
-              age = Math.abs(ageDate.getUTCFullYear() - 1970);
-            } else {
-              // Mock age for UI consistency if missing
-              age = 20 + (parseInt(u.id.slice(0, 2), 16) % 40 || 0);
-            }
+              return Math.abs(ageDate.getUTCFullYear() - 1970);
+            });
+          const avgAge = ages.length > 0 
+            ? Math.round(ages.reduce((sum, age) => sum + age, 0) / ages.length) 
+            : 0;
 
-            const joinDate = new Date(u.created_at);
-            const isActive = u.is_active !== false;
-
-            return {
-              id: u.id,
-              name: u.full_name || "User",
-              age: age,
-              gender: u.gender === 'female' ? 'Perempuan' : u.gender === 'male' ? 'Laki-laki' : 'Tidak disebutkan',
-              lastDiagnosis: "Pasien Terdaftar", 
-              lastVisit: format(joinDate, "dd MMM yyyy", { locale: idLocale }),
-              status: isActive ? 'Aktif' : 'Tidak Aktif'
-            };
+          setStats({
+            total,
+            newThisMonth,
+            active: total, // All are considered active for now
+            avgAge
           });
-
-          setPatients(formattedPatients);
-          setTotalItems(data.total);
         }
       } catch (err) {
-        console.error("Error fetching patients from backend:", err);
+        console.error("Error fetching patients:", err);
       } finally {
         setLoading(false);
       }
     }
     
-    fetchStats();
-    fetchPatients();
+    fetchPatientsFromSupabase();
   }, [user, searchQuery, page]);
 
   const filtered = patients; // Filtering already done by backend search param
@@ -347,7 +360,7 @@ export function DoctorPatients() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map((patient) => (
+                {!loading && filtered.map((patient) => (
                   <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
                     {/* Nama */}
                     <td className="py-4 px-4">
@@ -412,12 +425,19 @@ export function DoctorPatients() {
               </tbody>
             </table>
 
-            {filtered.length === 0 && (
+            {loading ? (
+              <div className="py-16 text-center">
+                <Loader2 className="h-10 w-10 text-sky-500 mx-auto mb-3 animate-spin" />
+                <p className="text-sm text-slate-500">Memuat data pasien...</p>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="py-16 text-center">
                 <Users className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm text-slate-500">Tidak ada pasien yang cocok</p>
+                <p className="text-sm text-slate-500">
+                  {searchQuery ? "Tidak ada pasien yang cocok dengan pencarian" : "Belum ada pasien terdaftar"}
+                </p>
               </div>
-            )}
+            ) : null}
           </div>
         </motion.div>
       </div>
