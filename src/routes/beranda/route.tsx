@@ -147,14 +147,14 @@ function Index() {
           >
             <Link
               to="/twin"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-8 py-3.5 text-sm font-bold shadow-2xl shadow-cyan-500/40 transition-all duration-300 hover:shadow-cyan-500/60 hover:scale-105 active:scale-95 group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 hover:from-cyan-400 hover:via-blue-400 hover:to-blue-500 text-white px-10 py-4 text-base font-bold shadow-2xl shadow-cyan-500/50 transition-all duration-300 hover:shadow-cyan-500/70 hover:scale-105 active:scale-95 group border border-cyan-300/20 hover:border-cyan-200/40 backdrop-blur-sm"
             >
               {t("home.start_btn")}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               to="/konsul"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-md text-white border border-white/30 hover:border-white/50 px-8 py-3.5 text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 hover:from-white/30 hover:to-white/10 backdrop-blur-xl text-white border border-white/40 hover:border-white/60 px-10 py-4 text-base font-bold transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-black/20 hover:shadow-xl hover:shadow-black/30"
             >
               {t("home.ai_btn")}
             </Link>
