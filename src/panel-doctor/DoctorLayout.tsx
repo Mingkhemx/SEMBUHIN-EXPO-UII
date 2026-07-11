@@ -44,14 +44,19 @@ export const useDoctorLayout = () => {
 // ─── Navigation config ────────────────────────────────────────────────────────
 
 export const DOCTOR_NAV = [
-  { id: "dashboard",       label: "Dashboard",       icon: LayoutDashboard, path: "/doctor" },
-  { id: "consultations",   label: "Konsultasi",      icon: Calendar,        path: "/doctor/consultations" },
-  { id: "chat",            label: "Chat Pasien",     icon: MessageSquare,   path: "/doctor/chat" },
-  { id: "prescriptions",   label: "Resep",           icon: FileText,        path: "/doctor/prescriptions" },
-  { id: "medical-records", label: "Rekam Medis",     icon: ClipboardList,   path: "/doctor/medical-records" },
-  { id: "patients",        label: "Pasien",          icon: Users,           path: "/doctor/patients" },
-  { id: "analytics",       label: "Analitik",        icon: Activity,        path: "/doctor/analytics" },
-  { id: "settings",        label: "Pengaturan",      icon: Settings,        path: "/doctor/settings" },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/doctor" },
+  { id: "consultations", label: "Konsultasi", icon: Calendar, path: "/doctor/consultations" },
+  { id: "chat", label: "Chat Pasien", icon: MessageSquare, path: "/doctor/chat" },
+  { id: "prescriptions", label: "Resep", icon: FileText, path: "/doctor/prescriptions" },
+  {
+    id: "medical-records",
+    label: "Rekam Medis",
+    icon: ClipboardList,
+    path: "/doctor/medical-records",
+  },
+  { id: "patients", label: "Pasien", icon: Users, path: "/doctor/patients" },
+  { id: "analytics", label: "Analitik", icon: Activity, path: "/doctor/analytics" },
+  { id: "settings", label: "Pengaturan", icon: Settings, path: "/doctor/settings" },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -72,8 +77,7 @@ export function DoctorShell() {
   const [title, setTitle] = useState("Doctor Panel");
   const [headerAction, setHeaderAction] = useState<React.ReactNode>();
 
-  const currentPath =
-    typeof window !== "undefined" ? window.location.pathname : "";
+  const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
   const { user, signOut } = useAuth();
 
   // Fetch doctor profile for the logged-in user
@@ -96,7 +100,9 @@ export function DoctorShell() {
         setDoctorProfile(data);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   const doctorName = doctorProfile?.name || user?.user_metadata?.full_name || "Dokter";
@@ -107,7 +113,6 @@ export function DoctorShell() {
     <DoctorContext.Provider value={{ setTitle, setHeaderAction }}>
       <div className="min-h-screen bg-white">
         <div className="flex h-screen overflow-hidden">
-
           {/* ── Sidebar ─────────────────────────────────────────────── */}
           <aside
             className={[
@@ -159,7 +164,9 @@ export function DoctorShell() {
                     ].join(" ")}
                   >
                     <item.icon
-                      className={["h-4 w-4", isActive ? "text-sky-600" : "text-slate-400"].join(" ")}
+                      className={["h-4 w-4", isActive ? "text-sky-600" : "text-slate-400"].join(
+                        " ",
+                      )}
                     />
                     {item.label}
                     {/* Active indicator dot */}
@@ -229,7 +236,6 @@ export function DoctorShell() {
 
           {/* ── Main content area ───────────────────────────────────── */}
           <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 min-w-0">
-
             {/* Top header */}
             <header className="bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between lg:px-6 shadow-sm shadow-slate-100/50 flex-shrink-0">
               <div className="flex items-center gap-3">

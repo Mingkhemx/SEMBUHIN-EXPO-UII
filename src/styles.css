@@ -66,7 +66,7 @@
      - Clearer text hierarchy
      - More vibrant primary colors
      ==================================== */
-  
+
   /* Base Colors - Softer white with subtle blue tint */
   --background: oklch(0.98 0.005 230);
   --foreground: oklch(0.18 0.015 235); /* Darker for better readability */
@@ -96,7 +96,7 @@
   --accent-foreground: oklch(0.18 0.015 235);
 
   /* Destructive - Warmer red for better visibility */
-  --destructive: oklch(0.55 0.20 25);
+  --destructive: oklch(0.55 0.2 25);
   --destructive-foreground: oklch(0.99 0.003 230);
 
   /* Borders & Inputs - More defined */
@@ -105,11 +105,11 @@
   --ring: oklch(0.55 0.14 230);
 
   /* Charts - More distinct colors */
-  --chart-1: oklch(0.55 0.14 230);  /* Primary blue */
-  --chart-2: oklch(0.60 0.12 210);  /* Cyan */
-  --chart-3: oklch(0.52 0.15 260);  /* Purple */
-  --chart-4: oklch(0.68 0.10 195);  /* Teal */
-  --chart-5: oklch(0.58 0.12 250);  /* Violet */
+  --chart-1: oklch(0.55 0.14 230); /* Primary blue */
+  --chart-2: oklch(0.6 0.12 210); /* Cyan */
+  --chart-3: oklch(0.52 0.15 260); /* Purple */
+  --chart-4: oklch(0.68 0.1 195); /* Teal */
+  --chart-5: oklch(0.58 0.12 250); /* Violet */
 
   /* Sidebar */
   --sidebar: oklch(0.975 0.006 230);
@@ -124,45 +124,39 @@
   /* Aurora - More vibrant but still subtle */
   --aurora-1: oklch(0.78 0.12 220);
   --aurora-2: oklch(0.76 0.13 215);
-  --aurora-3: oklch(0.80 0.11 240);
+  --aurora-3: oklch(0.8 0.11 240);
 
   /* Glass - Better visibility */
   --glass: oklch(1 0 0 / 0.65); /* Increased opacity from 0.55 */
   --glass-border: oklch(0.82 0.015 230 / 0.35); /* More visible border */
 
   /* Gradients - Enhanced contrast and vibrancy */
-  --gradient-aurora: radial-gradient(ellipse 130% 90% at 5% 15%,
-      oklch(0.82 0.11 220 / 0.55),
-      transparent 55%),
-    radial-gradient(ellipse 110% 80% at 95% 10%,
-      oklch(0.80 0.12 225 / 0.45),
-      transparent 50%),
-    radial-gradient(ellipse 140% 70% at 35% 95%,
-      oklch(0.83 0.10 235 / 0.40),
-      transparent 60%),
-    radial-gradient(ellipse 80% 60% at 70% 50%,
-      oklch(0.85 0.09 205 / 0.30),
-      transparent 55%),
-    linear-gradient(160deg, 
-      oklch(0.96 0.008 225), 
-      oklch(0.98 0.006 230) 40%, 
-      oklch(0.95 0.010 220) 70%, 
-      oklch(0.97 0.007 228));
+  --gradient-aurora:
+    radial-gradient(ellipse 130% 90% at 5% 15%, oklch(0.82 0.11 220 / 0.55), transparent 55%),
+    radial-gradient(ellipse 110% 80% at 95% 10%, oklch(0.8 0.12 225 / 0.45), transparent 50%),
+    radial-gradient(ellipse 140% 70% at 35% 95%, oklch(0.83 0.1 235 / 0.4), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 70% 50%, oklch(0.85 0.09 205 / 0.3), transparent 55%),
+    linear-gradient(
+      160deg,
+      oklch(0.96 0.008 225),
+      oklch(0.98 0.006 230) 40%,
+      oklch(0.95 0.01 220) 70%,
+      oklch(0.97 0.007 228)
+    );
 
   /* Primary Gradient - More vibrant for CTAs */
-  --gradient-primary: linear-gradient(135deg,
-      oklch(0.55 0.14 230),
-      oklch(0.60 0.13 215));
+  --gradient-primary: linear-gradient(135deg, oklch(0.55 0.14 230), oklch(0.6 0.13 215));
 
   /* Text Gradient - Better contrast */
-  --gradient-text: linear-gradient(135deg,
-      oklch(0.25 0.035 235),
-      oklch(0.38 0.08 225),
-      oklch(0.32 0.09 215));
+  --gradient-text: linear-gradient(
+    135deg,
+    oklch(0.25 0.035 235),
+    oklch(0.38 0.08 225),
+    oklch(0.32 0.09 215)
+  );
 
   /* Shadows - More defined but still soft */
-  --shadow-glass: 0 4px 24px -6px rgba(100, 180, 220, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-glass: 0 4px 24px -6px rgba(100, 180, 220, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --shadow-glow: 0 0 32px oklch(0.55 0.14 230 / 0.22);
   --shadow-elevated: 0 8px 35px -8px rgba(100, 160, 200, 0.16);
 }
@@ -219,27 +213,21 @@
   --glass: oklch(1 0 0 / 0.04);
   --glass-border: oklch(1 0 0 / 0.08);
 
-  --gradient-aurora: radial-gradient(circle at 10% 20%,
-      oklch(0.25 0.1 250 / 0.3),
-      transparent 60%),
-    radial-gradient(circle at 90% 10%,
-      oklch(0.2 0.12 220 / 0.25),
-      transparent 55%),
-    radial-gradient(circle at 50% 90%,
-      oklch(0.3 0.08 270 / 0.2),
-      transparent 65%),
+  --gradient-aurora:
+    radial-gradient(circle at 10% 20%, oklch(0.25 0.1 250 / 0.3), transparent 60%),
+    radial-gradient(circle at 90% 10%, oklch(0.2 0.12 220 / 0.25), transparent 55%),
+    radial-gradient(circle at 50% 90%, oklch(0.3 0.08 270 / 0.2), transparent 65%),
     linear-gradient(180deg, oklch(0.1 0.03 260), oklch(0.08 0.05 265));
 
-  --gradient-primary: linear-gradient(135deg,
-      oklch(0.6 0.15 240),
-      oklch(0.7 0.12 210));
-  --gradient-text: linear-gradient(135deg,
-      oklch(0.85 0.02 240),
-      oklch(0.7 0.1 230),
-      oklch(0.65 0.14 210));
+  --gradient-primary: linear-gradient(135deg, oklch(0.6 0.15 240), oklch(0.7 0.12 210));
+  --gradient-text: linear-gradient(
+    135deg,
+    oklch(0.85 0.02 240),
+    oklch(0.7 0.1 230),
+    oklch(0.65 0.14 210)
+  );
 
-  --shadow-glass: 0 8px 32px -8px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-glass: 0 8px 32px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-glow: 0 0 30px oklch(0.65 0.14 240 / 0.3);
   --shadow-elevated: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
 }
@@ -276,9 +264,11 @@
 
 @layer utilities {
   .glass {
-    background: linear-gradient(135deg,
-        rgba(255, 255, 255, 0.75) 0%,
-        rgba(255, 255, 255, 0.55) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(255, 255, 255, 0.55) 100%
+    );
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
     border: 1px solid rgba(200, 215, 235, 0.45);
@@ -290,14 +280,16 @@
   }
 
   .glass-strong {
-    background: linear-gradient(135deg,
-        rgba(255, 255, 255, 0.85) 0%,
-        rgba(255, 255, 255, 0.65) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.65) 100%
+    );
     backdrop-filter: blur(24px) saturate(150%);
     -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid rgba(200, 215, 235, 0.50);
+    border: 1px solid rgba(200, 215, 235, 0.5);
     box-shadow:
-      0 4px 28px -6px rgba(100, 160, 200, 0.10),
+      0 4px 28px -6px rgba(100, 160, 200, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
     will-change: transform;
     transform: translateZ(0);
@@ -345,10 +337,7 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(90deg,
-        transparent,
-        oklch(1 0 0 / 0.4),
-        transparent);
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.4), transparent);
     background-size: 200% 100%;
     animation: shimmer 2.5s linear infinite;
   }
@@ -364,7 +353,6 @@
   }
 
   @keyframes pulseGlow {
-
     0%,
     100% {
       box-shadow: 0 0 30px oklch(0.65 0.2 245 / 0.4);
@@ -380,8 +368,12 @@
   }
 
   @keyframes scanline {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(200%); }
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(200%);
+    }
   }
 
   .scrollbar-hide::-webkit-scrollbar {
@@ -393,13 +385,21 @@
   }
 
   @keyframes marquee-left {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
   }
 
   @keyframes marquee-right {
-    0%   { transform: translateX(-50%); }
-    100% { transform: translateX(0); }
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 
   /* Navbar Active Indicator Animation */
@@ -415,7 +415,8 @@
   }
 
   @keyframes glowPulse {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 8px oklch(0.55 0.14 230 / 0.3);
     }
     50% {

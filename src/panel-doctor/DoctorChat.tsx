@@ -97,36 +97,32 @@ export function DoctorChat() {
 
   // UI state
   const [selectedConsultationId, setSelectedConsultationId] = useState<string | null>(
-    searchParams.consultationId || null
+    searchParams.consultationId || null,
   );
   const [input, setInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sending, setSending] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">(
-    searchParams.consultationId ? "chat" : "list"
+    searchParams.consultationId ? "chat" : "list",
   );
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedConsultation = consultations.find((c) => c.id === selectedConsultationId) ?? null;
-  const currentMessages = selectedConsultationId
-    ? (messages[selectedConsultationId] ?? [])
-    : [];
+  const currentMessages = selectedConsultationId ? (messages[selectedConsultationId] ?? []) : [];
 
   // ── Resolve doctor profile ──
   useEffect(() => {
     if (!user) return;
     let active = true;
     (async () => {
-      const { data } = await supabase
-        .from("doctors")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
+      const { data } = await supabase.from("doctors").select("id").eq("user_id", user.id).single();
       if (!active) return;
       if (data) setDoctorId(data.id);
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   // ── Fetch consultations & messages ──
@@ -160,7 +156,7 @@ export function DoctorChat() {
           .select("*")
           .eq("consultation_id", c.id)
           .order("created_at", { ascending: true })
-          .limit(100)
+          .limit(100),
       );
 
       const msgResults = await Promise.all(msgPromises);
@@ -174,7 +170,9 @@ export function DoctorChat() {
       setLoading(false);
     })();
 
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [doctorId]);
 
   // ── Realtime subscription for messages ──
@@ -213,7 +211,7 @@ export function DoctorChat() {
               [newMsg.consultation_id]: [...existing, newMsg],
             };
           });
-        }
+        },
       )
       .subscribe();
 
@@ -228,7 +226,7 @@ export function DoctorChat() {
   }, [currentMessages]);
 
   const filteredConsultations = consultations.filter((c) =>
-    c.patient_name.toLowerCase().includes(searchQuery.toLowerCase())
+    c.patient_name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // ── Send message ──
@@ -295,7 +293,7 @@ export function DoctorChat() {
   const getUnreadCount = (consultationId: string) => {
     if (consultationId === selectedConsultationId) return 0;
     return (messages[consultationId] || []).filter(
-      (m) => m.sender_type === "patient" && m.read_at === null
+      (m) => m.sender_type === "patient" && m.read_at === null,
     ).length;
   };
 
@@ -303,9 +301,9 @@ export function DoctorChat() {
     <DoctorLayout title="Chat Pasien">
       {/* Split panel — patients list + chat area */}
       <div className="flex h-full -m-4 lg:-m-6">
-
         {/* Patients List */}
-        <div className="w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-white flex-shrink-0"
+        <div
+          className="w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-white flex-shrink-0"
           style={{ display: mobileView === "chat" ? "none" : undefined }}
         >
           {/* Search */}
@@ -343,13 +341,13 @@ export function DoctorChat() {
                     key={c.id}
                     onClick={() => openChat(c.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-slate-50 ${
-                      isActive
-                        ? "bg-sky-50 border-r-4 border-r-sky-500"
-                        : "hover:bg-slate-50"
+                      isActive ? "bg-sky-50 border-r-4 border-r-sky-500" : "hover:bg-slate-50"
                     }`}
                   >
                     <div className="relative flex-shrink-0">
-                      <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${defaultAvatar(c.patient_name)} flex items-center justify-center border border-white shadow-sm`}>
+                      <div
+                        className={`h-10 w-10 rounded-full bg-gradient-to-br ${defaultAvatar(c.patient_name)} flex items-center justify-center border border-white shadow-sm`}
+                      >
                         <Users className="h-5 w-5 text-white" />
                       </div>
                     </div>
@@ -372,7 +370,8 @@ export function DoctorChat() {
                       <div className="flex items-center justify-between gap-2 mt-0.5">
                         <span className="text-xs text-slate-500 truncate">
                           {lastMsg
-                            ? (lastMsg.sender_type === "doctor" ? "Anda: " : "") + lastMsg.message_text
+                            ? (lastMsg.sender_type === "doctor" ? "Anda: " : "") +
+                              lastMsg.message_text
                             : `Konsultasi ${c.consultation_status.replace("_", " ")}`}
                         </span>
                         {unread > 0 && (
@@ -390,7 +389,8 @@ export function DoctorChat() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-slate-50"
+        <div
+          className="flex-1 flex flex-col min-w-0 bg-slate-50"
           style={{ display: mobileView === "list" ? "none" : undefined }}
         >
           {selectedConsultation ? (
@@ -406,14 +406,20 @@ export function DoctorChat() {
                     <ArrowLeft className="h-5 w-5" />
                   </button>
 
-                  <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${defaultAvatar(selectedConsultation.patient_name)} flex items-center justify-center border border-white shadow-sm`}>
+                  <div
+                    className={`h-10 w-10 rounded-full bg-gradient-to-br ${defaultAvatar(selectedConsultation.patient_name)} flex items-center justify-center border border-white shadow-sm`}
+                  >
                     <Users className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-slate-900">{selectedConsultation.patient_name}</h3>
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      {selectedConsultation.patient_name}
+                    </h3>
                     <p className="text-xs text-slate-500">
                       {selectedConsultation.patient_phone} ·{" "}
-                      <span className="capitalize">{selectedConsultation.consultation_status.replace("_", " ")}</span>
+                      <span className="capitalize">
+                        {selectedConsultation.consultation_status.replace("_", " ")}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -491,7 +497,9 @@ export function DoctorChat() {
                                 ) : (
                                   <CheckCheck className="h-3 w-3 text-slate-400" />
                                 ))}
-                              <span className="text-[10px] text-slate-400">{formatTime(msg.created_at)}</span>
+                              <span className="text-[10px] text-slate-400">
+                                {formatTime(msg.created_at)}
+                              </span>
                             </div>
                           </div>
                           {isDoctor && (
@@ -568,7 +576,6 @@ export function DoctorChat() {
             </div>
           )}
         </div>
-
       </div>
     </DoctorLayout>
   );

@@ -157,7 +157,7 @@ export function AdminSettings() {
         .select("value")
         .eq("key", "maintenance_mode")
         .maybeSingle();
-      
+
       if (data?.value) {
         setMaintenance(!!data.value.active);
       }
@@ -169,15 +169,13 @@ export function AdminSettings() {
     setSaveState("saving");
     try {
       // Save maintenance mode to Supabase
-      const { error } = await supabase
-        .from("settings")
-        .upsert({
-          key: "maintenance_mode",
-          value: { 
-            active: maintenance, 
-            message: "Website sedang dalam perbaikan. Kami akan segera kembali!" 
-          }
-        });
+      const { error } = await supabase.from("settings").upsert({
+        key: "maintenance_mode",
+        value: {
+          active: maintenance,
+          message: "Website sedang dalam perbaikan. Kami akan segera kembali!",
+        },
+      });
 
       if (error) throw error;
 

@@ -3,6 +3,7 @@
 ## 🎬 Where to Find Videos
 
 ### Recommended Platforms:
+
 1. **Pexels Videos** (Free) - https://www.pexels.com/search/videos/
 2. **Pixabay Videos** (Free) - https://pixabay.com/videos/
 3. **Unsplash Videos** (Free) - https://unsplash.com/videos
@@ -12,6 +13,7 @@
 ## 🔍 Search Keywords for Healthcare Theme
 
 ### Primary Keywords:
+
 - `medical professional`
 - `healthcare provider`
 - `doctor office`
@@ -22,6 +24,7 @@
 - `wellness professional`
 
 ### Secondary Keywords:
+
 - `health care`
 - `medical science`
 - `laboratory`
@@ -34,6 +37,7 @@
 ## ✅ Ideal Video Characteristics
 
 ### Technical Specs:
+
 - **Resolution**: 1920x1080 (1080p) minimum, 4K preferred
 - **Aspect Ratio**: 16:9 (widescreen)
 - **Frame Rate**: 24fps or 30fps (60fps untuk smooth effect)
@@ -42,6 +46,7 @@
 - **File Size**: < 5MB untuk optimal loading (after compression)
 
 ### Visual Characteristics:
+
 - **Lighting**: Soft, professional lighting (tidak terlalu terang)
 - **Color Tone**: Cool tones (blue, white, grey) atau warm professional (beige, brown)
 - **Subject**: Healthcare professional, medical equipment, atau clinical setting
@@ -50,7 +55,9 @@
 - **Clarity**: HD quality, minimal grain/noise
 
 ### Content Guidelines:
+
 ✅ **Perfect For**:
+
 - Close-up shots dari healthcare professional
 - Doctor sedang memeriksa patient (respectful angle)
 - Medical equipment atau laboratory setup
@@ -59,6 +66,7 @@
 - Blurred medical background dengan clear foreground
 
 ❌ **Avoid**:
+
 - Graphic medical procedures
 - Emergency/trauma scenes
 - Overly emotional content
@@ -70,6 +78,7 @@
 ## 🎨 Color Schemes That Work Well
 
 ### Option 1: Cool Professional (Recommended for Sembuhin)
+
 ```
 Primary: Blues, Cyans, Whites
 Secondary: Grays, Light Greens
@@ -78,6 +87,7 @@ Result: Professional, trustworthy, medical
 ```
 
 ### Option 2: Warm Professional
+
 ```
 Primary: Warm whites, beiges, light oranges
 Secondary: Warm grays, soft browns
@@ -86,6 +96,7 @@ Result: Friendly, approachable, caring
 ```
 
 ### Option 3: Modern Clinical
+
 ```
 Primary: Pure white, light gray, blacks
 Secondary: Accent colors (minimal)
@@ -96,6 +107,7 @@ Result: Modern, cutting-edge, technical
 ## 📥 Download & Setup Instructions
 
 ### Step 1: Find Video
+
 1. Go to https://www.pexels.com/search/videos/
 2. Search using keywords above
 3. Filter by resolution (1080p+)
@@ -103,11 +115,13 @@ Result: Modern, cutting-edge, technical
 5. Check viewing rights (usually free for commercial use)
 
 ### Step 2: Download
+
 1. Click download button
 2. Select resolution (HD preferred)
 3. Save file as: `hero-bg-medical.mp4`
 
 ### Step 3: Compress (if needed)
+
 ```bash
 # Using FFmpeg (install: brew install ffmpeg)
 ffmpeg -i downloaded_video.mp4 -b:v 2500k -b:a 128k hero-bg-medical.mp4
@@ -117,6 +131,7 @@ ffmpeg -i downloaded_video.mp4 -b:v 1500k -b:a 96k -s 1920x1080 hero-bg-medical.
 ```
 
 ### Step 4: Place File
+
 ```
 /home/migwara/Documents/Sembuhin/
 └── public/
@@ -124,6 +139,7 @@ ffmpeg -i downloaded_video.mp4 -b:v 1500k -b:a 96k -s 1920x1080 hero-bg-medical.
 ```
 
 ### Step 5: Test
+
 - Open `http://localhost:5173/beranda`
 - Video should play on loop
 - Check no errors in console
@@ -134,6 +150,7 @@ ffmpeg -i downloaded_video.mp4 -b:v 1500k -b:a 96k -s 1920x1080 hero-bg-medical.
 If you need specific recommendations, look for videos with these characteristics:
 
 ### Healthcare Professional (Best Choice)
+
 - **Setting**: Modern clinic or hospital
 - **Subject**: Doctor, nurse, or healthcare provider
 - **Activity**: Discussing, examining, working at desk
@@ -142,6 +159,7 @@ If you need specific recommendations, look for videos with these characteristics
 - **Camera**: Slight pan or zoom
 
 ### Medical Technology (Modern Look)
+
 - **Setting**: Lab or modern facility
 - **Subject**: Medical equipment or technology
 - **Activity**: Working with equipment, data analysis
@@ -150,6 +168,7 @@ If you need specific recommendations, look for videos with these characteristics
 - **Camera**: Smooth zoom or pan
 
 ### Health Consultation (Engaging)
+
 - **Setting**: Clinical or office environment
 - **Subject**: Consultation between professional and person
 - **Activity**: Discussion or examination
@@ -160,6 +179,7 @@ If you need specific recommendations, look for videos with these characteristics
 ## 📊 Performance Optimization
 
 ### File Size Management:
+
 ```
 Target: < 5MB (ideal < 3MB)
 
@@ -170,12 +190,14 @@ Bitrate Options:
 ```
 
 ### Loading Strategy:
+
 - Video akan lazy-load pada hero section
 - Background fallback gradient jika video gagal load
 - Autoplay tanpa sound untuk better UX
 - Loop infinite
 
 ### Browser Compatibility:
+
 - ✅ Chrome/Edge: Full support
 - ✅ Firefox: Full support
 - ✅ Safari: Full support (iOS 11+)
@@ -187,11 +209,11 @@ After uploading, test:
 
 ```javascript
 // Open browser console and run:
-const video = document.querySelector('video');
-console.log('Video loaded:', video.readyState === 4);
-console.log('Duration:', video.duration, 'seconds');
-console.log('Current time:', video.currentTime);
-console.log('Playing:', !video.paused);
+const video = document.querySelector("video");
+console.log("Video loaded:", video.readyState === 4);
+console.log("Duration:", video.duration, "seconds");
+console.log("Current time:", video.currentTime);
+console.log("Playing:", !video.paused);
 ```
 
 ## 💡 Pro Tips
@@ -213,7 +235,8 @@ console.log('Playing:', !video.paused);
 
 ---
 
-**Next Action**: 
+**Next Action**:
+
 1. Choose and download video from Pexels
 2. Compress if needed
 3. Place in `/public/` folder

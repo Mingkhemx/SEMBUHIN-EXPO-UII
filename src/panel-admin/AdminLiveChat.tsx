@@ -84,23 +84,25 @@ export function AdminLiveChat() {
     try {
       const { data: consultations, error: consultError } = await supabase
         .from("consultations")
-        .select(`
+        .select(
+          `
           id, 
           patient_id, 
           patient_name, 
           patient_phone, 
           consultation_status, 
           created_at
-        `)
-        .eq('type', 'support')
+        `,
+        )
+        .eq("type", "support")
         .order("created_at", { ascending: false });
 
       if (consultError) throw consultError;
 
       // Extract unique patient IDs to fetch avatars
-      const patientIds = [...new Set(consultations.map(c => c.patient_id))].filter(Boolean);
+      const patientIds = [...new Set(consultations.map((c) => c.patient_id))].filter(Boolean);
       let avatarsMap: Record<string, string> = {};
-      
+
       if (patientIds.length > 0) {
         // Since we store auth metadata directly in auth.users, and it's not accessible from public client without a view,
         // Let's use the simplest approach for now: fetch profiles if we have a public profiles table,
@@ -110,7 +112,7 @@ export function AdminLiveChat() {
             .from("profiles") // Or whatever table stores public user data
             .select("id, avatar_url")
             .in("id", patientIds);
-            
+
           if (users) {
             users.forEach((u: any) => {
               if (u.avatar_url) avatarsMap[u.id] = u.avatar_url;
@@ -130,19 +132,19 @@ export function AdminLiveChat() {
       if (msgError) throw msgError;
 
       const msgMap: Record<string, ChatMessage[]> = {};
-      allMessages.forEach(msg => {
+      allMessages.forEach((msg) => {
         if (!msgMap[msg.consultation_id]) msgMap[msg.consultation_id] = [];
         msgMap[msg.consultation_id].push(msg as ChatMessage);
       });
-      
+
       const sessionData: ChatSession[] = consultations.map((c) => {
         const msgs = msgMap[c.id] || [];
-        
+
         return {
           ...c,
           patient_avatar: avatarsMap[c.patient_id] || null,
           lastMessage: msgs.length > 0 ? msgs[msgs.length - 1] : null,
-          unreadCount: msgs.filter(m => m.sender_type !== "admin" && !m.read_at).length
+          unreadCount: msgs.filter((m) => m.sender_type !== "admin" && !m.read_at).length,
         };
       });
 
@@ -171,20 +173,22 @@ export function AdminLiveChat() {
         { event: "INSERT", schema: "public", table: "consultation_messages" },
         async (payload) => {
           const newMsg = payload.new as ChatMessage;
-          setMessages(prev => ({
+          setMessages((prev) => ({
             ...prev,
-            [newMsg.consultation_id]: [...(prev[newMsg.consultation_id] || []), newMsg]
+            [newMsg.consultation_id]: [...(prev[newMsg.consultation_id] || []), newMsg],
           }));
-          
-          setSessions(prev => prev.map(s => 
-            s.id === newMsg.consultation_id 
-              ? { 
-                  ...s, 
-                  lastMessage: newMsg, 
-                  unreadCount: newMsg.sender_type !== "admin" ? s.unreadCount + 1 : s.unreadCount 
-                } 
-              : s
-          ));
+
+          setSessions((prev) =>
+            prev.map((s) =>
+              s.id === newMsg.consultation_id
+                ? {
+                    ...s,
+                    lastMessage: newMsg,
+                    unreadCount: newMsg.sender_type !== "admin" ? s.unreadCount + 1 : s.unreadCount,
+                  }
+                : s,
+            ),
+          );
 
           // Mark as read if it's the current session
           if (newMsg.consultation_id === selectedId && newMsg.sender_type !== "admin") {
@@ -193,19 +197,15 @@ export function AdminLiveChat() {
               p_as_sender_type: "admin",
             });
           }
-        }
+        },
       )
       .subscribe();
 
     const sessionChannel = supabase
       .channel("admin-chat-sessions")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "consultations" },
-        () => {
-          fetchSessions();
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "consultations" }, () => {
+        fetchSessions();
+      })
       .subscribe();
 
     return () => {
@@ -221,10 +221,8 @@ export function AdminLiveChat() {
         p_consultation_id: selectedId,
         p_as_sender_type: "admin",
       });
-      
-      setSessions(prev => prev.map(s => 
-        s.id === selectedId ? { ...s, unreadCount: 0 } : s
-      ));
+
+      setSessions((prev) => prev.map((s) => (s.id === selectedId ? { ...s, unreadCount: 0 } : s)));
     }
   }, [selectedId]);
 
@@ -270,7 +268,7 @@ export function AdminLiveChat() {
         .from("consultations")
         .update({ consultation_status: "completed" })
         .eq("id", selectedId);
-      
+
       if (error) throw error;
       fetchSessions();
     } catch (err) {
@@ -349,9 +347,7 @@ export function AdminLiveChat() {
                   onClick={() => setSelectedId(session.id)}
                   className={[
                     "w-full text-left px-4 py-4 border-b border-slate-100 hover:bg-slate-50 transition-all relative",
-                    selectedId === session.id
-                      ? "bg-sky-50/50"
-                      : "",
+                    selectedId === session.id ? "bg-sky-50/50" : "",
                   ].join(" ")}
                 >
                   {selectedId === session.id && (
@@ -364,8 +360,8 @@ export function AdminLiveChat() {
                     {/* Avatar with status dot */}
                     <div className="relative flex-shrink-0">
                       {session.patient_avatar ? (
-                        <img 
-                          src={session.patient_avatar} 
+                        <img
+                          src={session.patient_avatar}
                           alt={session.patient_name}
                           className="h-10 w-10 rounded-xl object-cover shadow-sm border border-slate-200"
                         />
@@ -396,7 +392,9 @@ export function AdminLiveChat() {
                         Percakapan Bantuan
                       </p>
                       <div className="flex items-center justify-between gap-1">
-                        <p className={`text-xs truncate flex-1 ${session.unreadCount > 0 ? "font-bold text-slate-700" : "text-slate-500"}`}>
+                        <p
+                          className={`text-xs truncate flex-1 ${session.unreadCount > 0 ? "font-bold text-slate-700" : "text-slate-500"}`}
+                        >
                           {session.lastMessage?.message_text || "Belum ada pesan"}
                         </p>
                         {session.unreadCount > 0 && (
@@ -422,8 +420,8 @@ export function AdminLiveChat() {
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative flex-shrink-0">
                     {selected.patient_avatar ? (
-                      <img 
-                        src={selected.patient_avatar} 
+                      <img
+                        src={selected.patient_avatar}
                         alt={selected.patient_name}
                         className="h-11 w-11 rounded-2xl object-cover shadow-sm border border-slate-200"
                       />
@@ -441,7 +439,9 @@ export function AdminLiveChat() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-base font-extrabold text-slate-900">{selected.patient_name}</span>
+                      <span className="text-base font-extrabold text-slate-900">
+                        {selected.patient_name}
+                      </span>
                     </div>
                     <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-2">
                       Layanan Bantuan Admin
@@ -484,10 +484,10 @@ export function AdminLiveChat() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       className={cn("flex w-full gap-3", isAdmin ? "justify-end" : "justify-start")}
                     >
-                      {!isAdmin && (
-                        selected.patient_avatar ? (
-                          <img 
-                            src={selected.patient_avatar} 
+                      {!isAdmin &&
+                        (selected.patient_avatar ? (
+                          <img
+                            src={selected.patient_avatar}
                             alt={selected.patient_name}
                             className="h-8 w-8 rounded-full object-cover shadow-sm border border-slate-200 flex-shrink-0 mt-1"
                           />
@@ -495,46 +495,56 @@ export function AdminLiveChat() {
                           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-sky-700 shadow-sm flex-shrink-0 mt-1">
                             {selected.patient_name[0].toUpperCase()}
                           </div>
-                        )
-                      )}
-                      <div className={cn(
-                        "flex flex-col max-w-[70%]",
-                        isAdmin ? "items-end" : "items-start"
-                      )}>
+                        ))}
+                      <div
+                        className={cn(
+                          "flex flex-col max-w-[70%]",
+                          isAdmin ? "items-end" : "items-start",
+                        )}
+                      >
                         {/* Bubble */}
                         <div
                           className={cn(
                             "px-4 py-3 shadow-sm relative group transition-all",
-                            isAdmin 
-                              ? "bg-sky-500 text-white rounded-[22px] rounded-tr-none" 
-                              : "bg-white border border-slate-200 text-slate-700 rounded-[22px] rounded-tl-none"
+                            isAdmin
+                              ? "bg-sky-500 text-white rounded-[22px] rounded-tr-none"
+                              : "bg-white border border-slate-200 text-slate-700 rounded-[22px] rounded-tl-none",
                           )}
                         >
                           <p className="text-[13px] leading-relaxed font-medium whitespace-pre-wrap">
                             {msg.message_text}
                           </p>
-                          
+
                           {/* Status & Time inside bubble */}
-                          <div className={cn(
-                            "flex items-center gap-1 mt-1.5",
-                            isAdmin ? "justify-end text-sky-100" : "justify-start text-slate-400"
-                          )}>
+                          <div
+                            className={cn(
+                              "flex items-center gap-1 mt-1.5",
+                              isAdmin ? "justify-end text-sky-100" : "justify-start text-slate-400",
+                            )}
+                          >
                             <span className="text-[9px] font-mono font-medium uppercase tracking-tighter">
                               {formatTime(msg.created_at)}
                             </span>
                             {isAdmin && (
                               <div className="flex">
-                                <CheckCircle className={cn("h-2.5 w-2.5", msg.read_at ? "text-emerald-300" : "text-sky-200")} />
+                                <CheckCircle
+                                  className={cn(
+                                    "h-2.5 w-2.5",
+                                    msg.read_at ? "text-emerald-300" : "text-sky-200",
+                                  )}
+                                />
                               </div>
                             )}
                           </div>
                         </div>
 
                         {/* Sender Label (Subtle) */}
-                        <span className={cn(
-                          "text-[9px] font-bold uppercase tracking-widest mt-1.5 px-1",
-                          isAdmin ? "text-sky-500" : "text-slate-400"
-                        )}>
+                        <span
+                          className={cn(
+                            "text-[9px] font-bold uppercase tracking-widest mt-1.5 px-1",
+                            isAdmin ? "text-sky-500" : "text-slate-400",
+                          )}
+                        >
                           {isAdmin ? "Anda (Admin)" : selected.patient_name}
                         </span>
                       </div>
@@ -556,7 +566,9 @@ export function AdminLiveChat() {
                     <Info className="h-3 w-3 text-violet-600" />
                   </div>
                   <p className="text-[11px] text-slate-500 font-medium">
-                    <span className="text-violet-700 font-bold uppercase tracking-wider">Balas sebagai Admin</span>
+                    <span className="text-violet-700 font-bold uppercase tracking-wider">
+                      Balas sebagai Admin
+                    </span>
                     {" — "}Pesan Anda akan langsung terkirim ke user
                   </p>
                 </div>
@@ -576,7 +588,11 @@ export function AdminLiveChat() {
                     disabled={!adminReply.trim() || sending}
                     className="bg-sky-600 hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-2xl px-6 py-3 transition-all flex-shrink-0 shadow-lg shadow-sky-600/20 flex items-center gap-2"
                   >
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {sending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                     Kirim
                   </button>
                 </div>
@@ -590,7 +606,8 @@ export function AdminLiveChat() {
               <div className="text-center max-w-xs">
                 <h3 className="text-xl font-bold text-slate-900">Pilih Percakapan</h3>
                 <p className="text-sm text-slate-500 mt-2 font-medium">
-                  Pilih sesi konsultasi dari daftar di sebelah kiri untuk memantau atau memberikan bantuan.
+                  Pilih sesi konsultasi dari daftar di sebelah kiri untuk memantau atau memberikan
+                  bantuan.
                 </p>
               </div>
             </div>

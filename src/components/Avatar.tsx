@@ -85,14 +85,12 @@ export function Avatar({
         "flex items-center justify-center bg-gradient-to-br text-white font-bold",
         getGradient(name),
         rounded,
-        className
+        className,
       )}
       aria-label={name}
       role="img"
     >
-      <span className={cn("leading-none", textClassName)}>
-        {getInitials(name)}
-      </span>
+      <span className={cn("leading-none", textClassName)}>{getInitials(name)}</span>
     </div>
   );
 }

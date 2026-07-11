@@ -23,7 +23,7 @@ function MaintenanceGuard({ children }: { children: React.ReactNode }) {
           .select("value")
           .eq("key", "maintenance_mode")
           .maybeSingle();
-        
+
         if (data?.value?.active) {
           setIsMaintenance(true);
         }
@@ -43,25 +43,27 @@ function MaintenanceGuard({ children }: { children: React.ReactNode }) {
         { event: "UPDATE", schema: "public", table: "settings", filter: "key=eq.maintenance_mode" },
         (payload) => {
           setIsMaintenance(!!payload.new.value?.active);
-        }
+        },
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
     if (checking) return;
 
-    const isMaintenancePage = location.pathname === '/maintenance';
-    const isAdminPath = location.pathname.startsWith('/admin');
+    const isMaintenancePage = location.pathname === "/maintenance";
+    const isAdminPath = location.pathname.startsWith("/admin");
 
     // Jika maintenance aktif, kunci semua user di page maintenance
     // Kecuali jika sedang mengakses Admin Panel (agar bisa mematikan maintenance)
     if (isMaintenance && !isMaintenancePage && !isAdminPath) {
-      navigate({ to: '/maintenance', replace: true });
+      navigate({ to: "/maintenance", replace: true });
     } else if (!isMaintenance && isMaintenancePage) {
-      navigate({ to: '/beranda', replace: true });
+      navigate({ to: "/beranda", replace: true });
     }
   }, [isMaintenance, checking, location.pathname, navigate]);
 
@@ -76,14 +78,14 @@ function BanGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading && userProfile) {
-      const isBanned = userProfile.status === 'banned';
-      const isInactive = userProfile.status === 'inactive';
-      const isBannedPage = location.pathname === '/banned';
+      const isBanned = userProfile.status === "banned";
+      const isInactive = userProfile.status === "inactive";
+      const isBannedPage = location.pathname === "/banned";
 
       if ((isBanned || isInactive) && !isBannedPage) {
-        navigate({ to: '/banned', replace: true });
+        navigate({ to: "/banned", replace: true });
       } else if (!isBanned && !isInactive && isBannedPage) {
-        navigate({ to: '/beranda', replace: true });
+        navigate({ to: "/beranda", replace: true });
       }
     }
   }, [userProfile, loading, location.pathname, navigate]);
@@ -123,7 +125,8 @@ function RootComponent() {
   const isDoctorPage = location.pathname.startsWith("/doctor");
   const isAdminPage = location.pathname.startsWith("/admin");
   const isDaftarDokterPage = location.pathname.startsWith("/daftar-dokter");
-  const isFullWidthPage = location.pathname.startsWith("/membership") || location.pathname.startsWith("/chat");
+  const isFullWidthPage =
+    location.pathname.startsWith("/membership") || location.pathname.startsWith("/chat");
 
   // Scroll ke atas setiap kali route berubah
   useEffect(() => {
@@ -133,7 +136,11 @@ function RootComponent() {
   const content = (
     <MaintenanceGuard>
       <BanGuard>
-        {isAuthPage || isDoctorPage || isAdminPage || isBannedPage || location.pathname === "/maintenance" ? (
+        {isAuthPage ||
+        isDoctorPage ||
+        isAdminPage ||
+        isBannedPage ||
+        location.pathname === "/maintenance" ? (
           <main className="flex-1 flex flex-col min-h-screen">
             <Outlet />
           </main>
@@ -141,7 +148,9 @@ function RootComponent() {
           <div className="flex-1 flex flex-col min-h-screen">
             <AuroraBackground />
             <Header />
-            <main className={`${isDaftarDokterPage || isFullWidthPage ? 'px-0 pt-10 pb-10' : 'mx-auto max-w-6xl px-4 pt-24'} flex-1`}>
+            <main
+              className={`${isDaftarDokterPage || isFullWidthPage ? "px-0 pt-10 pb-10" : "mx-auto max-w-6xl px-4 pt-24"} flex-1`}
+            >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={location.pathname}
@@ -163,9 +172,7 @@ function RootComponent() {
 
   return (
     <AuthProvider>
-      <LanguageProvider>
-        {content}
-      </LanguageProvider>
+      <LanguageProvider>{content}</LanguageProvider>
     </AuthProvider>
   );
 }

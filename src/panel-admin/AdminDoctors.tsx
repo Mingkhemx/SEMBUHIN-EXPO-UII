@@ -5,7 +5,35 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Check, X, Eye, UserX, Search, UserCheck, Loader2, RefreshCw, AlertCircle, ZoomIn, ZoomOut, RotateCw, Download, CheckCircle, XCircle, AlertTriangle, UserPlus, Mail, Phone, MapPin, Star, Calendar, Award, Users, Clock, ShieldCheck } from "lucide-react";
+import {
+  FileText,
+  Check,
+  X,
+  Eye,
+  UserX,
+  Search,
+  UserCheck,
+  Loader2,
+  RefreshCw,
+  AlertCircle,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  Download,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  UserPlus,
+  Mail,
+  Phone,
+  MapPin,
+  Star,
+  Calendar,
+  Award,
+  Users,
+  Clock,
+  ShieldCheck,
+} from "lucide-react";
 import { AdminLayout, StatusBadge } from "@/panel-admin/AdminLayout";
 import { supabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
@@ -62,13 +90,7 @@ type DocViewer = {
   isPdf: boolean;
 };
 
-function DocumentViewerOverlay({
-  viewer,
-  onClose,
-}: {
-  viewer: DocViewer;
-  onClose: () => void;
-}) {
+function DocumentViewerOverlay({ viewer, onClose }: { viewer: DocViewer; onClose: () => void }) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
 
@@ -105,9 +127,7 @@ function DocumentViewerOverlay({
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-sky-400" />
               <span className="text-white text-sm font-semibold">{viewer.label}</span>
-              <span className="text-slate-400 text-xs ml-1">
-                {viewer.isPdf ? "PDF" : "Gambar"}
-              </span>
+              <span className="text-slate-400 text-xs ml-1">{viewer.isPdf ? "PDF" : "Gambar"}</span>
             </div>
             <div className="flex items-center gap-1">
               {!viewer.isPdf && (
@@ -189,7 +209,11 @@ function DocumentViewerOverlay({
           {/* Footer hint */}
           <div className="px-5 py-2 bg-slate-800 border-t border-slate-700 flex-shrink-0">
             <p className="text-slate-500 text-xs text-center">
-              Klik di luar atau tekan <kbd className="px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 text-[10px] font-mono">Esc</kbd> untuk menutup
+              Klik di luar atau tekan{" "}
+              <kbd className="px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 text-[10px] font-mono">
+                Esc
+              </kbd>{" "}
+              untuk menutup
             </p>
           </div>
         </motion.div>
@@ -221,13 +245,28 @@ type ConfirmAction = {
 
 // Daftar kategori spesialisasi untuk dropdown
 const SPECIALTY_CATEGORIES = [
-  "Jantung", "Saraf", "Mental", "Kanker", "Kulit", "Tulang",
-  "Anak", "Umum", "Kandungan", "Mata", "THT", "Gigi", "Paru-paru",
+  "Jantung",
+  "Saraf",
+  "Mental",
+  "Kanker",
+  "Kulit",
+  "Tulang",
+  "Anak",
+  "Umum",
+  "Kandungan",
+  "Mata",
+  "THT",
+  "Gigi",
+  "Paru-paru",
 ];
 
 const BADGE_OPTIONS = [
-  "Terverifikasi", "Top Rated", "Senior Expert", "Most Booked",
-  "Spesialis Bulan Ini", "Highly Rated",
+  "Terverifikasi",
+  "Top Rated",
+  "Senior Expert",
+  "Most Booked",
+  "Spesialis Bulan Ini",
+  "Highly Rated",
 ];
 
 function ConfirmModal({
@@ -253,25 +292,35 @@ function ConfirmModal({
   const [avatarUrl, setAvatarUrl] = useState("");
 
   // Derive category from specialty if empty
-  const derivedCategory = category || (() => {
-    const spec = action.reg.specialty.toLowerCase();
-    if (spec.includes("jantung") || spec.includes("kardiovaskular") || spec.includes("penyakit dalam")) return "Jantung";
-    if (spec.includes("saraf") || spec.includes("neurologi")) return "Saraf";
-    if (spec.includes("psikolog") || spec.includes("mental")) return "Mental";
-    if (spec.includes("onkologi") || spec.includes("kanker")) return "Kanker";
-    if (spec.includes("dermatologi") || spec.includes("kulit")) return "Kulit";
-    if (spec.includes("ortopedi") || spec.includes("tulang")) return "Tulang";
-    if (spec.includes("pediatr") || spec.includes("anak")) return "Anak";
-    if (spec.includes("kandungan") || spec.includes("obstetri") || spec.includes("ginekologi")) return "Kandungan";
-    if (spec.includes("mata")) return "Mata";
-    if (spec.includes("tht") || spec.includes("telinga") || spec.includes("hidung")) return "THT";
-    if (spec.includes("gigi")) return "Gigi";
-    if (spec.includes("paru")) return "Paru-paru";
-    return "Umum";
-  })();
+  const derivedCategory =
+    category ||
+    (() => {
+      const spec = action.reg.specialty.toLowerCase();
+      if (
+        spec.includes("jantung") ||
+        spec.includes("kardiovaskular") ||
+        spec.includes("penyakit dalam")
+      )
+        return "Jantung";
+      if (spec.includes("saraf") || spec.includes("neurologi")) return "Saraf";
+      if (spec.includes("psikolog") || spec.includes("mental")) return "Mental";
+      if (spec.includes("onkologi") || spec.includes("kanker")) return "Kanker";
+      if (spec.includes("dermatologi") || spec.includes("kulit")) return "Kulit";
+      if (spec.includes("ortopedi") || spec.includes("tulang")) return "Tulang";
+      if (spec.includes("pediatr") || spec.includes("anak")) return "Anak";
+      if (spec.includes("kandungan") || spec.includes("obstetri") || spec.includes("ginekologi"))
+        return "Kandungan";
+      if (spec.includes("mata")) return "Mata";
+      if (spec.includes("tht") || spec.includes("telinga") || spec.includes("hidung")) return "THT";
+      if (spec.includes("gigi")) return "Gigi";
+      if (spec.includes("paru")) return "Paru-paru";
+      return "Umum";
+    })();
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onCancel]);
@@ -294,13 +343,16 @@ function ConfirmModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}
-        <div className={`h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4 ${
-          isReject ? "bg-rose-50" : "bg-emerald-50"
-        }`}>
-          {isReject
-            ? <XCircle className="h-7 w-7 text-rose-500" />
-            : <CheckCircle className="h-7 w-7 text-emerald-500" />
-          }
+        <div
+          className={`h-14 w-14 mx-auto rounded-2xl flex items-center justify-center mb-4 ${
+            isReject ? "bg-rose-50" : "bg-emerald-50"
+          }`}
+        >
+          {isReject ? (
+            <XCircle className="h-7 w-7 text-rose-500" />
+          ) : (
+            <CheckCircle className="h-7 w-7 text-emerald-500" />
+          )}
         </div>
 
         {/* Title */}
@@ -309,20 +361,28 @@ function ConfirmModal({
         </h3>
         <p className="text-slate-500 text-sm text-center mb-2">
           <span className="font-semibold text-slate-700">{action.reg.name}</span>
-          {" · "}{action.reg.specialty}
+          {" · "}
+          {action.reg.specialty}
         </p>
 
         {/* User link status */}
         {!isReject && (
-          <div className={`mx-auto mb-5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
-            action.reg.user_id
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : "bg-amber-50 text-amber-700 border border-amber-200"
-          }`}>
+          <div
+            className={`mx-auto mb-5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+              action.reg.user_id
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                : "bg-amber-50 text-amber-700 border border-amber-200"
+            }`}
+          >
             {action.reg.user_id ? (
-              <><UserCheck className="h-3.5 w-3.5" /> Akun terhubung — dokter bisa login ke panel</>
+              <>
+                <UserCheck className="h-3.5 w-3.5" /> Akun terhubung — dokter bisa login ke panel
+              </>
             ) : (
-              <><AlertTriangle className="h-3.5 w-3.5" /> Belum terhubung ke akun — dokter perlu mendaftar dulu</>
+              <>
+                <AlertTriangle className="h-3.5 w-3.5" /> Belum terhubung ke akun — dokter perlu
+                mendaftar dulu
+              </>
             )}
           </div>
         )}
@@ -330,11 +390,15 @@ function ConfirmModal({
         {/* ── Approve-specific fields ── */}
         {!isReject && (
           <div className="mb-5 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data Profil Dokter</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Data Profil Dokter
+            </p>
 
             {/* Category */}
             <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1.5">Kategori Spesialisasi</label>
+              <label className="text-xs font-semibold text-slate-600 block mb-1.5">
+                Kategori Spesialisasi
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -342,7 +406,9 @@ function ConfirmModal({
               >
                 <option value="">— Otomatis dari spesialisasi —</option>
                 {SPECIALTY_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>
@@ -356,14 +422,18 @@ function ConfirmModal({
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
               >
                 {BADGE_OPTIONS.map((b) => (
-                  <option key={b} value={b}>{b}</option>
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Available schedule */}
             <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1.5">Jadwal Praktek</label>
+              <label className="text-xs font-semibold text-slate-600 block mb-1.5">
+                Jadwal Praktek
+              </label>
               <input
                 type="text"
                 value={available}
@@ -375,7 +445,9 @@ function ConfirmModal({
 
             {/* Price */}
             <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1.5">Biaya Konsultasi (Rp)</label>
+              <label className="text-xs font-semibold text-slate-600 block mb-1.5">
+                Biaya Konsultasi (Rp)
+              </label>
               <input
                 type="number"
                 value={price}
@@ -385,13 +457,19 @@ function ConfirmModal({
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
               />
               <p className="text-[11px] text-slate-400 mt-1">
-                {Number(price || 0).toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 })}
+                {Number(price || 0).toLocaleString("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                })}
               </p>
             </div>
 
             {/* Description */}
             <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1.5">Deskripsi Singkat</label>
+              <label className="text-xs font-semibold text-slate-600 block mb-1.5">
+                Deskripsi Singkat
+              </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -403,7 +481,9 @@ function ConfirmModal({
 
             {/* Avatar URL */}
             <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1.5">Avatar URL (opsional)</label>
+              <label className="text-xs font-semibold text-slate-600 block mb-1.5">
+                Avatar URL (opsional)
+              </label>
               <input
                 type="text"
                 value={avatarUrl}
@@ -429,9 +509,10 @@ function ConfirmModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            placeholder={isReject
-              ? "Jelaskan alasan penolakan kepada dokter..."
-              : "Pesan selamat datang atau instruksi tambahan..."
+            placeholder={
+              isReject
+                ? "Jelaskan alasan penolakan kepada dokter..."
+                : "Pesan selamat datang atau instruksi tambahan..."
             }
             className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 resize-none"
           />
@@ -461,7 +542,9 @@ function ConfirmModal({
                   category: derivedCategory,
                   available: available || "Senin – Jumat",
                   badge: badge || "Terverifikasi",
-                  description: description || `Dokter spesialis ${action.reg.specialty} dengan pengalaman ${action.reg.experience_years} tahun.`,
+                  description:
+                    description ||
+                    `Dokter spesialis ${action.reg.specialty} dengan pengalaman ${action.reg.experience_years} tahun.`,
                   price: Number(price) || 0,
                   avatar_url: avatarUrl || "",
                 });
@@ -477,9 +560,13 @@ function ConfirmModal({
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : isReject ? (
-              <><XCircle className="h-4 w-4" /> Tolak</>
+              <>
+                <XCircle className="h-4 w-4" /> Tolak
+              </>
             ) : (
-              <><CheckCircle className="h-4 w-4" /> Setujui</>
+              <>
+                <CheckCircle className="h-4 w-4" /> Setujui
+              </>
             )}
           </button>
         </div>
@@ -524,10 +611,7 @@ export function AdminDoctors() {
           .select("*")
           .eq("status", "rejected")
           .order("created_at", { ascending: false }),
-        supabase
-          .from("doctors")
-          .select("*")
-          .order("joined_at", { ascending: false }),
+        supabase.from("doctors").select("*").order("joined_at", { ascending: false }),
       ]);
 
       if (pendingRes.error) throw pendingRes.error;
@@ -606,28 +690,30 @@ export function AdminDoctors() {
       }
 
       // Insert ke tabel doctors — dengan semua field profil
-      const { error: insertErr } = await supabase.from("doctors").insert([{
-        registration_id: reg.id,
-        name: reg.name,
-        email: reg.email,
-        phone: reg.phone,
-        specialty: reg.specialty,
-        license_number: reg.license_number,
-        hospital: reg.practice_location ?? reg.hospital ?? null,
-        experience_years: String(reg.experience_years),
-        is_active: true,
-        total_patients: 0,
-        rating: 0,
-        // Link ke auth user
-        user_id: reg.user_id || null,
-        // Field profil yang diisi admin saat approve
-        category: approveData.category,
-        available: approveData.available,
-        badge: approveData.badge,
-        description: approveData.description,
-        price: approveData.price,
-        avatar_url: finalAvatarUrl,
-      }]);
+      const { error: insertErr } = await supabase.from("doctors").insert([
+        {
+          registration_id: reg.id,
+          name: reg.name,
+          email: reg.email,
+          phone: reg.phone,
+          specialty: reg.specialty,
+          license_number: reg.license_number,
+          hospital: reg.practice_location ?? reg.hospital ?? null,
+          experience_years: String(reg.experience_years),
+          is_active: true,
+          total_patients: 0,
+          rating: 0,
+          // Link ke auth user
+          user_id: reg.user_id || null,
+          // Field profil yang diisi admin saat approve
+          category: approveData.category,
+          available: approveData.available,
+          badge: approveData.badge,
+          description: approveData.description,
+          price: approveData.price,
+          avatar_url: finalAvatarUrl,
+        },
+      ]);
 
       // 23505 = unique email violation — skip (dokter sudah ada)
       if (insertErr && insertErr.code !== "23505") throw insertErr;
@@ -642,7 +728,7 @@ export function AdminDoctors() {
               user_metadata: {
                 ...existingMeta,
                 role: "doctor",
-                doctor_id: reg.id,  // referensi ke doctors.id untuk lookup cepat
+                doctor_id: reg.id, // referensi ke doctors.id untuk lookup cepat
               },
             });
           }
@@ -876,7 +962,9 @@ export function AdminDoctors() {
                             {reg.name.split(" ").slice(-1)[0]?.[0] ?? "D"}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-slate-900 font-bold text-sm truncate">{reg.name}</h3>
+                            <h3 className="text-slate-900 font-bold text-sm truncate">
+                              {reg.name}
+                            </h3>
                             <p className="text-sky-600 text-xs font-medium mt-0.5">
                               {reg.specialty}
                             </p>
@@ -895,7 +983,9 @@ export function AdminDoctors() {
                           <div className="space-y-1.5 mb-3">
                             <div className="flex gap-2 text-xs">
                               <span className="text-slate-500 w-20 flex-shrink-0">Email</span>
-                              <span className="text-slate-700 font-medium truncate">{reg.email}</span>
+                              <span className="text-slate-700 font-medium truncate">
+                                {reg.email}
+                              </span>
                             </div>
                             <div className="flex gap-2 text-xs">
                               <span className="text-slate-500 w-20 flex-shrink-0">Telepon</span>
@@ -903,7 +993,9 @@ export function AdminDoctors() {
                             </div>
                             <div className="flex gap-2 text-xs">
                               <span className="text-slate-500 w-20 flex-shrink-0">RS / Klinik</span>
-                              <span className="text-slate-700 font-medium truncate">{reg.practice_location ?? reg.hospital ?? "-"}</span>
+                              <span className="text-slate-700 font-medium truncate">
+                                {reg.practice_location ?? reg.hospital ?? "-"}
+                              </span>
                             </div>
                             <div className="flex gap-2 text-xs">
                               <span className="text-slate-500 w-20 flex-shrink-0">Pengalaman</span>
@@ -1017,19 +1109,29 @@ export function AdminDoctors() {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200">
-                        {["Dokter", "Spesialisasi", "RS / Klinik", "Status", "Bergabung", "Pasien", "Aksi"].map(
-                          (h) => (
-                            <th
-                              key={h}
-                              className={[
-                                "text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3",
-                                h === "Aksi" ? "text-right" : h === "Status" ? "text-center" : "text-left",
-                              ].join(" ")}
-                            >
-                              {h}
-                            </th>
-                          ),
-                        )}
+                        {[
+                          "Dokter",
+                          "Spesialisasi",
+                          "RS / Klinik",
+                          "Status",
+                          "Bergabung",
+                          "Pasien",
+                          "Aksi",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className={[
+                              "text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3",
+                              h === "Aksi"
+                                ? "text-right"
+                                : h === "Status"
+                                  ? "text-center"
+                                  : "text-left",
+                            ].join(" ")}
+                          >
+                            {h}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
@@ -1146,7 +1248,9 @@ export function AdminDoctors() {
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="text-slate-900 font-bold text-sm truncate">{reg.name}</h3>
-                          <p className="text-rose-600 text-xs font-medium mt-0.5">{reg.specialty}</p>
+                          <p className="text-rose-600 text-xs font-medium mt-0.5">
+                            {reg.specialty}
+                          </p>
                           <p className="text-slate-500 text-[11px] mt-1">
                             STR:{" "}
                             <span className="text-slate-600 font-mono">{reg.license_number}</span>
@@ -1177,7 +1281,8 @@ export function AdminDoctors() {
             loading={actionLoading === confirmAction.reg.id}
             onCancel={() => setConfirmAction(null)}
             onConfirm={(notes, approveData) => {
-              if (confirmAction.type === "approve") doApprove(confirmAction.reg, notes, approveData!);
+              if (confirmAction.type === "approve")
+                doApprove(confirmAction.reg, notes, approveData!);
               else doReject(confirmAction.reg, notes);
             }}
           />
@@ -1185,12 +1290,7 @@ export function AdminDoctors() {
       </AnimatePresence>
 
       {/* ── Document Viewer Overlay ──────────────────────────────────────── */}
-      {docViewer && (
-        <DocumentViewerOverlay
-          viewer={docViewer}
-          onClose={() => setDocViewer(null)}
-        />
-      )}
+      {docViewer && <DocumentViewerOverlay viewer={docViewer} onClose={() => setDocViewer(null)} />}
 
       {/* ── Doctor Detail Modal ────────────────────────────────────────────── */}
       <AnimatePresence>
@@ -1198,8 +1298,14 @@ export function AdminDoctors() {
           <DoctorDetailModal
             doctor={viewDoctor}
             onClose={() => setViewDoctor(null)}
-            onActivate={() => { handleActivate(viewDoctor.id); setViewDoctor(null); }}
-            onDeactivate={() => { handleDeactivate(viewDoctor.id); setViewDoctor(null); }}
+            onActivate={() => {
+              handleActivate(viewDoctor.id);
+              setViewDoctor(null);
+            }}
+            onDeactivate={() => {
+              handleDeactivate(viewDoctor.id);
+              setViewDoctor(null);
+            }}
             actionLoading={actionLoading === viewDoctor.id}
           />
         )}
@@ -1247,7 +1353,7 @@ function DoctorDetailModal({
           >
             <X className="h-5 w-5" />
           </button>
-          
+
           {/* Status Badge Over Cover */}
           <div className="absolute top-6 left-6">
             <StatusBadge status={doctor.is_active ? "active" : "inactive"} />
@@ -1291,7 +1397,7 @@ function DoctorDetailModal({
                 </div>
               </div>
             </div>
-            
+
             <div className="flex gap-2">
               {doctor.is_active ? (
                 <button
@@ -1299,7 +1405,11 @@ function DoctorDetailModal({
                   disabled={actionLoading}
                   className="px-6 py-2.5 rounded-2xl text-sm font-bold bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 transition-all disabled:opacity-60 inline-flex items-center gap-2"
                 >
-                  {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserX className="h-4 w-4" />}
+                  {actionLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserX className="h-4 w-4" />
+                  )}
                   Nonaktifkan
                 </button>
               ) : (
@@ -1308,7 +1418,11 @@ function DoctorDetailModal({
                   disabled={actionLoading}
                   className="px-6 py-2.5 rounded-2xl text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all disabled:opacity-60 inline-flex items-center gap-2"
                 >
-                  {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                  {actionLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="h-4 w-4" />
+                  )}
                   Aktifkan
                 </button>
               )}
@@ -1319,12 +1433,17 @@ function DoctorDetailModal({
             {/* Bio Section */}
             <div className="space-y-4">
               <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100">
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Bio Singkat</h4>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                  Bio Singkat
+                </h4>
                 <p className="text-sm text-slate-600 leading-relaxed italic">
-                  "{doctor.description || `Dokter spesialis ${doctor.specialty} yang berkomitmen memberikan pelayanan terbaik bagi pasien Sembuhin.`}"
+                  "
+                  {doctor.description ||
+                    `Dokter spesialis ${doctor.specialty} yang berkomitmen memberikan pelayanan terbaik bagi pasien Sembuhin.`}
+                  "
                 </p>
               </div>
-              
+
               <div className="p-5 rounded-3xl bg-sky-50/50 border border-sky-100/50">
                 <h4 className="text-[11px] font-bold text-sky-600 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Clock className="h-3.5 w-3.5" />
@@ -1343,17 +1462,21 @@ function DoctorDetailModal({
                   <Mail className="h-4 w-4 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Email</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                    Email
+                  </p>
                   <p className="text-sm font-medium text-slate-700">{doctor.email}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
                 <div className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center">
                   <MapPin className="h-4 w-4 text-violet-600" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">RS / Klinik</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                    RS / Klinik
+                  </p>
                   <p className="text-sm font-medium text-slate-700">{doctor.hospital || "-"}</p>
                 </div>
               </div>
@@ -1363,8 +1486,12 @@ function DoctorDetailModal({
                   <FileText className="h-4 w-4 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">No. STR / Lisensi</p>
-                  <p className="text-sm font-mono font-medium text-slate-700">{doctor.license_number || "—"}</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                    No. STR / Lisensi
+                  </p>
+                  <p className="text-sm font-mono font-medium text-slate-700">
+                    {doctor.license_number || "—"}
+                  </p>
                 </div>
               </div>
 
@@ -1373,9 +1500,15 @@ function DoctorDetailModal({
                   <Calendar className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Bergabung Sejak</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                    Bergabung Sejak
+                  </p>
                   <p className="text-sm font-medium text-slate-700">
-                    {new Date(doctor.joined_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                    {new Date(doctor.joined_at).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
               </div>

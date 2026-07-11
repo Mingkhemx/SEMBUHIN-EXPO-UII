@@ -5,17 +5,12 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
-  plugins: [
-    TanStackRouterVite(),
-    react(),
-    tailwindcss(),
-    tsconfigPaths(),
-  ],
+  plugins: [TanStackRouterVite(), react(), tailwindcss(), tsconfigPaths()],
   server: {
     port: 8080,
     fs: {
       // Allow serving files from node_modules (for Human.js model files)
-      allow: ['..'],
+      allow: [".."],
     },
   },
   build: {

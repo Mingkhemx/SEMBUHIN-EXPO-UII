@@ -4,7 +4,7 @@ import * as THREE from "three";
 
 function PillModel() {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   useFrame((state) => {
     if (!groupRef.current) return;
     const t = state.clock.getElapsedTime();
@@ -12,7 +12,7 @@ function PillModel() {
     groupRef.current.rotation.x = Math.sin(t * 0.8) * 0.6 + 0.5;
     groupRef.current.rotation.y = t * 0.4 + Math.cos(t * 0.5) * 0.5;
     groupRef.current.rotation.z = Math.sin(t * 0.3) * 0.3;
-    
+
     // Slight random drift
     groupRef.current.position.y = Math.sin(t * 1.5) * 0.2 + Math.sin(t * 0.6) * 0.1;
     groupRef.current.position.x = Math.cos(t * 1.2) * 0.15;
@@ -52,7 +52,10 @@ function PillModel() {
 export function Pill3D() {
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center">
-      <Canvas camera={{ position: [0, 0, 4.5], fov: 45 }} className="w-full h-full pointer-events-none">
+      <Canvas
+        camera={{ position: [0, 0, 4.5], fov: 45 }}
+        className="w-full h-full pointer-events-none"
+      >
         <ambientLight intensity={1.5} />
         <directionalLight position={[5, 10, 5]} intensity={3} />
         <pointLight position={[-5, -5, 5]} intensity={2} color="#06b6d4" />

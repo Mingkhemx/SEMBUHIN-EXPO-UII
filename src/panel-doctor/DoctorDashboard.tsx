@@ -1,8 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  MessageSquare, FileText, Calendar, Users, Stethoscope,
-  CheckCircle, Clock, Loader2, AlertCircle, TrendingUp,
+  MessageSquare,
+  FileText,
+  Calendar,
+  Users,
+  Stethoscope,
+  CheckCircle,
+  Clock,
+  Loader2,
+  AlertCircle,
+  TrendingUp,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { DoctorLayout } from "@/panel-doctor/DoctorLayout";
@@ -65,9 +73,11 @@ export function DoctorDashboard() {
 
     try {
       // 1. Fetch stats from backend
-      const statsRes = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/dashboard-stats?doctor_id=${doctorId}`);
+      const statsRes = await fetch(
+        `https://sembuhin-expo-uii-production.up.railway.app/api/doctor/dashboard-stats?doctor_id=${doctorId}`,
+      );
       const statsData = await statsRes.json();
-      
+
       if (statsData.success) {
         setStats(statsData.stats);
       }
@@ -76,13 +86,14 @@ export function DoctorDashboard() {
       const today = new Date().toISOString().split("T")[0];
       const { data: consultations } = await supabase
         .from("consultations")
-        .select("id, patient_name, patient_phone, complaint, appointment_time, appointment_date, consultation_status, consultation_type")
+        .select(
+          "id, patient_name, patient_phone, complaint, appointment_time, appointment_date, consultation_status, consultation_type",
+        )
         .eq("doctor_id", doctorId)
         .eq("appointment_date", today)
         .order("appointment_time", { ascending: true });
 
       setRecentConsultations((consultations || []) as RecentConsultation[]);
-      
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
     } finally {
@@ -99,16 +110,30 @@ export function DoctorDashboard() {
     if (!doctorId) return;
     const channel = supabase
       .channel("dashboard-realtime")
-      .on("postgres_changes", {
-        event: "*", schema: "public", table: "consultations",
-        filter: `doctor_id=eq.${doctorId}`,
-      }, fetchData)
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "consultation_messages",
-      }, fetchData)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "consultations",
+          filter: `doctor_id=eq.${doctorId}`,
+        },
+        fetchData,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "consultation_messages",
+        },
+        fetchData,
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [doctorId, fetchData]);
 
   // ── Update status konsultasi ──
@@ -162,7 +187,6 @@ export function DoctorDashboard() {
   return (
     <DoctorLayout title="Dashboard">
       <div className="max-w-7xl mx-auto space-y-6">
-
         {/* Stats Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STAT_CARDS.map((stat, index) => (
@@ -174,7 +198,9 @@ export function DoctorDashboard() {
               className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-sm transition-all"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className={`h-10 w-10 rounded-lg ${stat.bg} ${stat.border} flex items-center justify-center`}>
+                <div
+                  className={`h-10 w-10 rounded-lg ${stat.bg} ${stat.border} flex items-center justify-center`}
+                >
                   <stat.icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
                 {loading ? (
@@ -183,9 +209,7 @@ export function DoctorDashboard() {
                   <TrendingUp className="h-4 w-4 text-emerald-400" />
                 )}
               </div>
-              <p className="text-2xl font-bold text-slate-900">
-                {loading ? "—" : stat.value}
-              </p>
+              <p className="text-2xl font-bold text-slate-900">{loading ? "—" : stat.value}</p>
               <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
             </motion.div>
           ))}
@@ -198,7 +222,10 @@ export function DoctorDashboard() {
               <h2 className="text-base font-semibold text-slate-900">Konsultasi Hari Ini</h2>
               <p className="text-sm text-slate-500">
                 {new Date().toLocaleDateString("id-ID", {
-                  weekday: "long", day: "numeric", month: "long", year: "numeric"
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
                 })}
               </p>
             </div>
@@ -225,7 +252,10 @@ export function DoctorDashboard() {
                 <thead>
                   <tr className="border-b border-slate-200">
                     {["Pasien", "Gejala", "Waktu", "Status", "Aksi"].map((h) => (
-                      <th key={h} className={`py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider ${h === "Aksi" ? "text-right" : "text-left"}`}>
+                      <th
+                        key={h}
+                        className={`py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider ${h === "Aksi" ? "text-right" : "text-left"}`}
+                      >
                         {h}
                       </th>
                     ))}
@@ -240,7 +270,9 @@ export function DoctorDashboard() {
                             {consult.patient_name[0]?.toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900 text-sm">{consult.patient_name}</p>
+                            <p className="font-medium text-slate-900 text-sm">
+                              {consult.patient_name}
+                            </p>
                             <p className="text-xs text-slate-400">{consult.patient_phone}</p>
                           </div>
                         </div>
@@ -255,14 +287,18 @@ export function DoctorDashboard() {
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                          consult.consultation_status === "completed"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                            : consult.consultation_status === "in_progress"
-                              ? "bg-amber-50 text-amber-700 border border-amber-100"
-                              : "bg-slate-50 text-slate-600 border border-slate-200"
-                        }`}>
-                          {consult.consultation_status === "completed" && <CheckCircle className="h-3 w-3" />}
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                            consult.consultation_status === "completed"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                              : consult.consultation_status === "in_progress"
+                                ? "bg-amber-50 text-amber-700 border border-amber-100"
+                                : "bg-slate-50 text-slate-600 border border-slate-200"
+                          }`}
+                        >
+                          {consult.consultation_status === "completed" && (
+                            <CheckCircle className="h-3 w-3" />
+                          )}
                           {consult.consultation_status.replace("_", " ")}
                         </span>
                       </td>
@@ -274,16 +310,23 @@ export function DoctorDashboard() {
                               disabled={actionLoading === consult.id}
                               className="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-semibold hover:bg-sky-700 transition-all disabled:opacity-60 flex items-center gap-1"
                             >
-                              {actionLoading === consult.id
-                                ? <Loader2 className="h-3 w-3 animate-spin" />
-                                : <Stethoscope className="h-3 w-3" />}
+                              {actionLoading === consult.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Stethoscope className="h-3 w-3" />
+                              )}
                               Mulai
                             </button>
                           )}
                           {consult.consultation_status === "in_progress" && (
                             <>
                               <button
-                                onClick={() => navigate({ to: "/doctor/chat", search: { consultationId: consult.id } })}
+                                onClick={() =>
+                                  navigate({
+                                    to: "/doctor/chat",
+                                    search: { consultationId: consult.id },
+                                  })
+                                }
                                 className="px-3 py-1.5 rounded-lg bg-sky-50 text-sky-700 text-xs font-semibold hover:bg-sky-100 border border-sky-200 transition-all flex items-center gap-1"
                               >
                                 <MessageSquare className="h-3 w-3" />
@@ -294,16 +337,23 @@ export function DoctorDashboard() {
                                 disabled={actionLoading === consult.id}
                                 className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-all disabled:opacity-60 flex items-center gap-1"
                               >
-                                {actionLoading === consult.id
-                                  ? <Loader2 className="h-3 w-3 animate-spin" />
-                                  : <CheckCircle className="h-3 w-3" />}
+                                {actionLoading === consult.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="h-3 w-3" />
+                                )}
                                 Selesai
                               </button>
                             </>
                           )}
                           {consult.consultation_status === "completed" && (
                             <button
-                              onClick={() => navigate({ to: "/doctor/chat", search: { consultationId: consult.id } })}
+                              onClick={() =>
+                                navigate({
+                                  to: "/doctor/chat",
+                                  search: { consultationId: consult.id },
+                                })
+                              }
                               className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold hover:bg-slate-200 transition-all flex items-center gap-1"
                             >
                               <AlertCircle className="h-3 w-3" />
@@ -323,9 +373,27 @@ export function DoctorDashboard() {
         {/* Quick Actions */}
         <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { label: "Buat Resep", icon: FileText, color: "bg-violet-600", hover: "hover:bg-violet-700", path: "/doctor/prescriptions" },
-            { label: "Semua Konsultasi", icon: Stethoscope, color: "bg-sky-600", hover: "hover:bg-sky-700", path: "/doctor/consultations" },
-            { label: "Chat Pasien", icon: MessageSquare, color: "bg-emerald-600", hover: "hover:bg-emerald-700", path: "/doctor/chat" },
+            {
+              label: "Buat Resep",
+              icon: FileText,
+              color: "bg-violet-600",
+              hover: "hover:bg-violet-700",
+              path: "/doctor/prescriptions",
+            },
+            {
+              label: "Semua Konsultasi",
+              icon: Stethoscope,
+              color: "bg-sky-600",
+              hover: "hover:bg-sky-700",
+              path: "/doctor/consultations",
+            },
+            {
+              label: "Chat Pasien",
+              icon: MessageSquare,
+              color: "bg-emerald-600",
+              hover: "hover:bg-emerald-700",
+              path: "/doctor/chat",
+            },
           ].map((action, index) => (
             <Link key={index} to={action.path}>
               <motion.button
@@ -340,7 +408,6 @@ export function DoctorDashboard() {
             </Link>
           ))}
         </div>
-
       </div>
     </DoctorLayout>
   );

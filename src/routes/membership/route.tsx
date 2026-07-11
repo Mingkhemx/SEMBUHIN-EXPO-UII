@@ -2,9 +2,17 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
-  Check, Loader2, ArrowRight,
-  ScanLine, Heart, Brain, Zap, Stethoscope, Shield,
-  Microscope, Pill,
+  Check,
+  Loader2,
+  ArrowRight,
+  ScanLine,
+  Heart,
+  Brain,
+  Zap,
+  Stethoscope,
+  Shield,
+  Microscope,
+  Pill,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,11 +69,14 @@ const FEATURES = [
   },
 ];
 
-
-
 // ─── Subcomponents ────────────────────────────────────────────────────────────
 
-function FaqItem({ faq, index, open, onToggle }: {
+function FaqItem({
+  faq,
+  index,
+  open,
+  onToggle,
+}: {
   faq: { q: string; a: string };
   index: number;
   open: boolean;
@@ -77,18 +88,22 @@ function FaqItem({ faq, index, open, onToggle }: {
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-6 py-5 text-left group"
       >
-        <span className={cn(
-          "text-[15px] font-medium transition-colors",
-          open ? "text-slate-900" : "text-slate-700 group-hover:text-slate-900"
-        )}>
+        <span
+          className={cn(
+            "text-[15px] font-medium transition-colors",
+            open ? "text-slate-900" : "text-slate-700 group-hover:text-slate-900",
+          )}
+        >
           {faq.q}
         </span>
-        <span className={cn(
-          "flex-shrink-0 h-6 w-6 rounded-full border flex items-center justify-center transition-all duration-200",
-          open
-            ? "border-slate-900 bg-slate-900 text-white rotate-180"
-            : "border-slate-200 text-slate-400 group-hover:border-slate-400"
-        )}>
+        <span
+          className={cn(
+            "flex-shrink-0 h-6 w-6 rounded-full border flex items-center justify-center transition-all duration-200",
+            open
+              ? "border-slate-900 bg-slate-900 text-white rotate-180"
+              : "border-slate-200 text-slate-400 group-hover:border-slate-400",
+          )}
+        >
           <ChevronDown className="h-3.5 w-3.5" />
         </span>
       </button>
@@ -140,23 +155,33 @@ function MembershipPage() {
     el.setAttribute("data-client-key", key);
     el.async = true;
     document.body.appendChild(el);
-    return () => { try { document.body.removeChild(el); } catch {} };
+    return () => {
+      try {
+        document.body.removeChild(el);
+      } catch {}
+    };
   }, []);
 
   const handleUpgrade = async () => {
-    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!user) {
+      navigate({ to: "/auth" });
+      return;
+    }
     setIsProcessing(true);
     try {
-      const res = await fetch("https://sembuhin-expo-uii-production.up.railway.app/api/payment/membership", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user.id,
-          email: user.email,
-          name: user.user_metadata?.full_name || "Pengguna Sembuhin",
-          amount: billing === "monthly" ? monthlyPrice : yearlyTotal,
-        }),
-      });
+      const res = await fetch(
+        "https://sembuhin-expo-uii-production.up.railway.app/api/payment/membership",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || "Pengguna Sembuhin",
+            amount: billing === "monthly" ? monthlyPrice : yearlyTotal,
+          }),
+        },
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal membuat transaksi");
       if (data.is_mock) {
@@ -167,10 +192,22 @@ function MembershipPage() {
       }
       if ((window as any).snap) {
         (window as any).snap.pay(data.token, {
-          onSuccess: () => { toast.success("Selamat datang di Sembuhin Premium!"); upgradeToPremium(); setIsProcessing(false); },
-          onPending: () => { toast.info("Menunggu konfirmasi pembayaran..."); setIsProcessing(false); },
-          onError: () => { toast.error("Pembayaran gagal."); setIsProcessing(false); },
-          onClose: () => { setIsProcessing(false); },
+          onSuccess: () => {
+            toast.success("Selamat datang di Sembuhin Premium!");
+            upgradeToPremium();
+            setIsProcessing(false);
+          },
+          onPending: () => {
+            toast.info("Menunggu konfirmasi pembayaran...");
+            setIsProcessing(false);
+          },
+          onError: () => {
+            toast.error("Pembayaran gagal.");
+            setIsProcessing(false);
+          },
+          onClose: () => {
+            setIsProcessing(false);
+          },
         });
       } else {
         throw new Error("Midtrans belum siap. Refresh halaman.");
@@ -183,7 +220,6 @@ function MembershipPage() {
 
   return (
     <div className="min-h-screen">
-
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="px-4 pt-28 pb-6">
         <motion.div
@@ -206,11 +242,19 @@ function MembershipPage() {
             {/* Floating stat chips — desktop only */}
             <div className="absolute top-5 right-5 flex-col gap-2 hidden md:flex">
               {[
-                { icon: Stethoscope, label: "Konsultasi",  value: stats.konsultasi, color: "text-sky-400"    },
-                { icon: Microscope,  label: "Lab",         value: stats.lab,        color: "text-violet-400" },
-                { icon: Pill,        label: "Resep",       value: stats.resep,      color: "text-emerald-400"},
+                {
+                  icon: Stethoscope,
+                  label: "Konsultasi",
+                  value: stats.konsultasi,
+                  color: "text-sky-400",
+                },
+                { icon: Microscope, label: "Lab", value: stats.lab, color: "text-violet-400" },
+                { icon: Pill, label: "Resep", value: stats.resep, color: "text-emerald-400" },
               ].map(({ icon: Icon, label, value, color }) => (
-                <div key={label} className="flex items-center gap-2.5 bg-white/10 border border-white/15 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                <div
+                  key={label}
+                  className="flex items-center gap-2.5 bg-white/10 border border-white/15 backdrop-blur-sm rounded-xl px-3 py-1.5"
+                >
                   <Icon className={cn("h-3.5 w-3.5 flex-shrink-0", color)} />
                   <span className="text-[12px] font-medium text-white/70">{label}</span>
                   <span className={cn("ml-auto text-[13px] font-bold", color)}>{value}</span>
@@ -225,12 +269,16 @@ function MembershipPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-400" />
                 </span>
-                <span className="text-[11px] font-bold text-white/60 tracking-widest uppercase">Sembuhin Premium</span>
+                <span className="text-[11px] font-bold text-white/60 tracking-widest uppercase">
+                  Sembuhin Premium
+                </span>
               </div>
 
               <h1 className="text-[1.9rem] sm:text-[2.4rem] font-bold text-white leading-[1.1] tracking-tight mb-2.5">
-                Satu langganan untuk<br />
-                <span className="text-white/40">semua kebutuhan</span><br />
+                Satu langganan untuk
+                <br />
+                <span className="text-white/40">semua kebutuhan</span>
+                <br />
                 kesehatanmu.
               </h1>
               <p className="text-[13px] text-white/50 leading-relaxed mb-5 max-w-sm">
@@ -241,11 +289,14 @@ function MembershipPage() {
               {/* Stat chips row */}
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 {[
-                  { label: "Total",      value: stats.total,      dot: "bg-sky-400"     },
+                  { label: "Total", value: stats.total, dot: "bg-sky-400" },
                   { label: "Konsultasi", value: stats.konsultasi, dot: "bg-emerald-400" },
-                  { label: "Resep",      value: stats.resep,      dot: "bg-violet-400"  },
+                  { label: "Resep", value: stats.resep, dot: "bg-violet-400" },
                 ].map((s) => (
-                  <div key={s.label} className="flex items-center gap-1.5 bg-white/8 border border-white/10 rounded-lg px-2.5 py-1">
+                  <div
+                    key={s.label}
+                    className="flex items-center gap-1.5 bg-white/8 border border-white/10 rounded-lg px-2.5 py-1"
+                  >
                     <span className={cn("h-1.5 w-1.5 rounded-full", s.dot)} />
                     <span className="text-[12px] font-bold text-white/80">{s.value}</span>
                     <span className="text-[11px] text-white/40">{s.label}</span>
@@ -263,15 +314,19 @@ function MembershipPage() {
                       "px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all flex items-center gap-1.5",
                       billing === b
                         ? "bg-white text-slate-900 shadow-sm"
-                        : "text-white/60 hover:text-white/80"
+                        : "text-white/60 hover:text-white/80",
                     )}
                   >
                     {b === "monthly" ? "Bulanan" : "Tahunan"}
                     {b === "yearly" && (
-                      <span className={cn(
-                        "text-[9px] font-bold px-1.5 py-0.5 rounded-full",
-                        billing === "yearly" ? "bg-emerald-500 text-white" : "bg-white/15 text-emerald-300"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-[9px] font-bold px-1.5 py-0.5 rounded-full",
+                          billing === "yearly"
+                            ? "bg-emerald-500 text-white"
+                            : "bg-white/15 text-emerald-300",
+                        )}
+                      >
                         -25%
                       </span>
                     )}
@@ -286,7 +341,6 @@ function MembershipPage() {
       {/* ── PRICING CARDS ────────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-4 pb-32">
         <div className="grid md:grid-cols-2 gap-5 items-stretch">
-
           {/* FREE CARD */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -304,29 +358,30 @@ function MembershipPage() {
                 </span>
                 <span className="text-sm text-slate-400 mb-1.5">/bulan</span>
               </div>
-              <p className="text-[13px] text-slate-400">
-                Untuk memulai. Tidak perlu kartu kredit.
-              </p>
+              <p className="text-[13px] text-slate-400">Untuk memulai. Tidak perlu kartu kredit.</p>
             </div>
 
             <div className="space-y-3.5 flex-1 mb-8">
               {FEATURES.map((f, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <span className={cn(
-                    "h-[18px] w-[18px] rounded-full flex items-center justify-center flex-shrink-0",
-                    f.free
-                      ? "bg-emerald-100"
-                      : "border border-slate-200"
-                  )}>
-                    {f.free
-                      ? <Check className="h-2.5 w-2.5 text-emerald-600 stroke-[3]" />
-                      : <span className="h-1 w-1 rounded-full bg-slate-300" />
-                    }
+                  <span
+                    className={cn(
+                      "h-[18px] w-[18px] rounded-full flex items-center justify-center flex-shrink-0",
+                      f.free ? "bg-emerald-100" : "border border-slate-200",
+                    )}
+                  >
+                    {f.free ? (
+                      <Check className="h-2.5 w-2.5 text-emerald-600 stroke-[3]" />
+                    ) : (
+                      <span className="h-1 w-1 rounded-full bg-slate-300" />
+                    )}
                   </span>
-                  <span className={cn(
-                    "text-sm",
-                    f.free ? "text-slate-800 font-medium" : "text-slate-350 text-slate-400"
-                  )}>
+                  <span
+                    className={cn(
+                      "text-sm",
+                      f.free ? "text-slate-800 font-medium" : "text-slate-350 text-slate-400",
+                    )}
+                  >
                     {f.title}
                   </span>
                 </div>
@@ -352,10 +407,14 @@ function MembershipPage() {
             }}
           >
             {/* Subtle glow orbs */}
-            <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-[0.06]
-              bg-sky-400 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full opacity-[0.05]
-              bg-violet-400 blur-3xl pointer-events-none" />
+            <div
+              className="absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-[0.06]
+              bg-sky-400 blur-3xl pointer-events-none"
+            />
+            <div
+              className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full opacity-[0.05]
+              bg-violet-400 blur-3xl pointer-events-none"
+            />
 
             <div className="relative mb-8">
               <div className="flex items-start justify-between mb-4">
@@ -441,7 +500,9 @@ function MembershipPage() {
                     disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_1px_3px_rgba(0,0,0,0.15)]"
                 >
                   {isProcessing ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Memproses...</>
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Memproses...
+                    </>
                   ) : (
                     <>
                       {user ? "Upgrade ke Premium" : "Mulai Sekarang"}
@@ -455,14 +516,8 @@ function MembershipPage() {
               </p>
             </div>
           </motion.div>
-
         </div>
       </section>
-
-
-
-
-
     </div>
   );
 }

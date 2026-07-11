@@ -31,7 +31,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
       elements.push(
         <h4 key={i} className="font-bold text-[13px] mt-2 mb-1 text-foreground">
           {renderInline(trimmed.slice(4))}
-        </h4>
+        </h4>,
       );
       i++;
       continue;
@@ -40,7 +40,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
       elements.push(
         <h3 key={i} className="font-bold text-[14px] mt-2.5 mb-1 text-foreground">
           {renderInline(trimmed.slice(3))}
-        </h3>
+        </h3>,
       );
       i++;
       continue;
@@ -49,7 +49,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
       elements.push(
         <h2 key={i} className="font-bold text-[15px] mt-3 mb-1.5 text-foreground">
           {renderInline(trimmed.slice(2))}
-        </h2>
+        </h2>,
       );
       i++;
       continue;
@@ -65,7 +65,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
           listItems.push(
             <li key={i} className="mb-1.5 text-[13px] leading-relaxed">
               {renderInline(content)}
-            </li>
+            </li>,
           );
           i++;
         } else if (cur === "") {
@@ -84,7 +84,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
       elements.push(
         <ol key={`ol-${i}`} className="list-decimal pl-5 space-y-0.5 my-1.5">
           {listItems}
-        </ol>
+        </ol>,
       );
       continue;
     }
@@ -99,7 +99,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
           listItems.push(
             <li key={i} className="mb-1.5 text-[13px] leading-relaxed">
               {renderInline(content)}
-            </li>
+            </li>,
           );
           i++;
         } else if (cur === "") {
@@ -117,7 +117,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
       elements.push(
         <ul key={`ul-${i}`} className="list-disc pl-5 space-y-0.5 my-1.5">
           {listItems}
-        </ul>
+        </ul>,
       );
       continue;
     }
@@ -126,7 +126,7 @@ export function MarkdownRenderer({ text, className = "" }: Props) {
     elements.push(
       <p key={i} className="text-[13px] leading-relaxed mb-1.5">
         {renderInline(trimmed)}
-      </p>
+      </p>,
     );
     i++;
   }
@@ -154,21 +154,24 @@ function renderInline(text: string): ReactNode[] {
       parts.push(
         <strong key={key++} className="font-semibold text-foreground">
           {match[2]}
-        </strong>
+        </strong>,
       );
     } else if (match[3]) {
       // Italic
       parts.push(
         <em key={key++} className="italic">
           {match[3]}
-        </em>
+        </em>,
       );
     } else if (match[4]) {
       // Inline code
       parts.push(
-        <code key={key++} className="rounded bg-sky-50 px-1 py-0.5 text-[12px] font-mono text-sky-700">
+        <code
+          key={key++}
+          className="rounded bg-sky-50 px-1 py-0.5 text-[12px] font-mono text-sky-700"
+        >
           {match[4]}
-        </code>
+        </code>,
       );
     }
 

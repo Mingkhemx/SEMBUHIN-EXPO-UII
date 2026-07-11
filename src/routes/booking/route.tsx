@@ -1,15 +1,6 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  ArrowRight,
-  User,
-  Phone,
-  Mail,
-  Loader2,
-} from "lucide-react";
+import { Calendar, Clock, MapPin, ArrowRight, User, Phone, Mail, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -80,7 +71,7 @@ function BookingPage() {
     if (error) {
       console.error("Gagal membuat konsultasi:", error);
       setErrorMsg(
-        "Gagal membuat janji konsultasi. Pastikan tabel 'consultations' sudah dibuat (jalankan supabase-consultations.sql)."
+        "Gagal membuat janji konsultasi. Pastikan tabel 'consultations' sudah dibuat (jalankan supabase-consultations.sql).",
       );
       return;
     }
@@ -96,20 +87,10 @@ function BookingPage() {
     });
   };
 
-  const timeSlots = [
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-  ];
+  const timeSlots = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left: Form */}
         <div className="lg:col-span-2 space-y-6">
@@ -130,9 +111,7 @@ function BookingPage() {
                     type="text"
                     required
                     value={form.patientName}
-                    onChange={(e) =>
-                      setForm({ ...form, patientName: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, patientName: e.target.value })}
                     placeholder="Masukkan nama lengkap"
                     className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   />
@@ -151,9 +130,7 @@ function BookingPage() {
                       type="tel"
                       required
                       value={form.patientPhone}
-                      onChange={(e) =>
-                        setForm({ ...form, patientPhone: e.target.value })
-                      }
+                      onChange={(e) => setForm({ ...form, patientPhone: e.target.value })}
                       placeholder="0812xxxxxxxx"
                       className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                     />
@@ -169,9 +146,7 @@ function BookingPage() {
                     <input
                       type="email"
                       value={form.patientEmail}
-                      onChange={(e) =>
-                        setForm({ ...form, patientEmail: e.target.value })
-                      }
+                      onChange={(e) => setForm({ ...form, patientEmail: e.target.value })}
                       placeholder="email@example.com"
                       className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                     />
@@ -211,7 +186,7 @@ function BookingPage() {
                         "py-2.5 px-1.5 rounded-xl text-sm font-semibold transition-all border",
                         form.time === time
                           ? "bg-gradient-to-r from-sky-600 to-blue-600 text-white border-transparent shadow-lg shadow-sky-500/20"
-                          : "bg-white text-slate-700 border-slate-200 hover:border-sky-300 hover:bg-sky-50"
+                          : "bg-white text-slate-700 border-slate-200 hover:border-sky-300 hover:bg-sky-50",
                       )}
                     >
                       {time}
@@ -222,9 +197,7 @@ function BookingPage() {
 
               {/* Keluhan */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Keluhan
-                </label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Keluhan</label>
                 <textarea
                   required
                   rows={4}
@@ -282,7 +255,9 @@ function BookingPage() {
               <h3 className="text-xl font-bold font-display text-slate-900">
                 {search.doctorName || "Dr. Sarah Wijaya"}
               </h3>
-              <p className="text-sm text-slate-500 mt-1 font-semibold">{search.doctorSpec || "Bedah Kardiovaskular"}</p>
+              <p className="text-sm text-slate-500 mt-1 font-semibold">
+                {search.doctorSpec || "Bedah Kardiovaskular"}
+              </p>
               <div className="flex items-center gap-3 mt-4 text-sm text-slate-600">
                 <MapPin className="h-4 w-4 text-sky-500" />
                 <span>{search.doctorHospital || "RS Jantung Harapan Kita"}</span>
@@ -296,9 +271,7 @@ function BookingPage() {
 
           {/* Price summary */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-6">
-            <h4 className="text-base font-bold text-slate-900 mb-4">
-              Ringkasan Biaya
-            </h4>
+            <h4 className="text-base font-bold text-slate-900 mb-4">Ringkasan Biaya</h4>
             <div className="flex items-center justify-between py-2 border-b border-slate-100">
               <span className="text-sm text-slate-600">Biaya Konsultasi</span>
               <span className="text-lg font-bold font-display text-slate-900">

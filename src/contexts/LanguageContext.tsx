@@ -26,7 +26,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const t = (path: string): any => {
     const keys = path.split(".");
     let result = translations[language];
-    
+
     for (const key of keys) {
       if (result && result[key] !== undefined) {
         result = result[key];
@@ -45,7 +45,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         return foundFallback ? fallback : path;
       }
     }
-    
+
     return result !== undefined ? result : path;
   };
 

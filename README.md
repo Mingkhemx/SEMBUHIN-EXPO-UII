@@ -4,7 +4,7 @@
 
 # **SEMBUHIN**
 
-### *Platform Ekosistem Kesehatan Digital Terintegrasi*
+### _Platform Ekosistem Kesehatan Digital Terintegrasi_
 
 **Kesehatan & Kesejahteraan Hidup Luar Biasa**
 
@@ -28,27 +28,30 @@
 ## ✨ Fitur Utama
 
 ### 🏥 Pelayanan Kesehatan
-| Fitur | Deskripsi |
-|-------|-----------|
-| **Konsultasi Dokter** | Temukan & buat janji dengan dokter spesialis terpercaya |
-| **AI Symptom Triage** | Input gejala, AI mengklasifikasikan urgensi: darurat, perlu dokter, atau self-care |
-| **Mental Health Care** | Screening PHQ-9 & GAD-7, modul CBT interaktif, video call AI therapist |
-| **Cek Jantung** | Pantau detak jantung real-time terhubung dari HP |
-| **Health Twin 3D** | Avatar digital twin tubuh dengan model anatomi 3D interaktif |
-| **Dermatologi AI Scan** | Live camera + analisis AI real-time untuk kondisi kulit |
-| **Mood Check** | Deteksi mood via kamera depan dengan analisis ekspresi wajah |
-| **Rekam Medis Mandiri** | Riwayat konsultasi, lab & resep tersimpan, ekspor PDF kapan saja |
-| **Komunitas Pasien** | Forum per kondisi medis, dimoderasi dokter, klaim divalidasi AI |
-| **Resep Digital** | Visualisasi 3D molekul obat & riwayat resep |
+
+| Fitur                   | Deskripsi                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **Konsultasi Dokter**   | Temukan & buat janji dengan dokter spesialis terpercaya                            |
+| **AI Symptom Triage**   | Input gejala, AI mengklasifikasikan urgensi: darurat, perlu dokter, atau self-care |
+| **Mental Health Care**  | Screening PHQ-9 & GAD-7, modul CBT interaktif, video call AI therapist             |
+| **Cek Jantung**         | Pantau detak jantung real-time terhubung dari HP                                   |
+| **Health Twin 3D**      | Avatar digital twin tubuh dengan model anatomi 3D interaktif                       |
+| **Dermatologi AI Scan** | Live camera + analisis AI real-time untuk kondisi kulit                            |
+| **Mood Check**          | Deteksi mood via kamera depan dengan analisis ekspresi wajah                       |
+| **Rekam Medis Mandiri** | Riwayat konsultasi, lab & resep tersimpan, ekspor PDF kapan saja                   |
+| **Komunitas Pasien**    | Forum per kondisi medis, dimoderasi dokter, klaim divalidasi AI                    |
+| **Resep Digital**       | Visualisasi 3D molekul obat & riwayat resep                                        |
 
 ### 📚 Edukasi Kesehatan
-| Fitur | Deskripsi |
-|-------|-----------|
-| **Artikel Kesehatan** | Kumpulan riset dan artikel medis terpercaya dari dokter & ahli |
-| **Tips Hidup Sehat** | Panduan nutrisi, checklist kebiasaan harian & tantangan mingguan |
-| **Video Edukasi** | Konten visual interaktif dengan YouTube embed player |
+
+| Fitur                 | Deskripsi                                                        |
+| --------------------- | ---------------------------------------------------------------- |
+| **Artikel Kesehatan** | Kumpulan riset dan artikel medis terpercaya dari dokter & ahli   |
+| **Tips Hidup Sehat**  | Panduan nutrisi, checklist kebiasaan harian & tantangan mingguan |
+| **Video Edukasi**     | Konten visual interaktif dengan YouTube embed player             |
 
 ### 🔧 Fitur Platform
+
 - 🔐 **Login / Register** — Autentikasi dengan social login (Google, Apple)
 - 🌐 **Multi-bahasa** — 7 bahasa: Indonesia, English, Melayu, 中文, 日本語, 한국어, العربية
 - 💬 **Live Chat** — Chat widget dengan quick replies & typing indicator
@@ -59,25 +62,26 @@
 
 ## 🛠️ Tech Stack
 
-| Kategori | Teknologi |
-|----------|-----------|
-| **Framework** | React 19.2 + TypeScript 5.8 |
-| **Build Tool** | Vite 7.3 |
-| **Routing** | TanStack Router 1.168 (file-based) |
-| **Styling** | Tailwind CSS 4.2 + Tailwind Merge |
-| **Animation** | Framer Motion 12.x |
-| **3D Rendering** | Three.js + React Three Fiber + Drei |
-| **UI Components** | Radix UI primitives + shadcn/ui |
-| **Icons** | Lucide React |
-| **Real-time** | Socket.IO Client |
-| **Forms** | React Hook Form + Zod validation |
-| **Linting** | ESLint 9 + Prettier |
+| Kategori          | Teknologi                           |
+| ----------------- | ----------------------------------- |
+| **Framework**     | React 19.2 + TypeScript 5.8         |
+| **Build Tool**    | Vite 7.3                            |
+| **Routing**       | TanStack Router 1.168 (file-based)  |
+| **Styling**       | Tailwind CSS 4.2 + Tailwind Merge   |
+| **Animation**     | Framer Motion 12.x                  |
+| **3D Rendering**  | Three.js + React Three Fiber + Drei |
+| **UI Components** | Radix UI primitives + shadcn/ui     |
+| **Icons**         | Lucide React                        |
+| **Real-time**     | Socket.IO Client                    |
+| **Forms**         | React Hook Form + Zod validation    |
+| **Linting**       | ESLint 9 + Prettier                 |
 
 ---
 
 ## 🚀 Memulai
 
 ### Prasyarat
+
 - **Node.js** >= 18.x
 - **npm** >= 9.x
 
@@ -158,14 +162,14 @@ src/
 
 ## 🎨 Design System
 
-| Elemen | Spesifikasi |
-|--------|-------------|
-| **Font** | Inter (body) + Space Grotesk (display) |
-| **Primary Color** | Sky Blue (`#0ea5e9`) |
-| **Animation** | Fade + Blur (prinsip halus, tidak dramatis) |
-| **Cards** | White bg + subtle borders + shadow-lg |
-| **Background** | Aurora gradient blobs (animated) |
-| **Icons** | Lucide React (line-style) |
+| Elemen            | Spesifikasi                                 |
+| ----------------- | ------------------------------------------- |
+| **Font**          | Inter (body) + Space Grotesk (display)      |
+| **Primary Color** | Sky Blue (`#0ea5e9`)                        |
+| **Animation**     | Fade + Blur (prinsip halus, tidak dramatis) |
+| **Cards**         | White bg + subtle borders + shadow-lg       |
+| **Background**    | Aurora gradient blobs (animated)            |
+| **Icons**         | Lucide React (line-style)                   |
 
 ---
 
@@ -184,7 +188,8 @@ Proyek ini dikembangkan untuk keperluan akademis — **Kelompok 5 PSI (Pengemban
 <img src="https://img.shields.io/badge/Fullstack_Developer-0EA5E9?style=for-the-badge&logo=github&logoColor=white" />
 
 ### **MigwaraDev**
-#### *Muhammad Rifki Apreliant*
+
+#### _Muhammad Rifki Apreliant_
 
 <br />
 
@@ -196,7 +201,7 @@ Proyek ini dikembangkan untuk keperluan akademis — **Kelompok 5 PSI (Pengemban
 
 ---
 
-*Dibangun dengan ❤️ menggunakan React, TypeScript, dan teknologi modern lainnya.*
+_Dibangun dengan ❤️ menggunakan React, TypeScript, dan teknologi modern lainnya._
 
 **© 2026 Sembuhin — MigwaraDev × Kelompok 5 PSI**
 

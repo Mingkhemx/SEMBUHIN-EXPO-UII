@@ -1,8 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  Mic, MicOff, Send, Star, Sparkles, Zap, Crown,
-  ChevronDown, Phone, PhoneOff,
+  Mic,
+  MicOff,
+  Send,
+  Star,
+  Sparkles,
+  Zap,
+  Crown,
+  ChevronDown,
+  Phone,
+  PhoneOff,
 } from "lucide-react";
 import { VoiceWave } from "@/components/VoiceWave";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,7 +19,6 @@ import { supabase } from "@/lib/supabase";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { useConversation } from "@elevenlabs/react";
 import { useLanguage } from "@/contexts/LanguageContext";
-
 
 /* ─── Model Config ─────────────────────────────────────────── */
 type ModelId = "1.1" | "1.2" | "1.3";
@@ -140,7 +147,9 @@ function VoiceMode() {
               {isConnected ? (
                 <>
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-emerald-600">{isSpeaking ? t("konsul.speaking") : t("konsul.listening")}</span>
+                  <span className="text-emerald-600">
+                    {isSpeaking ? t("konsul.speaking") : t("konsul.listening")}
+                  </span>
                 </>
               ) : (
                 <>
@@ -236,15 +245,17 @@ function Konsul() {
 
   // Handle rating
   const handleRating = async (msgId: string, rating: number) => {
-    setMessages(prev => prev.map(msg => msg.id === msgId ? { ...msg, rating } : msg));
+    setMessages((prev) => prev.map((msg) => (msg.id === msgId ? { ...msg, rating } : msg)));
   };
 
   useEffect(() => {
     if (user) {
-      const today = new Date().toISOString().split('T')[0];
-      supabase.from('chat_history').select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', `${today}T00:00:00.000Z`)
+      const today = new Date().toISOString().split("T")[0];
+      supabase
+        .from("chat_history")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", `${today}T00:00:00.000Z`)
         .then(({ count }) => setChatCount(count || 0));
     }
   }, [user]);
@@ -266,9 +277,19 @@ function Konsul() {
   const send = async (text?: string) => {
     const messageText = (text ?? input).trim();
     if (!messageText) return;
-    if (!user) { navigate({ to: '/auth' }); return; }
+    if (!user) {
+      navigate({ to: "/auth" });
+      return;
+    }
     if (chatLimit > 0 && chatCount >= chatLimit) {
-      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: `${t("konsul.limit_reached")} **${chatLimit} ${t("konsul.chats_today")}**.` }]);
+      setMessages((m) => [
+        ...m,
+        {
+          id: Date.now().toString(),
+          role: "doc",
+          text: `${t("konsul.limit_reached")} **${chatLimit} ${t("konsul.chats_today")}**.`,
+        },
+      ]);
       return;
     }
 
@@ -276,79 +297,93 @@ function Konsul() {
     setInput("");
     setIsTyping(true);
     // Save to chat_history (non-blocking, ignore if table doesn't exist)
-    supabase.from('chat_history').insert({ user_id: user.id, message: messageText, sender: 'user' }).then(() => {});
-    setChatCount(prev => prev + 1);
+    supabase
+      .from("chat_history")
+      .insert({ user_id: user.id, message: messageText, sender: "user" })
+      .then(() => {});
+    setChatCount((prev) => prev + 1);
 
     try {
       const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-      if (!API_KEY) throw new Error('API key tidak dikonfigurasi');
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
+      if (!API_KEY) throw new Error("API key tidak dikonfigurasi");
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Sembuhin AI',
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${API_KEY}`,
+          "HTTP-Referer": window.location.origin,
+          "X-Title": "Sembuhin AI",
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
+          model: "google/gemini-2.5-flash",
           max_tokens: 1024,
           messages: [
             {
-              role: 'system',
-              content: 'Kamu adalah Dr. Sembuhin, asisten kesehatan AI profesional dari Sembuhin. HANYA jawab tentang kesehatan. Jawab dalam Bahasa Indonesia dengan format markdown yang rapi.'
+              role: "system",
+              content:
+                "Kamu adalah Dr. Sembuhin, asisten kesehatan AI profesional dari Sembuhin. HANYA jawab tentang kesehatan. Jawab dalam Bahasa Indonesia dengan format markdown yang rapi.",
             },
-            { role: 'user', content: messageText }
-          ]
-        })
+            { role: "user", content: messageText },
+          ],
+        }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || 'OpenRouter error');
+      if (!response.ok) throw new Error(data.error?.message || "OpenRouter error");
       const botText = data.choices[0].message.content;
 
       setCurrentTypingText("");
       let i = 0;
       const botId = Date.now().toString();
       const typingInterval = setInterval(() => {
-        if (i <= botText.length) { setCurrentTypingText(botText.substring(0, i)); i++; }
-        else {
+        if (i <= botText.length) {
+          setCurrentTypingText(botText.substring(0, i));
+          i++;
+        } else {
           clearInterval(typingInterval);
           setMessages((m) => [...m, { id: botId, role: "doc", text: botText }]);
-          setCurrentTypingText(""); setIsTyping(false);
+          setCurrentTypingText("");
+          setIsTyping(false);
         }
       }, 20);
-      await supabase.from('chat_history').insert({ user_id: user.id, message: botText, sender: 'doc' }).then(() => {});
+      await supabase
+        .from("chat_history")
+        .insert({ user_id: user.id, message: botText, sender: "doc" })
+        .then(() => {});
     } catch (err: any) {
-      console.error('AI error:', err.message);
-      setMessages((m) => [...m, { id: Date.now().toString(), role: "doc", text: t("konsul.error_message") }]);
+      console.error("AI error:", err.message);
+      setMessages((m) => [
+        ...m,
+        { id: Date.now().toString(), role: "doc", text: t("konsul.error_message") },
+      ]);
       setIsTyping(false);
     }
   };
 
   return (
     <div className="space-y-6 pb-12">
-        {/* ── Header ─────────────────────────────────────────── */}
-        <header className="pt-4 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div>
-              <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
-                {t("konsul.title")} <span className="text-gradient">{t("konsul.title_accent")}</span>
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                {t("konsul.subtitle")}
-              </p>
-              <p className="mt-1 text-xs text-amber-600 font-medium">
-                {t("konsul.warning")}
-              </p>
-            </div>
+      {/* ── Header ─────────────────────────────────────────── */}
+      <header className="pt-4 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+          <div>
+            <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+              {t("konsul.title")} <span className="text-gradient">{t("konsul.title_accent")}</span>
+            </h1>
+            <p className="mt-2 text-muted-foreground">{t("konsul.subtitle")}</p>
+            <p className="mt-1 text-xs text-amber-600 font-medium">{t("konsul.warning")}</p>
+          </div>
           {/* Usage counter pill */}
           {user && (
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/80 px-4 py-2 text-xs font-medium text-slate-600 shadow-sm">
               <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               {chatLimit > 0 ? (
-                <span>{t("konsul.remaining")} <strong>{chatLimit - chatCount}</strong> {t("konsul.of")} {chatLimit} {t("konsul.chats_today")}</span>
+                <span>
+                  {t("konsul.remaining")} <strong>{chatLimit - chatCount}</strong> {t("konsul.of")}{" "}
+                  {chatLimit} {t("konsul.chats_today")}
+                </span>
               ) : (
-                <span><strong>{t("konsul.unlimited")}</strong></span>
+                <span>
+                  <strong>{t("konsul.unlimited")}</strong>
+                </span>
               )}
             </div>
           )}
@@ -385,7 +420,11 @@ function Konsul() {
             <div className="flex items-center justify-between border-b border-white/40 px-5 py-3.5">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <img src="/gif_logo/icon.png" alt="Sembuhin AI" className="h-10 w-10 object-contain" />
+                  <img
+                    src="/gif_logo/icon.png"
+                    alt="Sembuhin AI"
+                    className="h-10 w-10 object-contain"
+                  />
                   <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-400 border-2 border-white">
                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
                   </span>
@@ -393,7 +432,9 @@ function Konsul() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-[15px]">Dr. Sembuhin AI</span>
-                    <span className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${selectedModel.accent} px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide`}>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${selectedModel.accent} px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide`}
+                    >
                       {selectedModel.badge}
                     </span>
                   </div>
@@ -405,7 +446,9 @@ function Konsul() {
               </div>
               {user && chatLimit > 0 && (
                 <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-medium text-slate-600">
-                  <span className={`h-2 w-2 rounded-full ${chatCount >= chatLimit ? 'bg-rose-400' : chatCount >= chatLimit * 0.8 ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                  <span
+                    className={`h-2 w-2 rounded-full ${chatCount >= chatLimit ? "bg-rose-400" : chatCount >= chatLimit * 0.8 ? "bg-amber-400" : "bg-emerald-400"}`}
+                  />
                   {chatCount}/{chatLimit}
                 </div>
               )}
@@ -423,7 +466,11 @@ function Konsul() {
                 >
                   {m.role === "doc" && (
                     <div className="flex-shrink-0">
-                      <img src="/gif_logo/icon.png" alt="Sembuhin" className="h-8 w-8 object-contain" />
+                      <img
+                        src="/gif_logo/icon.png"
+                        alt="Sembuhin"
+                        className="h-8 w-8 object-contain"
+                      />
                     </div>
                   )}
                   <div className={`max-w-[80%] ${m.role === "user" ? "order-2" : ""}`}>
@@ -449,8 +496,10 @@ function Konsul() {
                         transition={{ delay: 0.3 }}
                         className="mt-2 flex items-center gap-1 px-1"
                       >
-                        <span className="text-[11px] text-muted-foreground mr-1">{t("konsul.rating_question")}</span>
-                        {[1, 2, 3, 4, 5].map(rating => (
+                        <span className="text-[11px] text-muted-foreground mr-1">
+                          {t("konsul.rating_question")}
+                        </span>
+                        {[1, 2, 3, 4, 5].map((rating) => (
                           <button
                             key={rating}
                             onClick={() => handleRating(m.id, rating)}
@@ -463,7 +512,7 @@ function Konsul() {
                     )}
                     {m.role === "doc" && m.rating && (
                       <div className="mt-2 flex items-center gap-1 px-1">
-                        {[1, 2, 3, 4, 5].map(rating => (
+                        {[1, 2, 3, 4, 5].map((rating) => (
                           <Star
                             key={rating}
                             className={`h-3.5 w-3.5 ${rating <= (m.rating ?? 0) ? "text-amber-400 fill-amber-400" : "text-gray-300"}`}
@@ -489,7 +538,11 @@ function Konsul() {
                   className="flex items-end gap-3 justify-start"
                 >
                   <div className="flex-shrink-0">
-                    <img src="/gif_logo/icon.png" alt="Sembuhin" className="h-8 w-8 object-contain" />
+                    <img
+                      src="/gif_logo/icon.png"
+                      alt="Sembuhin"
+                      className="h-8 w-8 object-contain"
+                    />
                   </div>
                   <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl rounded-bl-md px-4 py-3 shadow-md">
                     {currentTypingText ? (
@@ -498,17 +551,32 @@ function Konsul() {
                       <div className="flex items-center gap-2">
                         <motion.div
                           animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 0.8, repeat: Infinity, delay: 0, ease: "easeInOut" }}
+                          transition={{
+                            duration: 0.8,
+                            repeat: Infinity,
+                            delay: 0,
+                            ease: "easeInOut",
+                          }}
                           className="h-2.5 w-2.5 rounded-full bg-slate-400"
                         />
                         <motion.div
                           animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 0.8, repeat: Infinity, delay: 0.2, ease: "easeInOut" }}
+                          transition={{
+                            duration: 0.8,
+                            repeat: Infinity,
+                            delay: 0.2,
+                            ease: "easeInOut",
+                          }}
                           className="h-2.5 w-2.5 rounded-full bg-slate-400"
                         />
                         <motion.div
                           animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 0.8, repeat: Infinity, delay: 0.4, ease: "easeInOut" }}
+                          transition={{
+                            duration: 0.8,
+                            repeat: Infinity,
+                            delay: 0.4,
+                            ease: "easeInOut",
+                          }}
                           className="h-2.5 w-2.5 rounded-full bg-slate-400"
                         />
                       </div>
@@ -552,11 +620,13 @@ function Konsul() {
 
                   {/* Model selector button — clean cloud pill */}
                   <button
-                    onClick={() => setShowModelPicker(v => !v)}
+                    onClick={() => setShowModelPicker((v) => !v)}
                     className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-medium text-slate-600 transition-all hover:bg-slate-200 flex-shrink-0"
                   >
                     <span>{selectedModel.name}</span>
-                    <ChevronDown className={`h-3 w-3 transition-transform ${showModelPicker ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`h-3 w-3 transition-transform ${showModelPicker ? "rotate-180" : ""}`}
+                    />
                   </button>
 
                   {/* Send button */}
@@ -592,19 +662,21 @@ function Konsul() {
                               setShowModelPicker(false);
                             }}
                             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition-all ${
-                              isActive
-                                ? "bg-slate-100"
-                                : "hover:bg-slate-50"
+                              isActive ? "bg-slate-100" : "hover:bg-slate-50"
                             }`}
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className={`text-[13px] font-medium ${isActive ? 'text-slate-900' : 'text-slate-600'}`}>{model.name}</span>
-                                {isActive && (
-                                  <span className="text-sky-500 text-xs">✓</span>
-                                )}
+                                <span
+                                  className={`text-[13px] font-medium ${isActive ? "text-slate-900" : "text-slate-600"}`}
+                                >
+                                  {model.name}
+                                </span>
+                                {isActive && <span className="text-sky-500 text-xs">✓</span>}
                               </div>
-                              <p className="text-[11px] text-slate-400 mt-0.5">{model.description}</p>
+                              <p className="text-[11px] text-slate-400 mt-0.5">
+                                {model.description}
+                              </p>
                             </div>
                             <span className="text-[10px] font-medium text-slate-400 flex-shrink-0 ml-3">
                               {model.limit > 0 ? `${model.limit}${t("konsul.per_day")}` : "∞"}
@@ -627,12 +699,18 @@ function Konsul() {
                     <div className="h-1 w-16 rounded-full bg-slate-200 overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
-                          chatCount >= chatLimit ? 'bg-rose-400' : chatCount >= chatLimit * 0.8 ? 'bg-amber-400' : 'bg-emerald-400'
+                          chatCount >= chatLimit
+                            ? "bg-rose-400"
+                            : chatCount >= chatLimit * 0.8
+                              ? "bg-amber-400"
+                              : "bg-emerald-400"
                         }`}
                         style={{ width: `${Math.min((chatCount / chatLimit) * 100, 100)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-slate-400">{chatCount}/{chatLimit}</span>
+                    <span className="text-[10px] text-slate-400">
+                      {chatCount}/{chatLimit}
+                    </span>
                   </div>
                 )}
               </div>
@@ -652,7 +730,9 @@ function Konsul() {
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">Voice Mode</span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    Voice Mode
+                  </span>
                   <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Groq AI
@@ -662,7 +742,9 @@ function Konsul() {
                   {listening
                     ? "Mendengarkan..."
                     : isTyping
-                      ? currentTypingText.startsWith("🎙") ? "Mentranskripsi..." : "Memproses jawaban..."
+                      ? currentTypingText.startsWith("🎙")
+                        ? "Mentranskripsi..."
+                        : "Memproses jawaban..."
                       : "Tekan tombol untuk bicara"}
                 </h2>
                 <p className="mt-3 text-muted-foreground text-sm">
@@ -677,11 +759,14 @@ function Konsul() {
                 {messages.length > 1 && (
                   <div className="mt-4 space-y-2 max-h-40 overflow-y-auto">
                     {messages.slice(-4).map((m) => (
-                      <div key={m.id} className={`text-xs rounded-xl px-3 py-2 ${
-                        m.role === "user"
-                          ? "bg-slate-800 text-white text-right ml-8"
-                          : "bg-white border border-slate-200 text-slate-700 mr-8"
-                      }`}>
+                      <div
+                        key={m.id}
+                        className={`text-xs rounded-xl px-3 py-2 ${
+                          m.role === "user"
+                            ? "bg-slate-800 text-white text-right ml-8"
+                            : "bg-white border border-slate-200 text-slate-700 mr-8"
+                        }`}
+                      >
                         {m.text.length > 100 ? m.text.substring(0, 100) + "..." : m.text}
                       </div>
                     ))}
@@ -689,7 +774,7 @@ function Konsul() {
                 )}
 
                 <button
-                  onClick={() => listening ? stopRecording() : startRecording()}
+                  onClick={() => (listening ? stopRecording() : startRecording())}
                   disabled={isTyping}
                   className={`mt-6 inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 font-semibold shadow-glow transition-all text-sm ${
                     listening

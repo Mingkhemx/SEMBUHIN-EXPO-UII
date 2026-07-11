@@ -70,7 +70,12 @@ function OrderStatusBadge({ status }: { status: string }) {
 
 function Th({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <th className={cn("text-left px-5 py-3 text-slate-500 text-xs uppercase font-semibold", className)}>
+    <th
+      className={cn(
+        "text-left px-5 py-3 text-slate-500 text-xs uppercase font-semibold",
+        className,
+      )}
+    >
       {children}
     </th>
   );
@@ -100,7 +105,19 @@ export function AdminMarketplace() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
 
-  const CATEGORIES = ["Obat", "Antibiotik", "Suplemen", "Alat Kesehatan", "Kebersihan", "Herbal", "Vitamin", "Demam", "Lambung", "Alergi", "Higienis"];
+  const CATEGORIES = [
+    "Obat",
+    "Antibiotik",
+    "Suplemen",
+    "Alat Kesehatan",
+    "Kebersihan",
+    "Herbal",
+    "Vitamin",
+    "Demam",
+    "Lambung",
+    "Alergi",
+    "Higienis",
+  ];
 
   useEffect(() => {
     if (editingProduct) {
@@ -129,15 +146,15 @@ export function AdminMarketplace() {
 
     // Subscribe to realtime changes
     const productSub = supabase
-      .channel('public:products')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+      .channel("public:products")
+      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => {
         fetchProducts();
       })
       .subscribe();
 
     const orderSub = supabase
-      .channel('public:orders')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+      .channel("public:orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
         fetchOrders();
       })
       .subscribe();
@@ -155,12 +172,18 @@ export function AdminMarketplace() {
   }
 
   async function fetchProducts() {
-    const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (!error && data) setProducts(data);
   }
 
   async function fetchOrders() {
-    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (!error && data) setOrders(data);
   }
 
@@ -190,24 +213,22 @@ export function AdminMarketplace() {
   async function uploadImage(file: File): Promise<string | null> {
     try {
       setIsUploading(true);
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `products/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('marketplace')
+        .from("marketplace")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('marketplace')
-        .getPublicUrl(filePath);
+      const { data } = supabase.storage.from("marketplace").getPublicUrl(filePath);
 
       return data.publicUrl;
     } catch (error: any) {
-      console.error('Error uploading image:', error.message);
-      toast.error('Gagal mengunggah foto: ' + error.message);
+      console.error("Error uploading image:", error.message);
+      toast.error("Gagal mengunggah foto: " + error.message);
       return null;
     } finally {
       setIsUploading(false);
@@ -217,7 +238,7 @@ export function AdminMarketplace() {
   async function handleSaveProduct(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const priceValue = parseInt(newPrice);
     const stockValue = parseInt(newStock);
 
@@ -232,7 +253,7 @@ export function AdminMarketplace() {
       const uploadedUrl = await uploadImage(newImage);
       if (uploadedUrl) imageUrl = uploadedUrl;
     }
-    
+
     const productData = {
       name: newName,
       category: newCategory,
@@ -241,28 +262,26 @@ export function AdminMarketplace() {
       emoji: newEmoji,
       image_url: imageUrl,
       description: newDescription,
-      status: stockValue > 0 ? "tersedia" : "habis"
+      status: stockValue > 0 ? "tersedia" : "habis",
     };
 
     let error;
     if (editingProduct) {
       const { error: updateError } = await supabase
-        .from('products')
+        .from("products")
         .update(productData)
-        .eq('id', editingProduct.id);
+        .eq("id", editingProduct.id);
       error = updateError;
     } else {
-      const { error: insertError } = await supabase
-        .from('products')
-        .insert([productData]);
+      const { error: insertError } = await supabase.from("products").insert([productData]);
       error = insertError;
     }
 
     if (error) {
       console.error("Supabase Save Error:", error);
-      toast.error(`Gagal ${editingProduct ? 'memperbarui' : 'menambah'} produk: ` + error.message);
+      toast.error(`Gagal ${editingProduct ? "memperbarui" : "menambah"} produk: ` + error.message);
     } else {
-      toast.success(`Produk berhasil ${editingProduct ? 'diperbarui' : 'ditambahkan'}`);
+      toast.success(`Produk berhasil ${editingProduct ? "diperbarui" : "ditambahkan"}`);
       setShowAddModal(false);
       setEditingProduct(null);
     }
@@ -272,7 +291,7 @@ export function AdminMarketplace() {
   async function handleDeleteProduct(id: string) {
     if (!confirm("Yakin ingin menghapus produk ini?")) return;
 
-    const { error } = await supabase.from('products').delete().eq('id', id);
+    const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) {
       toast.error("Gagal menghapus: " + error.message);
     } else {
@@ -281,10 +300,7 @@ export function AdminMarketplace() {
   }
 
   async function handleUpdateOrderStatus(orderId: string, newStatus: string) {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('id', orderId);
+    const { error } = await supabase.from("orders").update({ status: newStatus }).eq("id", orderId);
 
     if (error) {
       toast.error("Gagal memperbarui status: " + error.message);
@@ -323,7 +339,9 @@ export function AdminMarketplace() {
           />
           <AdminStatCard
             label="Pesanan Hari Ini"
-            value={orders.filter(o => new Date(o.created_at).toDateString() === new Date().toDateString()).length.toString()}
+            value={orders
+              .filter((o) => new Date(o.created_at).toDateString() === new Date().toDateString())
+              .length.toString()}
             change="+12%"
             positive
             icon={<ShoppingCart className="h-5 w-5 text-sky-600" />}
@@ -404,9 +422,15 @@ export function AdminMarketplace() {
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-50 to-violet-50 border border-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {product.image_url ? (
-                              <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+                              <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="h-full w-full object-cover"
+                              />
                             ) : (
-                              <span className="text-xl">{product.emoji || <Package className="h-4 w-4 text-slate-400" />}</span>
+                              <span className="text-xl">
+                                {product.emoji || <Package className="h-4 w-4 text-slate-400" />}
+                              </span>
                             )}
                           </div>
                           <span className="text-sm font-semibold text-slate-900">
@@ -437,14 +461,14 @@ export function AdminMarketplace() {
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
-                          <button 
+                          <button
                             onClick={() => setEditingProduct(product)}
                             className="flex items-center gap-1 text-xs font-semibold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1.5 rounded-lg transition-colors"
                           >
                             <Edit className="h-3.5 w-3.5" />
                             Edit
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDeleteProduct(product.id)}
                             className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-lg transition-colors"
                           >
@@ -457,7 +481,12 @@ export function AdminMarketplace() {
                   ))}
                   {!isLoading && products.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="py-10 text-center text-slate-400 text-sm font-medium">Belum ada produk. Klik "Tambah Produk" untuk memulai.</td>
+                      <td
+                        colSpan={6}
+                        className="py-10 text-center text-slate-400 text-sm font-medium"
+                      >
+                        Belum ada produk. Klik "Tambah Produk" untuk memulai.
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -489,7 +518,9 @@ export function AdminMarketplace() {
                       className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                     >
                       <td className="px-5 py-3.5">
-                        <span className="text-xs font-bold text-sky-600 uppercase">#{order.id.slice(0,8)}</span>
+                        <span className="text-xs font-bold text-sky-600 uppercase">
+                          #{order.id.slice(0, 8)}
+                        </span>
                       </td>
                       <td className="px-5 py-3.5">
                         <span className="text-sm font-semibold text-slate-900">
@@ -497,19 +528,25 @@ export function AdminMarketplace() {
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="text-sm text-slate-600">{order.items?.length || 0} items</span>
+                        <span className="text-sm text-slate-600">
+                          {order.items?.length || 0} items
+                        </span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="text-sm font-semibold text-slate-900">Rp {order.total_amount.toLocaleString("id-ID")}</span>
+                        <span className="text-sm font-semibold text-slate-900">
+                          Rp {order.total_amount.toLocaleString("id-ID")}
+                        </span>
                       </td>
                       <td className="px-5 py-3.5">
                         <OrderStatusBadge status={order.status} />
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="text-sm text-slate-500">{new Date(order.created_at).toLocaleDateString("id-ID")}</span>
+                        <span className="text-sm text-slate-500">
+                          {new Date(order.created_at).toLocaleDateString("id-ID")}
+                        </span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <button 
+                        <button
                           onClick={() => setViewingOrder(order)}
                           className="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-lg transition-colors"
                         >
@@ -520,7 +557,12 @@ export function AdminMarketplace() {
                   ))}
                   {!isLoading && orders.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-10 text-center text-slate-400 text-sm font-medium">Belum ada pesanan masuk.</td>
+                      <td
+                        colSpan={7}
+                        className="py-10 text-center text-slate-400 text-sm font-medium"
+                      >
+                        Belum ada pesanan masuk.
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -559,7 +601,9 @@ export function AdminMarketplace() {
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-3">
                             <div className="h-9 w-9 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center flex-shrink-0 text-xl">
-                              {product.emoji || <AlertTriangle className="h-4 w-4 text-amber-600" />}
+                              {product.emoji || (
+                                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                              )}
                             </div>
                             <span className="text-sm font-semibold text-slate-900">
                               {product.name}
@@ -583,7 +627,7 @@ export function AdminMarketplace() {
                           <StatusBadge status={product.status} />
                         </td>
                         <td className="px-5 py-3.5">
-                          <button 
+                          <button
                             onClick={() => setEditingProduct(product)}
                             className="flex items-center gap-1 text-xs font-semibold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1.5 rounded-lg transition-colors"
                           >
@@ -630,7 +674,9 @@ export function AdminMarketplace() {
                     {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
                   </h2>
                   <p className="text-xs text-slate-500 font-medium">
-                    {editingProduct ? "Perbarui data obat/alkes" : "Input data obat/alkes secara lengkap"}
+                    {editingProduct
+                      ? "Perbarui data obat/alkes"
+                      : "Input data obat/alkes secara lengkap"}
                   </p>
                 </div>
                 <button
@@ -647,7 +693,9 @@ export function AdminMarketplace() {
               <form onSubmit={handleSaveProduct} className="p-8 space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nama Produk</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                      Nama Produk
+                    </label>
                     <input
                       required
                       value={newName}
@@ -657,7 +705,9 @@ export function AdminMarketplace() {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Deskripsi</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                      Deskripsi
+                    </label>
                     <textarea
                       value={newDescription}
                       onChange={(e) => setNewDescription(e.target.value)}
@@ -666,16 +716,27 @@ export function AdminMarketplace() {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Foto Produk</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                      Foto Produk
+                    </label>
                     <div className="flex items-center gap-4">
                       <div className="h-24 w-24 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden relative group">
                         {imagePreview ? (
                           <>
-                            <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                            <img
+                              src={imagePreview}
+                              alt="Preview"
+                              className="h-full w-full object-cover"
+                            />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <label className="cursor-pointer p-2 bg-white/20 rounded-full backdrop-blur-sm">
                                 <Upload className="h-4 w-4 text-white" />
-                                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleImageChange}
+                                  className="hidden"
+                                />
                               </label>
                             </div>
                           </>
@@ -683,7 +744,12 @@ export function AdminMarketplace() {
                           <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full hover:bg-slate-100 transition-colors">
                             <ImageIcon className="h-6 w-6 text-slate-300 mb-1" />
                             <span className="text-[10px] font-bold text-slate-400">UPLOAD</span>
-                            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageChange}
+                              className="hidden"
+                            />
                           </label>
                         )}
                         {isUploading && (
@@ -693,25 +759,35 @@ export function AdminMarketplace() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs text-slate-500 mb-2">Gunakan foto berkualitas tinggi (format JPG, PNG). Maksimal 2MB.</p>
+                        <p className="text-xs text-slate-500 mb-2">
+                          Gunakan foto berkualitas tinggi (format JPG, PNG). Maksimal 2MB.
+                        </p>
                       </div>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kategori</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                      Kategori
+                    </label>
                     <select
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}
                       className={inputCls}
                     >
-                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="hidden">
                     {/* Hidden emoji field since it's now a combined input */}
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Harga (Rp)</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                      Harga (Rp)
+                    </label>
                     <input
                       required
                       type="number"
@@ -722,7 +798,9 @@ export function AdminMarketplace() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Stok</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                      Stok
+                    </label>
                     <input
                       required
                       type="number"
@@ -779,7 +857,9 @@ export function AdminMarketplace() {
               <div className="px-8 pt-8 pb-6 flex items-center justify-between border-b border-slate-100">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Detail Pesanan</h2>
-                  <p className="text-xs text-sky-600 font-bold uppercase tracking-widest">#{viewingOrder.id.slice(0, 8)}</p>
+                  <p className="text-xs text-sky-600 font-bold uppercase tracking-widest">
+                    #{viewingOrder.id.slice(0, 8)}
+                  </p>
                 </div>
                 <button
                   onClick={() => setViewingOrder(null)}
@@ -792,34 +872,55 @@ export function AdminMarketplace() {
               <div className="p-8 space-y-6">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pasien</p>
-                    <p className="font-semibold text-slate-900">{viewingOrder.patient_name || "Guest"}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      Pasien
+                    </p>
+                    <p className="font-semibold text-slate-900">
+                      {viewingOrder.patient_name || "Guest"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tanggal</p>
-                    <p className="font-semibold text-slate-900">{new Date(viewingOrder.created_at).toLocaleString("id-ID")}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      Tanggal
+                    </p>
+                    <p className="font-semibold text-slate-900">
+                      {new Date(viewingOrder.created_at).toLocaleString("id-ID")}
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Item Pesanan</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                    Item Pesanan
+                  </p>
                   <div className="space-y-3">
                     {viewingOrder.items?.map((item: any, idx: number) => (
-                      <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100"
+                      >
                         <div className="flex items-center gap-3">
                           <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden">
                             {item.image_url ? (
-                              <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                              <img
+                                src={item.image_url}
+                                alt={item.name}
+                                className="h-full w-full object-cover"
+                              />
                             ) : (
                               <span className="text-2xl">{item.emoji}</span>
                             )}
                           </div>
                           <div>
                             <p className="text-sm font-bold text-slate-900">{item.name}</p>
-                            <p className="text-xs text-slate-500">{item.quantity} x Rp {item.price?.toLocaleString("id-ID")}</p>
+                            <p className="text-xs text-slate-500">
+                              {item.quantity} x Rp {item.price?.toLocaleString("id-ID")}
+                            </p>
                           </div>
                         </div>
-                        <p className="text-sm font-bold text-slate-900">Rp {(item.quantity * item.price).toLocaleString("id-ID")}</p>
+                        <p className="text-sm font-bold text-slate-900">
+                          Rp {(item.quantity * item.price).toLocaleString("id-ID")}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -827,11 +928,15 @@ export function AdminMarketplace() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                   <p className="text-sm font-bold text-slate-900">Total Pembayaran</p>
-                  <p className="text-xl font-black text-sky-600">Rp {viewingOrder.total_amount.toLocaleString("id-ID")}</p>
+                  <p className="text-xl font-black text-sky-600">
+                    Rp {viewingOrder.total_amount.toLocaleString("id-ID")}
+                  </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Update Status</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                    Update Status
+                  </p>
                   <div className="grid grid-cols-2 gap-2">
                     {["Menunggu", "Diproses", "Dikirim", "Selesai", "Dibatalkan"].map((status) => (
                       <button

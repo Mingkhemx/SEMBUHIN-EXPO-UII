@@ -27,7 +27,6 @@ import { Route as DoctorRouteRouteImport } from './routes/doctor/route'
 import { Route as DermatologiRouteRouteImport } from './routes/dermatologi/route'
 import { Route as DaftarDokterRouteRouteImport } from './routes/daftar-dokter/route'
 import { Route as ChatRouteRouteImport } from './routes/chat/route'
-import { Route as CekJantungRouteRouteImport } from './routes/cek-jantung/route'
 import { Route as BookingRouteRouteImport } from './routes/booking/route'
 import { Route as BerandaRouteRouteImport } from './routes/beranda/route'
 import { Route as BannedRouteRouteImport } from './routes/banned/route'
@@ -141,11 +140,6 @@ const DaftarDokterRouteRoute = DaftarDokterRouteRouteImport.update({
 const ChatRouteRoute = ChatRouteRouteImport.update({
   id: '/chat',
   path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CekJantungRouteRoute = CekJantungRouteRouteImport.update({
-  id: '/cek-jantung',
-  path: '/cek-jantung',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingRouteRoute = BookingRouteRouteImport.update({
@@ -280,7 +274,6 @@ export interface FileRoutesByFullPath {
   '/banned': typeof BannedRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/booking': typeof BookingRouteRoute
-  '/cek-jantung': typeof CekJantungRouteRoute
   '/chat': typeof ChatRouteRoute
   '/daftar-dokter': typeof DaftarDokterRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
@@ -324,7 +317,6 @@ export interface FileRoutesByTo {
   '/banned': typeof BannedRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/booking': typeof BookingRouteRoute
-  '/cek-jantung': typeof CekJantungRouteRoute
   '/chat': typeof ChatRouteRoute
   '/daftar-dokter': typeof DaftarDokterRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
@@ -368,7 +360,6 @@ export interface FileRoutesById {
   '/banned': typeof BannedRouteRoute
   '/beranda': typeof BerandaRouteRoute
   '/booking': typeof BookingRouteRoute
-  '/cek-jantung': typeof CekJantungRouteRoute
   '/chat': typeof ChatRouteRoute
   '/daftar-dokter': typeof DaftarDokterRouteRoute
   '/dermatologi': typeof DermatologiRouteRoute
@@ -415,7 +406,6 @@ export interface FileRouteTypes {
     | '/banned'
     | '/beranda'
     | '/booking'
-    | '/cek-jantung'
     | '/chat'
     | '/daftar-dokter'
     | '/dermatologi'
@@ -459,7 +449,6 @@ export interface FileRouteTypes {
     | '/banned'
     | '/beranda'
     | '/booking'
-    | '/cek-jantung'
     | '/chat'
     | '/daftar-dokter'
     | '/dermatologi'
@@ -502,7 +491,6 @@ export interface FileRouteTypes {
     | '/banned'
     | '/beranda'
     | '/booking'
-    | '/cek-jantung'
     | '/chat'
     | '/daftar-dokter'
     | '/dermatologi'
@@ -548,7 +536,6 @@ export interface RootRouteChildren {
   BannedRouteRoute: typeof BannedRouteRoute
   BerandaRouteRoute: typeof BerandaRouteRoute
   BookingRouteRoute: typeof BookingRouteRoute
-  CekJantungRouteRoute: typeof CekJantungRouteRoute
   ChatRouteRoute: typeof ChatRouteRoute
   DaftarDokterRouteRoute: typeof DaftarDokterRouteRoute
   DermatologiRouteRoute: typeof DermatologiRouteRoute
@@ -695,13 +682,6 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof ChatRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cek-jantung': {
-      id: '/cek-jantung'
-      path: '/cek-jantung'
-      fullPath: '/cek-jantung'
-      preLoaderRoute: typeof CekJantungRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/booking': {
@@ -947,7 +927,6 @@ const rootRouteChildren: RootRouteChildren = {
   BannedRouteRoute: BannedRouteRoute,
   BerandaRouteRoute: BerandaRouteRoute,
   BookingRouteRoute: BookingRouteRoute,
-  CekJantungRouteRoute: CekJantungRouteRoute,
   ChatRouteRoute: ChatRouteRoute,
   DaftarDokterRouteRoute: DaftarDokterRouteRoute,
   DermatologiRouteRoute: DermatologiRouteRoute,

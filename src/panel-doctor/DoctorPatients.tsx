@@ -1,7 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Search, UserCheck, UserX, Eye, TrendingUp, Activity, Loader2, X, Mail, Phone, MapPin, Calendar, Heart } from "lucide-react";
+import {
+  Users,
+  Search,
+  UserCheck,
+  UserX,
+  Eye,
+  TrendingUp,
+  Activity,
+  Loader2,
+  X,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Heart,
+} from "lucide-react";
 import { DoctorLayout } from "@/panel-doctor/DoctorLayout";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -142,21 +157,21 @@ export function DoctorPatients() {
     total: 0,
     newThisMonth: 0,
     active: 0,
-    avgAge: 0
+    avgAge: 0,
   });
   const [selectedPatient, setSelectedPatient] = useState<PatientData | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  
+
   const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
     async function fetchPatientsFromSupabase() {
       if (!user) return;
-      
+
       try {
         setLoading(true);
-        
+
         // Query profiles table - hanya ambil user dengan role 'user' (bukan admin/doctor)
         let query = supabase
           .from("profiles")
@@ -208,14 +223,21 @@ export function DoctorPatients() {
             email: u.email || "-",
             phone: u.phone || "-",
             age: age,
-            gender: u.gender === 'female' ? 'Perempuan' : u.gender === 'male' ? 'Laki-laki' : 'Tidak disebutkan',
+            gender:
+              u.gender === "female"
+                ? "Perempuan"
+                : u.gender === "male"
+                  ? "Laki-laki"
+                  : "Tidak disebutkan",
             address: u.address || "-",
-            dateOfBirth: u.date_of_birth ? format(new Date(u.date_of_birth), "dd MMMM yyyy", { locale: idLocale }) : "-",
+            dateOfBirth: u.date_of_birth
+              ? format(new Date(u.date_of_birth), "dd MMMM yyyy", { locale: idLocale })
+              : "-",
             bloodType: u.blood_type || "-",
             allergies: u.allergies || "-",
-            lastDiagnosis: "Pasien Terdaftar", 
+            lastDiagnosis: "Pasien Terdaftar",
             lastVisit: format(joinDate, "dd MMM yyyy", { locale: idLocale }),
-            status: 'Aktif'
+            status: "Aktif",
           };
         });
 
@@ -230,12 +252,12 @@ export function DoctorPatients() {
 
         if (!statsError && allUsers) {
           const total = allUsers.length;
-          
+
           // Count new patients this month
           const now = new Date();
           const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
           const newThisMonth = allUsers.filter(
-            (u) => new Date(u.created_at) >= thisMonthStart
+            (u) => new Date(u.created_at) >= thisMonthStart,
           ).length;
 
           // Calculate average age
@@ -247,15 +269,14 @@ export function DoctorPatients() {
               const ageDate = new Date(ageDiffMs);
               return Math.abs(ageDate.getUTCFullYear() - 1970);
             });
-          const avgAge = ages.length > 0 
-            ? Math.round(ages.reduce((sum, age) => sum + age, 0) / ages.length) 
-            : 0;
+          const avgAge =
+            ages.length > 0 ? Math.round(ages.reduce((sum, age) => sum + age, 0) / ages.length) : 0;
 
           setStats({
             total,
             newThisMonth,
             active: total, // All are considered active for now
-            avgAge
+            avgAge,
           });
         }
       } catch (err) {
@@ -264,7 +285,7 @@ export function DoctorPatients() {
         setLoading(false);
       }
     }
-    
+
     fetchPatientsFromSupabase();
   }, [user, searchQuery, page]);
 
@@ -374,71 +395,72 @@ export function DoctorPatients() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {!loading && filtered.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
-                    {/* Nama */}
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0">
-                          <Users className="h-4 w-4 text-sky-600" />
+                {!loading &&
+                  filtered.map((patient) => (
+                    <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
+                      {/* Nama */}
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0">
+                            <Users className="h-4 w-4 text-sky-600" />
+                          </div>
+                          <p className="font-medium text-slate-900 whitespace-nowrap">
+                            {patient.name}
+                          </p>
                         </div>
-                        <p className="font-medium text-slate-900 whitespace-nowrap">
-                          {patient.name}
-                        </p>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Usia / Gender */}
-                    <td className="py-4 px-4">
-                      <div className="text-sm">
-                        <p className="text-slate-900">{patient.age} tahun</p>
-                        <p className="text-slate-500 text-xs">{patient.gender}</p>
-                      </div>
-                    </td>
+                      {/* Usia / Gender */}
+                      <td className="py-4 px-4">
+                        <div className="text-sm">
+                          <p className="text-slate-900">{patient.age} tahun</p>
+                          <p className="text-slate-500 text-xs">{patient.gender}</p>
+                        </div>
+                      </td>
 
-                    {/* Diagnosis */}
-                    <td className="py-4 px-4 text-sm text-slate-600 whitespace-nowrap">
-                      {patient.lastDiagnosis}
-                    </td>
+                      {/* Diagnosis */}
+                      <td className="py-4 px-4 text-sm text-slate-600 whitespace-nowrap">
+                        {patient.lastDiagnosis}
+                      </td>
 
-                    {/* Tanggal */}
-                    <td className="py-4 px-4 text-sm text-slate-600 whitespace-nowrap">
-                      {patient.lastVisit}
-                    </td>
+                      {/* Tanggal */}
+                      <td className="py-4 px-4 text-sm text-slate-600 whitespace-nowrap">
+                        {patient.lastVisit}
+                      </td>
 
-                    {/* Status */}
-                    <td className="py-4 px-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${
-                          patient.status === "Aktif"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                            : "bg-slate-50 text-slate-500 border-slate-200"
-                        }`}
-                      >
-                        {patient.status === "Aktif" ? (
-                          <UserCheck className="h-3 w-3" />
-                        ) : (
-                          <UserX className="h-3 w-3" />
-                        )}
-                        {patient.status}
-                      </span>
-                    </td>
+                      {/* Status */}
+                      <td className="py-4 px-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${
+                            patient.status === "Aktif"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                              : "bg-slate-50 text-slate-500 border-slate-200"
+                          }`}
+                        >
+                          {patient.status === "Aktif" ? (
+                            <UserCheck className="h-3 w-3" />
+                          ) : (
+                            <UserX className="h-3 w-3" />
+                          )}
+                          {patient.status}
+                        </span>
+                      </td>
 
-                    {/* Aksi */}
-                    <td className="py-4 px-4 text-right">
-                      <button
-                        onClick={() => {
-                          setSelectedPatient(patient);
-                          setShowDetailModal(true);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 border border-sky-100 text-sm font-medium hover:bg-sky-100 transition-all"
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                        Lihat Detail
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      {/* Aksi */}
+                      <td className="py-4 px-4 text-right">
+                        <button
+                          onClick={() => {
+                            setSelectedPatient(patient);
+                            setShowDetailModal(true);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 border border-sky-100 text-sm font-medium hover:bg-sky-100 transition-all"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Lihat Detail
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
 
@@ -451,7 +473,9 @@ export function DoctorPatients() {
               <div className="py-16 text-center">
                 <Users className="h-10 w-10 text-slate-300 mx-auto mb-3" />
                 <p className="text-sm text-slate-500">
-                  {searchQuery ? "Tidak ada pasien yang cocok dengan pencarian" : "Belum ada pasien terdaftar"}
+                  {searchQuery
+                    ? "Tidak ada pasien yang cocok dengan pencarian"
+                    : "Belum ada pasien terdaftar"}
                 </p>
               </div>
             ) : null}
@@ -471,7 +495,7 @@ export function DoctorPatients() {
               onClick={() => setShowDetailModal(false)}
               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
             />
-            
+
             {/* Modal */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -479,7 +503,7 @@ export function DoctorPatients() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
             >
-              <div 
+              <div
                 className="pointer-events-auto w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -510,47 +534,67 @@ export function DoctorPatients() {
                       <Users className="h-4 w-4 text-sky-600" />
                       Informasi Pribadi
                     </h4>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Mail className="h-4 w-4 text-slate-400" />
-                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Email</p>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                            Email
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-slate-900 truncate">{selectedPatient.email}</p>
+                        <p className="text-sm font-semibold text-slate-900 truncate">
+                          {selectedPatient.email}
+                        </p>
                       </div>
 
                       <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Phone className="h-4 w-4 text-slate-400" />
-                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">No. Telepon</p>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                            No. Telepon
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.phone}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {selectedPatient.phone}
+                        </p>
                       </div>
 
                       <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Calendar className="h-4 w-4 text-slate-400" />
-                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tanggal Lahir</p>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                            Tanggal Lahir
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.dateOfBirth}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {selectedPatient.dateOfBirth}
+                        </p>
                         <p className="text-xs text-slate-500 mt-1">{selectedPatient.age} tahun</p>
                       </div>
 
                       <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Activity className="h-4 w-4 text-slate-400" />
-                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Jenis Kelamin</p>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                            Jenis Kelamin
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.gender}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {selectedPatient.gender}
+                        </p>
                       </div>
 
                       <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 col-span-2">
                         <div className="flex items-center gap-2 mb-2">
                           <MapPin className="h-4 w-4 text-slate-400" />
-                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Alamat</p>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                            Alamat
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.address}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {selectedPatient.address}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -561,22 +605,30 @@ export function DoctorPatients() {
                       <Heart className="h-4 w-4 text-rose-600" />
                       Informasi Medis
                     </h4>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-rose-50 rounded-lg p-4 border border-rose-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Activity className="h-4 w-4 text-rose-600" />
-                          <p className="text-xs font-medium text-rose-700 uppercase tracking-wider">Golongan Darah</p>
+                          <p className="text-xs font-medium text-rose-700 uppercase tracking-wider">
+                            Golongan Darah
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.bloodType}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {selectedPatient.bloodType}
+                        </p>
                       </div>
 
                       <div className="bg-rose-50 rounded-lg p-4 border border-rose-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Heart className="h-4 w-4 text-rose-600" />
-                          <p className="text-xs font-medium text-rose-700 uppercase tracking-wider">Alergi</p>
+                          <p className="text-xs font-medium text-rose-700 uppercase tracking-wider">
+                            Alergi
+                          </p>
                         </div>
-                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.allergies}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {selectedPatient.allergies}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -587,19 +639,27 @@ export function DoctorPatients() {
                       <Activity className="h-4 w-4 text-emerald-600" />
                       Status Pasien
                     </h4>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                        <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-2">Status</p>
+                        <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-2">
+                          Status
+                        </p>
                         <div className="flex items-center gap-2">
                           <UserCheck className="h-4 w-4 text-emerald-600" />
-                          <p className="text-sm font-semibold text-slate-900">{selectedPatient.status}</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {selectedPatient.status}
+                          </p>
                         </div>
                       </div>
 
                       <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                        <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-2">Terakhir Kunjungan</p>
-                        <p className="text-sm font-semibold text-slate-900">{selectedPatient.lastVisit}</p>
+                        <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-2">
+                          Terakhir Kunjungan
+                        </p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {selectedPatient.lastVisit}
+                        </p>
                       </div>
                     </div>
                   </div>

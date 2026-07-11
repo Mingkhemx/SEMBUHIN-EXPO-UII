@@ -1,24 +1,24 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { motion } from 'framer-motion';
-import { Ban, ShieldAlert, Clock, LogOut, ArrowLeft, HeartPulse, CalendarDays } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useState } from 'react';
-import { formatDistanceToNow, format } from 'date-fns';
-import { id as idLocale } from 'date-fns/locale';
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { motion } from "framer-motion";
+import { Ban, ShieldAlert, Clock, LogOut, ArrowLeft, HeartPulse, CalendarDays } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { formatDistanceToNow, format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
-export const Route = createFileRoute('/banned')({
+export const Route = createFileRoute("/banned")({
   component: BannedPage,
 });
 
 function BannedPage() {
   const { userProfile, signOut } = useAuth();
-  const [timeLeft, setTimeLeft] = useState<string>('');
-  const [estimatedOpen, setEstimatedOpen] = useState<string>('');
+  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [estimatedOpen, setEstimatedOpen] = useState<string>("");
 
   useEffect(() => {
     if (userProfile?.ban_until) {
       const banDate = new Date(userProfile.ban_until);
-      
+
       const updateTimer = () => {
         const now = new Date();
         const diff = banDate.getTime() - now.getTime();
@@ -32,16 +32,18 @@ function BannedPage() {
 
           let timeString = "";
           if (days > 0) timeString += `${days} Hari `;
-          timeString += `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-          
+          timeString += `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
           setTimeLeft(timeString);
-          setEstimatedOpen(format(banDate, "EEEE, dd MMMM yyyy 'pukul' HH:mm", { locale: idLocale }));
+          setEstimatedOpen(
+            format(banDate, "EEEE, dd MMMM yyyy 'pukul' HH:mm", { locale: idLocale }),
+          );
         } else {
-          setTimeLeft('Hukuman berakhir');
-          setEstimatedOpen('Silakan hubungi admin untuk aktivasi akun.');
+          setTimeLeft("Hukuman berakhir");
+          setEstimatedOpen("Silakan hubungi admin untuk aktivasi akun.");
         }
       };
-      
+
       updateTimer();
       const interval = setInterval(updateTimer, 1000);
       return () => clearInterval(interval);
@@ -50,7 +52,7 @@ function BannedPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-md w-full bg-white rounded-[32px] shadow-2xl shadow-rose-500/10 border border-slate-100 overflow-hidden"
@@ -61,18 +63,22 @@ function BannedPage() {
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.25),transparent)]" />
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl" />
-          
+
           <div className="relative z-10 flex flex-col items-center">
             {/* Logo Sembuhin - Balanced Size */}
-            <motion.div 
+            <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="mb-12"
             >
-              <img src="/gif_logo/logo.png" alt="Sembuhin Logo" className="h-16 w-auto object-contain drop-shadow-xl" />
+              <img
+                src="/gif_logo/logo.png"
+                alt="Sembuhin Logo"
+                className="h-16 w-auto object-contain drop-shadow-xl"
+              />
             </motion.div>
-            
+
             {/* Title with Icon - One Line, No Wrap */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
@@ -93,7 +99,7 @@ function BannedPage() {
         {/* Content */}
         <div className="p-10">
           <div className="space-y-8">
-            <motion.div 
+            <motion.div
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -108,13 +114,13 @@ function BannedPage() {
                   <span className="text-sm uppercase tracking-wider">Alasan Penangguhan</span>
                 </div>
                 <p className="text-slate-700 text-base font-medium leading-relaxed pl-2 border-l-4 border-rose-200 ml-2">
-                  {userProfile?.status_reason || 'Pelanggaran ketentuan layanan Sembuhin.'}
+                  {userProfile?.status_reason || "Pelanggaran ketentuan layanan Sembuhin."}
                 </p>
               </div>
             </motion.div>
 
             {userProfile?.ban_until && (
-              <motion.div 
+              <motion.div
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.6 }}
@@ -137,23 +143,25 @@ function BannedPage() {
                     </div>
                     <span className="text-sm uppercase tracking-wider">Estimasi Dibuka</span>
                   </div>
-                  <div className="pl-2 text-slate-600 text-sm font-medium">
-                    {estimatedOpen}
-                  </div>
+                  <div className="pl-2 text-slate-600 text-sm font-medium">{estimatedOpen}</div>
                 </div>
               </motion.div>
             )}
 
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
               className="text-slate-500 text-sm text-center leading-relaxed px-2"
             >
-              Kami menjunjung tinggi keamanan komunitas. Jika Anda merasa ini adalah kesalahan, silakan hubungi tim dukungan melalui <span className="text-sky-600 font-bold hover:underline cursor-pointer">support@sembuhin.id</span>
+              Kami menjunjung tinggi keamanan komunitas. Jika Anda merasa ini adalah kesalahan,
+              silakan hubungi tim dukungan melalui{" "}
+              <span className="text-sky-600 font-bold hover:underline cursor-pointer">
+                support@sembuhin.id
+              </span>
             </motion.p>
 
-            <motion.div 
+            <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8 }}

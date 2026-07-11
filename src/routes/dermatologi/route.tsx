@@ -1,89 +1,113 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
-  ScanLine, Camera, X, Loader2, CheckCircle2, AlertTriangle,
-  Info, ChevronRight, Image as ImageIcon, Clock, ShieldCheck,
-  Stethoscope, Zap, Eye, Search, RotateCcw, Sparkles, LogIn,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
-import { useNavigate } from '@tanstack/react-router'
+  ScanLine,
+  Camera,
+  X,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  ChevronRight,
+  Image as ImageIcon,
+  Clock,
+  ShieldCheck,
+  Stethoscope,
+  Zap,
+  Eye,
+  Search,
+  RotateCcw,
+  Sparkles,
+  LogIn,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/dermatologi')({
+export const Route = createFileRoute("/dermatologi")({
   head: () => ({
     meta: [
-      { title: 'Dermatologi AI Scan — Sembuhin' },
-      { name: 'description', content: 'Foto area kulit bermasalah, AI pre-screening awal sebelum ke dermatologis.' },
+      { title: "Dermatologi AI Scan — Sembuhin" },
+      {
+        name: "description",
+        content: "Foto area kulit bermasalah, AI pre-screening awal sebelum ke dermatologis.",
+      },
     ],
   }),
   component: DermatologiPage,
-})
+});
 
 /* ─── Types ──────────────────────────────────────────────────────── */
-type ViewMode = 'upload' | 'analyzing' | 'result' | 'history' | 'conditions'
-type Severity = 'ringan' | 'sedang' | 'perlu-perhatian'
+type ViewMode = "upload" | "analyzing" | "result" | "history" | "conditions";
+type Severity = "ringan" | "sedang" | "perlu-perhatian";
 
 interface ScanResult {
-  condition: string
-  confidence: number
-  severity: Severity
-  description: string
-  recommendation: string
-  characteristics: string[]
-  aiSource?: 'sembuhin' | 'mock'
+  condition: string;
+  confidence: number;
+  severity: Severity;
+  description: string;
+  recommendation: string;
+  characteristics: string[];
+  aiSource?: "sembuhin" | "mock";
 }
 
 interface SkinCondition {
-  id: string
-  name: string
-  description: string
-  common: boolean
-  severity: Severity
-  icon: typeof Zap
+  id: string;
+  name: string;
+  description: string;
+  common: boolean;
+  severity: Severity;
+  icon: typeof Zap;
 }
 
 interface PastScan {
-  id: string
-  date: string
-  condition: string
-  confidence: number
-  severity: Severity
-  thumbnail: string
-  description?: string
-  recommendation?: string
-  characteristics?: string[]
+  id: string;
+  date: string;
+  condition: string;
+  confidence: number;
+  severity: Severity;
+  thumbnail: string;
+  description?: string;
+  recommendation?: string;
+  characteristics?: string[];
 }
 
 /* ─── OpenRouter Skin Analysis ───────────────────────────────────── */
-const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY as string | undefined
+const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY as string | undefined;
 
 /* Kompres gambar ke max 800px supaya tidak 400 error */
 async function compressImage(base64: string): Promise<string> {
   return new Promise((resolve) => {
-    const img = new Image()
+    const img = new Image();
     img.onload = () => {
-      const MAX = 800
-      let { width, height } = img
+      const MAX = 800;
+      let { width, height } = img;
       if (width > MAX || height > MAX) {
-        if (width > height) { height = Math.round(height * MAX / width); width = MAX }
-        else { width = Math.round(width * MAX / height); height = MAX }
+        if (width > height) {
+          height = Math.round((height * MAX) / width);
+          width = MAX;
+        } else {
+          width = Math.round((width * MAX) / height);
+          height = MAX;
+        }
       }
-      const canvas = document.createElement('canvas')
-      canvas.width = width; canvas.height = height
-      canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
-      resolve(canvas.toDataURL('image/jpeg', 0.75).split(',')[1])
-    }
-    img.onerror = () => resolve(base64)
-    img.src = `data:image/jpeg;base64,${base64}`
-  })
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", 0.75).split(",")[1]);
+    };
+    img.onerror = () => resolve(base64);
+    img.src = `data:image/jpeg;base64,${base64}`;
+  });
 }
 
 async function analyzeSkinWithAI(imageBase64: string): Promise<ScanResult | null> {
-  if (!OPENROUTER_KEY) return null
+  if (!OPENROUTER_KEY) return null;
 
-  const compressed = await compressImage(imageBase64)
+  const compressed = await compressImage(imageBase64);
 
   const prompt = `Kamu adalah dokter spesialis dermatologi AI yang sangat berpengalaman dengan keahlian tingkat tinggi dalam diagnosis visual kondisi kulit.
 
@@ -109,95 +133,200 @@ WAJIB jawab HANYA dalam format JSON valid ini (tanpa markdown, tanpa teks lain):
 }
 
 severity hanya boleh: "ringan", "sedang", atau "perlu-perhatian"
-confidence adalah angka 0-100`
+confidence adalah angka 0-100`;
 
   try {
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'Sembuhin Dermatologi AI',
+        Authorization: `Bearer ${OPENROUTER_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": window.location.origin,
+        "X-Title": "Sembuhin Dermatologi AI",
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-opus-4.8',
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${compressed}` } },
-          ],
-        }],
+        model: "anthropic/claude-opus-4.8",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${compressed}` } },
+            ],
+          },
+        ],
         temperature: 0.1,
         max_tokens: 700,
       }),
-    })
+    });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      console.error('[DermaAI] HTTP', res.status, err)
-      return null
+      const err = await res.json().catch(() => ({}));
+      console.error("[DermaAI] HTTP", res.status, err);
+      return null;
     }
 
-    const data = await res.json()
-    const text: string = data?.choices?.[0]?.message?.content ?? ''
-    const clean = text.replace(/```json|```/g, '').trim()
-    const jsonMatch = clean.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) { console.error('[DermaAI] No JSON in response:', clean); return null }
-    const parsed = JSON.parse(jsonMatch[0]) as ScanResult
-    if (!['ringan', 'sedang', 'perlu-perhatian'].includes(parsed.severity)) {
-      parsed.severity = 'ringan'
+    const data = await res.json();
+    const text: string = data?.choices?.[0]?.message?.content ?? "";
+    const clean = text.replace(/```json|```/g, "").trim();
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("[DermaAI] No JSON in response:", clean);
+      return null;
     }
-    parsed.aiSource = 'sembuhin'
-    return parsed
+    const parsed = JSON.parse(jsonMatch[0]) as ScanResult;
+    if (!["ringan", "sedang", "perlu-perhatian"].includes(parsed.severity)) {
+      parsed.severity = "ringan";
+    }
+    parsed.aiSource = "sembuhin";
+    return parsed;
   } catch (err) {
-    console.error('[DermaAI] Error:', err)
-    return null
+    console.error("[DermaAI] Error:", err);
+    return null;
   }
 }
 
 /* ─── Mock Data ──────────────────────────────────────────────────── */
 const SKIN_CONDITIONS: SkinCondition[] = [
-  { id: '1', name: 'Jerawat (Acne Vulgaris)', description: 'Kondisi kulit umum akibat pori-pori tersumbat. Ditandai dengan komedo, papul, pustul, atau nodul.', common: true, severity: 'ringan', icon: AlertTriangle },
-  { id: '2', name: 'Eksim (Dermatitis Atopik)', description: 'Peradangan kulit kronis yang menyebabkan gatal, kemerahan, dan kulit kering bersisik.', common: true, severity: 'sedang', icon: Zap },
-  { id: '3', name: 'Psoriasis', description: 'Penyakit autoimun yang menyebabkan penumpukan sel kulit, membentuk sisik tebal berwarna perak.', common: false, severity: 'perlu-perhatian', icon: Eye },
-  { id: '4', name: 'Kurap (Tinea)', description: 'Infeksi jamur pada kulit yang ditandai dengan ruam melingkar berwarna merah dan gatal.', common: true, severity: 'ringan', icon: AlertTriangle },
-  { id: '5', name: 'Rosacea', description: 'Kondisi kronis yang menyebabkan kemerahan pada wajah, terlihat seperti pembuluh darah.', common: false, severity: 'sedang', icon: Eye },
-  { id: '6', name: 'Kutil', description: 'Pertumbuhan kulit jinak yang disebabkan oleh HPV. Biasanya muncul di tangan atau kaki.', common: true, severity: 'ringan', icon: AlertTriangle },
-  { id: '7', name: 'Melasma', description: 'Bercak coklat keabu-abuan pada kulit, biasanya di wajah. Umum pada wanita hamil.', common: true, severity: 'ringan', icon: Eye },
-  { id: '8', name: 'Vitiligo', description: 'Kondisi yang menyebabkan hilangnya pigmentasi kulit dalam bercak-bercak.', common: false, severity: 'perlu-perhatian', icon: Eye },
-]
+  {
+    id: "1",
+    name: "Jerawat (Acne Vulgaris)",
+    description:
+      "Kondisi kulit umum akibat pori-pori tersumbat. Ditandai dengan komedo, papul, pustul, atau nodul.",
+    common: true,
+    severity: "ringan",
+    icon: AlertTriangle,
+  },
+  {
+    id: "2",
+    name: "Eksim (Dermatitis Atopik)",
+    description:
+      "Peradangan kulit kronis yang menyebabkan gatal, kemerahan, dan kulit kering bersisik.",
+    common: true,
+    severity: "sedang",
+    icon: Zap,
+  },
+  {
+    id: "3",
+    name: "Psoriasis",
+    description:
+      "Penyakit autoimun yang menyebabkan penumpukan sel kulit, membentuk sisik tebal berwarna perak.",
+    common: false,
+    severity: "perlu-perhatian",
+    icon: Eye,
+  },
+  {
+    id: "4",
+    name: "Kurap (Tinea)",
+    description:
+      "Infeksi jamur pada kulit yang ditandai dengan ruam melingkar berwarna merah dan gatal.",
+    common: true,
+    severity: "ringan",
+    icon: AlertTriangle,
+  },
+  {
+    id: "5",
+    name: "Rosacea",
+    description:
+      "Kondisi kronis yang menyebabkan kemerahan pada wajah, terlihat seperti pembuluh darah.",
+    common: false,
+    severity: "sedang",
+    icon: Eye,
+  },
+  {
+    id: "6",
+    name: "Kutil",
+    description:
+      "Pertumbuhan kulit jinak yang disebabkan oleh HPV. Biasanya muncul di tangan atau kaki.",
+    common: true,
+    severity: "ringan",
+    icon: AlertTriangle,
+  },
+  {
+    id: "7",
+    name: "Melasma",
+    description: "Bercak coklat keabu-abuan pada kulit, biasanya di wajah. Umum pada wanita hamil.",
+    common: true,
+    severity: "ringan",
+    icon: Eye,
+  },
+  {
+    id: "8",
+    name: "Vitiligo",
+    description: "Kondisi yang menyebabkan hilangnya pigmentasi kulit dalam bercak-bercak.",
+    common: false,
+    severity: "perlu-perhatian",
+    icon: Eye,
+  },
+];
 
 const PAST_SCANS: PastScan[] = [
-  { id: '1', date: '10 Feb 2026', condition: 'Jerawat', confidence: 87, severity: 'ringan', thumbnail: '🔴' },
-  { id: '2', date: '28 Jan 2026', condition: 'Eksim', confidence: 72, severity: 'sedang', thumbnail: '🟡' },
-  { id: '3', date: '15 Jan 2026', condition: 'Normal', confidence: 95, severity: 'ringan', thumbnail: '🟢' },
-]
+  {
+    id: "1",
+    date: "10 Feb 2026",
+    condition: "Jerawat",
+    confidence: 87,
+    severity: "ringan",
+    thumbnail: "🔴",
+  },
+  {
+    id: "2",
+    date: "28 Jan 2026",
+    condition: "Eksim",
+    confidence: 72,
+    severity: "sedang",
+    thumbnail: "🟡",
+  },
+  {
+    id: "3",
+    date: "15 Jan 2026",
+    condition: "Normal",
+    confidence: 95,
+    severity: "ringan",
+    thumbnail: "🟢",
+  },
+];
 
 // Mock result for both healthy and sick cases
 const getMockResult = (isHealthy: boolean = Math.random() > 0.5): ScanResult => {
   if (isHealthy) {
     return {
-      condition: 'Kulit Normal',
+      condition: "Kulit Normal",
       confidence: 92,
-      severity: 'ringan',
-      description: 'Kulit Anda terlihat sehat dan tidak ada tanda-tanda kondisi kulit yang perlu dikhawatirkan. Tetap jaga kebersihan dan kelembapan kulit!',
-      recommendation: 'Lanjutkan rutinitas perawatan kulit yang sehat: cuci dengan sabun lembut, gunakan pelembap, dan lindungi dari sinar matahari.',
+      severity: "ringan",
+      description:
+        "Kulit Anda terlihat sehat dan tidak ada tanda-tanda kondisi kulit yang perlu dikhawatirkan. Tetap jaga kebersihan dan kelembapan kulit!",
+      recommendation:
+        "Lanjutkan rutinitas perawatan kulit yang sehat: cuci dengan sabun lembut, gunakan pelembap, dan lindungi dari sinar matahari.",
       characteristics: [
-        'Tekstur kulit halus dan sehat',
-        'Tidak ada kemerahan atau iritasi',
-        'Tidak ada bintik atau lesi abnormal',
-        'Kulit terhidrasi dengan baik',
+        "Tekstur kulit halus dan sehat",
+        "Tidak ada kemerahan atau iritasi",
+        "Tidak ada bintik atau lesi abnormal",
+        "Kulit terhidrasi dengan baik",
       ],
-    }
+    };
   } else {
     const randomCondition = [
-      { condition: 'Dermatitis Kontak Iritan', severity: 'sedang' as Severity, desc: 'Kondisi peradangan kulit yang disebabkan oleh paparan zat iritan.', rec: 'Hindari kontak dengan zat iritan. Gunakan pelembap hypoallergenic.' },
-      { condition: 'Jerawat (Acne Vulgaris)', severity: 'ringan' as Severity, desc: 'Kondisi kulit umum akibat pori-pori tersumbat, ditandai dengan komedo atau pustul.', rec: 'Jaga kebersihan kulit, gunakan produk non-comedogenic, konsultasi jika memburuk.' },
-      { condition: 'Eksim (Dermatitis Atopik)', severity: 'sedang' as Severity, desc: 'Peradangan kulit kronis yang menyebabkan gatal, kemerahan, dan kulit kering bersisik.', rec: 'Gunakan pelembap secara rutin, hindari pemicu, konsultasi dengan dokter.' },
-    ][Math.floor(Math.random() * 3)]
-    
+      {
+        condition: "Dermatitis Kontak Iritan",
+        severity: "sedang" as Severity,
+        desc: "Kondisi peradangan kulit yang disebabkan oleh paparan zat iritan.",
+        rec: "Hindari kontak dengan zat iritan. Gunakan pelembap hypoallergenic.",
+      },
+      {
+        condition: "Jerawat (Acne Vulgaris)",
+        severity: "ringan" as Severity,
+        desc: "Kondisi kulit umum akibat pori-pori tersumbat, ditandai dengan komedo atau pustul.",
+        rec: "Jaga kebersihan kulit, gunakan produk non-comedogenic, konsultasi jika memburuk.",
+      },
+      {
+        condition: "Eksim (Dermatitis Atopik)",
+        severity: "sedang" as Severity,
+        desc: "Peradangan kulit kronis yang menyebabkan gatal, kemerahan, dan kulit kering bersisik.",
+        rec: "Gunakan pelembap secara rutin, hindari pemicu, konsultasi dengan dokter.",
+      },
+    ][Math.floor(Math.random() * 3)];
+
     return {
       condition: randomCondition.condition,
       confidence: 75 + Math.floor(Math.random() * 15),
@@ -205,297 +334,346 @@ const getMockResult = (isHealthy: boolean = Math.random() > 0.5): ScanResult => 
       description: randomCondition.desc,
       recommendation: randomCondition.rec,
       characteristics: [
-        'Kemerahan pada area kulit',
-        'Gatal atau rasa tidak nyaman',
-        'Perubahan tekstur kulit',
-        'Tanda-tanda peradangan',
+        "Kemerahan pada area kulit",
+        "Gatal atau rasa tidak nyaman",
+        "Perubahan tekstur kulit",
+        "Tanda-tanda peradangan",
       ],
-    }
+    };
   }
-}
+};
 
 // Default mock result
-const MOCK_RESULT: ScanResult = getMockResult()
+const MOCK_RESULT: ScanResult = getMockResult();
 
-const SEVERITY_CONFIG: Record<Severity, { label: string; color: string; bgColor: string; icon: typeof CheckCircle2 }> = {
-  ringan: { label: 'Ringan', color: 'text-emerald-700', bgColor: 'bg-emerald-50 border-emerald-200', icon: CheckCircle2 },
-  sedang: { label: 'Sedang', color: 'text-amber-700', bgColor: 'bg-amber-50 border-amber-200', icon: AlertTriangle },
-  'perlu-perhatian': { label: 'Perlu Perhatian', color: 'text-red-700', bgColor: 'bg-red-50 border-red-200', icon: AlertTriangle },
-}
+const SEVERITY_CONFIG: Record<
+  Severity,
+  { label: string; color: string; bgColor: string; icon: typeof CheckCircle2 }
+> = {
+  ringan: {
+    label: "Ringan",
+    color: "text-emerald-700",
+    bgColor: "bg-emerald-50 border-emerald-200",
+    icon: CheckCircle2,
+  },
+  sedang: {
+    label: "Sedang",
+    color: "text-amber-700",
+    bgColor: "bg-amber-50 border-amber-200",
+    icon: AlertTriangle,
+  },
+  "perlu-perhatian": {
+    label: "Perlu Perhatian",
+    color: "text-red-700",
+    bgColor: "bg-red-50 border-red-200",
+    icon: AlertTriangle,
+  },
+};
 
 const fadeIn: Variants = {
   hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-}
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+};
 
 /* ─── Component ──────────────────────────────────────────────────── */
 function DermatologiPage() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const [viewMode, setViewMode] = useState<ViewMode>('upload')
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-  const [scanResult, setScanResult] = useState<ScanResult | null>(null)
-  const [searchCondition, setSearchCondition] = useState('')
-  const [cameraActive, setCameraActive] = useState(false)
-  const [scanProgress, setScanProgress] = useState(0)
-  const [liveDetections, setLiveDetections] = useState<{ name: string; pct: number; severity: Severity }[]>([])
-  const [aiAnalyzing, setAiAnalyzing] = useState(false)
+  const [viewMode, setViewMode] = useState<ViewMode>("upload");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [searchCondition, setSearchCondition] = useState("");
+  const [cameraActive, setCameraActive] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [liveDetections, setLiveDetections] = useState<
+    { name: string; pct: number; severity: Severity }[]
+  >([]);
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
   // Real history from Supabase
-  const [pastScans, setPastScans] = useState<PastScan[]>([])
-  const [historyLoading, setHistoryLoading] = useState(false)
+  const [pastScans, setPastScans] = useState<PastScan[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const liveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const captureAndAnalyzeRef = useRef<(() => void) | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const liveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const captureAndAnalyzeRef = useRef<(() => void) | null>(null);
 
   /* Attach stream ke video saat cameraActive jadi true */
   useEffect(() => {
     if (cameraActive && streamRef.current && videoRef.current) {
-      videoRef.current.srcObject = streamRef.current
-      videoRef.current.play().catch(() => {})
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
     }
-  }, [cameraActive])
+  }, [cameraActive]);
 
   /* Cleanup on unmount */
   useEffect(() => {
     return () => {
-      if (liveIntervalRef.current) clearInterval(liveIntervalRef.current)
-      streamRef.current?.getTracks().forEach(t => t.stop())
-    }
-  }, [])
+      if (liveIntervalRef.current) clearInterval(liveIntervalRef.current);
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
 
   /* Load riwayat scan dari Supabase */
   const loadHistory = useCallback(async () => {
-    if (!user) return
-    setHistoryLoading(true)
+    if (!user) return;
+    setHistoryLoading(true);
     try {
       const { data, error } = await supabase
-        .from('skin_scans')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
-      if (error) throw error
-      const mapped: PastScan[] = (data ?? []).map(row => ({
+        .from("skin_scans")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      const mapped: PastScan[] = (data ?? []).map((row) => ({
         id: row.id,
-        date: new Date(row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        date: new Date(row.created_at).toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
         condition: row.condition,
         confidence: row.confidence,
         severity: row.severity as Severity,
-        thumbnail: row.thumbnail ?? (row.severity === 'ringan' ? '🟢' : row.severity === 'sedang' ? '🟡' : '🔴'),
+        thumbnail:
+          row.thumbnail ??
+          (row.severity === "ringan" ? "🟢" : row.severity === "sedang" ? "🟡" : "🔴"),
         description: row.description,
         recommendation: row.recommendation,
         characteristics: row.characteristics,
-      }))
-      setPastScans(mapped)
+      }));
+      setPastScans(mapped);
     } catch (e) {
-      console.error('Load history error:', e)
+      console.error("Load history error:", e);
     } finally {
-      setHistoryLoading(false)
+      setHistoryLoading(false);
     }
-  }, [user])
+  }, [user]);
 
   /* Load history saat tab riwayat dibuka */
   useEffect(() => {
-    if (viewMode === 'history') loadHistory()
-  }, [viewMode, loadHistory])
+    if (viewMode === "history") loadHistory();
+  }, [viewMode, loadHistory]);
 
   /* Simpan hasil scan ke Supabase */
-  const saveScan = useCallback(async (result: ScanResult) => {
-    if (!user) return
-    const thumbnail = result.severity === 'ringan' ? '🟢' : result.severity === 'sedang' ? '🟡' : '🔴'
-    try {
-      await supabase.from('skin_scans').insert({
-        user_id: user.id,
-        condition: result.condition,
-        confidence: result.confidence,
-        severity: result.severity,
-        description: result.description,
-        recommendation: result.recommendation,
-        characteristics: result.characteristics,
-        ai_source: result.aiSource ?? 'mock',
-        thumbnail,
-      })
-    } catch (e) {
-      console.error('Save scan error:', e)
-    }
-  }, [user])
+  const saveScan = useCallback(
+    async (result: ScanResult) => {
+      if (!user) return;
+      const thumbnail =
+        result.severity === "ringan" ? "🟢" : result.severity === "sedang" ? "🟡" : "🔴";
+      try {
+        await supabase.from("skin_scans").insert({
+          user_id: user.id,
+          condition: result.condition,
+          confidence: result.confidence,
+          severity: result.severity,
+          description: result.description,
+          recommendation: result.recommendation,
+          characteristics: result.characteristics,
+          ai_source: result.aiSource ?? "mock",
+          thumbnail,
+        });
+      } catch (e) {
+        console.error("Save scan error:", e);
+      }
+    },
+    [user],
+  );
 
   // Start live camera
   const startCamera = async () => {
     try {
-      let stream: MediaStream | null = null
+      let stream: MediaStream | null = null;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
-        })
+        });
       } catch {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
-        })
+        });
       }
 
-      streamRef.current = stream
-      setCameraActive(true)
-      startLiveDetection()
+      streamRef.current = stream;
+      setCameraActive(true);
+      startLiveDetection();
 
       // Attach stream after React renders the video element
       setTimeout(() => {
         if (videoRef.current && streamRef.current) {
-          videoRef.current.srcObject = streamRef.current
-          videoRef.current.play().catch(() => {})
+          videoRef.current.srcObject = streamRef.current;
+          videoRef.current.play().catch(() => {});
         }
-      }, 100)
+      }, 100);
     } catch (err) {
-      console.error('Gagal mengaktifkan kamera:', err)
-      setCameraActive(true)
-      startLiveDetection()
+      console.error("Gagal mengaktifkan kamera:", err);
+      setCameraActive(true);
+      startLiveDetection();
     }
-  }
+  };
 
   const stopCamera = () => {
-    if (liveIntervalRef.current) { clearInterval(liveIntervalRef.current); liveIntervalRef.current = null }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop())
-      streamRef.current = null
+    if (liveIntervalRef.current) {
+      clearInterval(liveIntervalRef.current);
+      liveIntervalRef.current = null;
     }
-    if (videoRef.current) videoRef.current.srcObject = null
-    setCameraActive(false)
-    setScanProgress(0)
-    setLiveDetections([])
-  }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCameraActive(false);
+    setScanProgress(0);
+    setLiveDetections([]);
+  };
 
   // Simulate live AI detections
   const startLiveDetection = () => {
     const conditions = [
-      { name: 'Kulit Normal',      pct: 45, severity: 'ringan'           as Severity },
-      { name: 'Dermatitis Kontak', pct: 28, severity: 'sedang'           as Severity },
-      { name: 'Jerawat',           pct: 15, severity: 'ringan'           as Severity },
-      { name: 'Eksim',             pct:  8, severity: 'sedang'           as Severity },
-      { name: 'Infeksi Jamur',     pct:  4, severity: 'perlu-perhatian'  as Severity },
-    ]
+      { name: "Kulit Normal", pct: 45, severity: "ringan" as Severity },
+      { name: "Dermatitis Kontak", pct: 28, severity: "sedang" as Severity },
+      { name: "Jerawat", pct: 15, severity: "ringan" as Severity },
+      { name: "Eksim", pct: 8, severity: "sedang" as Severity },
+      { name: "Infeksi Jamur", pct: 4, severity: "perlu-perhatian" as Severity },
+    ];
 
-    let step = 0
+    let step = 0;
     liveIntervalRef.current = setInterval(() => {
-      step++
-      const revealed = conditions.slice(0, Math.min(step, conditions.length)).map((c) => ({
-        ...c,
-        pct: Math.max(1, Math.min(99, c.pct + Math.floor(Math.random() * 7) - 3)),
-      })).sort((a, b) => b.pct - a.pct)
-      setLiveDetections(revealed)
-      setScanProgress(Math.min(step * 12, 100))
+      step++;
+      const revealed = conditions
+        .slice(0, Math.min(step, conditions.length))
+        .map((c) => ({
+          ...c,
+          pct: Math.max(1, Math.min(99, c.pct + Math.floor(Math.random() * 7) - 3)),
+        }))
+        .sort((a, b) => b.pct - a.pct);
+      setLiveDetections(revealed);
+      setScanProgress(Math.min(step * 12, 100));
 
       if (step >= 10) {
-        clearInterval(liveIntervalRef.current!)
-        liveIntervalRef.current = null
+        clearInterval(liveIntervalRef.current!);
+        liveIntervalRef.current = null;
         // Auto capture & analyze when 100%
         setTimeout(() => {
-          captureAndAnalyzeRef.current?.()
-        }, 800)
+          captureAndAnalyzeRef.current?.();
+        }, 800);
       }
-    }, 800)
-  }
+    }, 800);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
     reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string
-      setUploadedImage(dataUrl)
+      const dataUrl = ev.target?.result as string;
+      setUploadedImage(dataUrl);
       // Extract base64 (remove data:image/...;base64, prefix)
-      const base64 = dataUrl.split(',')[1]
-      startAnalysis(base64)
-    }
-    reader.readAsDataURL(file)
-  }
+      const base64 = dataUrl.split(",")[1];
+      startAnalysis(base64);
+    };
+    reader.readAsDataURL(file);
+  };
 
-  const startAnalysis = useCallback(async (imageBase64?: string) => {
-    setViewMode('analyzing')
-    setAiAnalyzing(true)
+  const startAnalysis = useCallback(
+    async (imageBase64?: string) => {
+      setViewMode("analyzing");
+      setAiAnalyzing(true);
 
-    if (imageBase64 && OPENROUTER_KEY) {
-      const result = await analyzeSkinWithAI(imageBase64)
-      setAiAnalyzing(false)
-      if (result) {
-        setScanResult(result)
-        setViewMode('result')
-        if (user) saveScan(result)
-        return
+      if (imageBase64 && OPENROUTER_KEY) {
+        const result = await analyzeSkinWithAI(imageBase64);
+        setAiAnalyzing(false);
+        if (result) {
+          setScanResult(result);
+          setViewMode("result");
+          if (user) saveScan(result);
+          return;
+        }
+        // Jika API gagal, langsung fallback ke mock tanpa delay
+        const mock = getMockResult();
+        setScanResult(mock);
+        setViewMode("result");
+        if (user) saveScan(mock);
+        return;
       }
-      // Jika API gagal, langsung fallback ke mock tanpa delay
-      const mock = getMockResult()
-      setScanResult(mock)
-      setViewMode('result')
-      if (user) saveScan(mock)
-      return
-    }
 
-    // Fallback mock untuk case tanpa imageBase64 atau OPENROUTER_KEY
-    setAiAnalyzing(false)
-    setTimeout(() => {
-      const mock = getMockResult()
-      setScanResult(mock)
-      setViewMode('result')
-      if (user) saveScan(mock)
-    }, 2500)
-  }, [user, saveScan])
+      // Fallback mock untuk case tanpa imageBase64 atau OPENROUTER_KEY
+      setAiAnalyzing(false);
+      setTimeout(() => {
+        const mock = getMockResult();
+        setScanResult(mock);
+        setViewMode("result");
+        if (user) saveScan(mock);
+      }, 2500);
+    },
+    [user, saveScan],
+  );
 
   const captureAndAnalyze = useCallback(() => {
-    let base64: string | undefined
+    let base64: string | undefined;
     if (videoRef.current) {
-      const canvas = document.createElement('canvas')
-      canvas.width = videoRef.current.videoWidth || 640
-      canvas.height = videoRef.current.videoHeight || 480
-      const ctx = canvas.getContext('2d')
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth || 640;
+      canvas.height = videoRef.current.videoHeight || 480;
+      const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0)
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
-        setUploadedImage(dataUrl)
-        base64 = dataUrl.split(',')[1]
+        ctx.drawImage(videoRef.current, 0, 0);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        setUploadedImage(dataUrl);
+        base64 = dataUrl.split(",")[1];
       }
     }
-    stopCamera()
-    startAnalysis(base64)
-  }, [startAnalysis])
+    stopCamera();
+    startAnalysis(base64);
+  }, [startAnalysis]);
 
   // Keep ref in sync so startLiveDetection can call it without stale closure
-  useEffect(() => { captureAndAnalyzeRef.current = captureAndAnalyze }, [captureAndAnalyze])
+  useEffect(() => {
+    captureAndAnalyzeRef.current = captureAndAnalyze;
+  }, [captureAndAnalyze]);
 
   const resetAll = () => {
-    setViewMode('upload')
-    setUploadedImage(null)
-    setScanResult(null)
-    setCameraActive(false)
-    setScanProgress(0)
-    setLiveDetections([])
-    stopCamera()
-  }
+    setViewMode("upload");
+    setUploadedImage(null);
+    setScanResult(null);
+    setCameraActive(false);
+    setScanProgress(0);
+    setLiveDetections([]);
+    stopCamera();
+  };
 
   const filteredConditions = SKIN_CONDITIONS.filter((c) =>
-    c.name.toLowerCase().includes(searchCondition.toLowerCase())
-  )
+    c.name.toLowerCase().includes(searchCondition.toLowerCase()),
+  );
 
   return (
     <div className="relative z-10 min-h-screen">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-14">
-
-      {/* ── Hero Card with Image ──────────────────────────────── */}
-        <motion.div variants={fadeIn} initial="hidden" animate="visible"
+        {/* ── Hero Card with Image ──────────────────────────────── */}
+        <motion.div
+          variants={fadeIn}
+          initial="hidden"
+          animate="visible"
           className="relative w-full overflow-hidden rounded-3xl shadow-2xl flex flex-col justify-end min-h-[380px]"
         >
-          <img src="/images/scan.jpg" alt="Dermatologi AI Scan" className="absolute inset-0 w-full h-full object-cover object-center" />
+          <img
+            src="/images/scan.jpg"
+            alt="Dermatologi AI Scan"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
           <div className="relative p-7 sm:p-10 lg:p-12">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 px-3 py-1.5 mb-5 w-fit">
               <ScanLine className="h-3 w-3 text-pink-300" />
-              <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">Dermatologi AI Scan</span>
+              <span className="text-[11px] font-bold text-white/90 tracking-wider uppercase">
+                Dermatologi AI Scan
+              </span>
               <span className="h-3.5 w-px bg-white/30 mx-1" />
               <span className="text-[11px] font-semibold text-pink-300">Sembuhin AI 1.2</span>
             </div>
@@ -503,25 +681,30 @@ function DermatologiPage() {
               Pre-Screening Kulit Anda
             </h1>
             <p className="mt-4 text-sm sm:text-base text-white/80 leading-relaxed max-w-xl">
-              Upload foto area kulit yang bermasalah. AI kami akan menganalisis dan memberikan indikasi awal sebelum konsultasi ke dermatologis.
+              Upload foto area kulit yang bermasalah. AI kami akan menganalisis dan memberikan
+              indikasi awal sebelum konsultasi ke dermatologis.
             </p>
             {/* Navigation tabs */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
               {[
-                { key: 'upload',   label: 'Scan Baru',    icon: Camera },
-                { key: 'history',  label: 'Riwayat Scan', icon: Clock  },
+                { key: "upload", label: "Scan Baru", icon: Camera },
+                { key: "history", label: "Riwayat Scan", icon: Clock },
               ].map(({ key, label, icon: Icon }) => (
-                <button key={key}
+                <button
+                  key={key}
                   onClick={() => setViewMode(key as ViewMode)}
                   className={cn(
-                    'flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all',
+                    "flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all",
                     viewMode === key
-                      ? 'bg-white/20 border-white/40 text-white backdrop-blur-sm shadow-md'
-                      : 'bg-white/10 border-white/20 text-white/60 hover:bg-white/15 hover:text-white/80 backdrop-blur-sm'
+                      ? "bg-white/20 border-white/40 text-white backdrop-blur-sm shadow-md"
+                      : "bg-white/10 border-white/20 text-white/60 hover:bg-white/15 hover:text-white/80 backdrop-blur-sm",
                   )}
                 >
-                  <Icon className="h-4 w-4" />{label}
-                  {viewMode === key && <div className="h-1.5 w-1.5 rounded-full bg-pink-400 ml-1" />}
+                  <Icon className="h-4 w-4" />
+                  {label}
+                  {viewMode === key && (
+                    <div className="h-1.5 w-1.5 rounded-full bg-pink-400 ml-1" />
+                  )}
                 </button>
               ))}
             </div>
@@ -529,9 +712,14 @@ function DermatologiPage() {
         </motion.div>
 
         {/* ═══════════════════ UPLOAD / LIVE CAMERA ═══════════════════ */}
-        {viewMode === 'upload' && (
-          <motion.div key="upload" variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
-
+        {viewMode === "upload" && (
+          <motion.div
+            key="upload"
+            variants={fadeIn}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+          >
             {!cameraActive ? (
               /* ── Start Camera CTA ── */
               <div className="space-y-6">
@@ -559,7 +747,7 @@ function DermatologiPage() {
                         Nyalakan Kamera
                       </button>
                     </div>
-                    
+
                     {/* Opsi Upload Foto */}
                     <div className="text-center space-y-4 p-5 rounded-2xl bg-slate-50 border border-slate-200">
                       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-600 mx-auto">
@@ -567,7 +755,9 @@ function DermatologiPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-slate-800">Upload Foto Kulit</h4>
-                        <p className="text-xs text-slate-500 mt-1">Upload foto area kulit dari galeri Anda.</p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Upload foto area kulit dari galeri Anda.
+                        </p>
                       </div>
                       <input
                         ref={fileInputRef}
@@ -595,18 +785,33 @@ function DermatologiPage() {
                   </h3>
                   <div className="grid sm:grid-cols-3 gap-3">
                     {[
-                      { icon: Eye, title: 'Fokus Jelas', desc: 'Pastikan area kulit terlihat tajam dan tidak blur' },
-                      { icon: Zap, title: 'Cahaya Cukup', desc: 'Scan di tempat terang, hindari bayangan' },
-                      { icon: Camera, title: 'Jarak Dekat', desc: 'Arahkan kamera close-up ±15-20 cm' },
+                      {
+                        icon: Eye,
+                        title: "Fokus Jelas",
+                        desc: "Pastikan area kulit terlihat tajam dan tidak blur",
+                      },
+                      {
+                        icon: Zap,
+                        title: "Cahaya Cukup",
+                        desc: "Scan di tempat terang, hindari bayangan",
+                      },
+                      {
+                        icon: Camera,
+                        title: "Jarak Dekat",
+                        desc: "Arahkan kamera close-up ±15-20 cm",
+                      },
                     ].map((tip) => {
-                      const Icon = tip.icon
+                      const Icon = tip.icon;
                       return (
-                        <div key={tip.title} className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                        <div
+                          key={tip.title}
+                          className="rounded-xl bg-slate-50 border border-slate-100 p-4"
+                        >
                           <Icon className="h-5 w-5 text-pink-600 mb-2" />
                           <p className="text-xs font-bold text-slate-800">{tip.title}</p>
                           <p className="text-[11px] text-slate-500 mt-0.5">{tip.desc}</p>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </div>
@@ -615,7 +820,10 @@ function DermatologiPage() {
               /* ── Live Camera View ── */
               <div className="space-y-0">
                 {/* Camera Feed */}
-                <div className="relative rounded-t-2xl overflow-hidden bg-slate-900 shadow-2xl" style={{ aspectRatio: '4/3' }}>
+                <div
+                  className="relative rounded-t-2xl overflow-hidden bg-slate-900 shadow-2xl"
+                  style={{ aspectRatio: "4/3" }}
+                >
                   {/* Video Feed */}
                   <video
                     ref={videoRef}
@@ -638,12 +846,13 @@ function DermatologiPage() {
 
                   {/* Scanning line animation */}
                   <motion.div
-                    animate={{ top: ['5%', '95%', '5%'] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                    animate={{ top: ["5%", "95%", "5%"] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                     className="absolute left-0 right-0 h-0.5 pointer-events-none"
                     style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.8), transparent)',
-                      boxShadow: '0 0 20px rgba(236, 72, 153, 0.5)',
+                      background:
+                        "linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.8), transparent)",
+                      boxShadow: "0 0 20px rgba(236, 72, 153, 0.5)",
                     }}
                   />
 
@@ -656,7 +865,12 @@ function DermatologiPage() {
                   </div>
 
                   {/* Top bar: Status + Progress */}
-                  <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)' }}>
+                  <div
+                    className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between"
+                    style={{
+                      background: "linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)",
+                    }}
+                  >
                     <div className="flex items-center gap-2">
                       <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
                       <span className="text-xs font-bold text-white">LIVE</span>
@@ -695,7 +909,14 @@ function DermatologiPage() {
                     </button>
                   </div>
 
-                  <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageUpload} />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
                 </div>
 
                 {/* ── AI Analysis Card (below camera) ── */}
@@ -722,7 +943,7 @@ function DermatologiPage() {
                     )}
                     <AnimatePresence>
                       {liveDetections.map((det, i) => {
-                        const sevConf = SEVERITY_CONFIG[det.severity]
+                        const sevConf = SEVERITY_CONFIG[det.severity];
                         return (
                           <motion.div
                             key={det.name}
@@ -730,50 +951,108 @@ function DermatologiPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3 }}
                             className={cn(
-                              'flex items-center gap-3 p-3 rounded-xl border',
-                              i === 0 ? cn(sevConf.bgColor, 'shadow-sm') : 'bg-slate-50 border-slate-100'
+                              "flex items-center gap-3 p-3 rounded-xl border",
+                              i === 0
+                                ? cn(sevConf.bgColor, "shadow-sm")
+                                : "bg-slate-50 border-slate-100",
                             )}
                           >
                             {/* Percentage Circle */}
                             <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
                               <svg className="h-12 w-12 -rotate-90" viewBox="0 0 48 48">
-                                <circle cx="24" cy="24" r="20" fill="none" stroke="#f1f5f9" strokeWidth="4" />
+                                <circle
+                                  cx="24"
+                                  cy="24"
+                                  r="20"
+                                  fill="none"
+                                  stroke="#f1f5f9"
+                                  strokeWidth="4"
+                                />
                                 <motion.circle
-                                  cx="24" cy="24" r="20" fill="none"
-                                  stroke={i === 0 ? (det.severity === 'ringan' ? '#10b981' : det.severity === 'sedang' ? '#f59e0b' : '#ef4444') : '#94a3b8'}
-                                  strokeWidth="4" strokeLinecap="round"
+                                  cx="24"
+                                  cy="24"
+                                  r="20"
+                                  fill="none"
+                                  stroke={
+                                    i === 0
+                                      ? det.severity === "ringan"
+                                        ? "#10b981"
+                                        : det.severity === "sedang"
+                                          ? "#f59e0b"
+                                          : "#ef4444"
+                                      : "#94a3b8"
+                                  }
+                                  strokeWidth="4"
+                                  strokeLinecap="round"
                                   strokeDasharray={`${2 * Math.PI * 20}`}
                                   initial={{ strokeDashoffset: 2 * Math.PI * 20 }}
-                                  animate={{ strokeDashoffset: 2 * Math.PI * 20 * (1 - det.pct / 100) }}
+                                  animate={{
+                                    strokeDashoffset: 2 * Math.PI * 20 * (1 - det.pct / 100),
+                                  }}
                                   transition={{ duration: 0.6 }}
                                 />
                               </svg>
-                              <span className={cn('absolute text-xs font-bold', i === 0 ? sevConf.color : 'text-slate-500')}>{det.pct}%</span>
+                              <span
+                                className={cn(
+                                  "absolute text-xs font-bold",
+                                  i === 0 ? sevConf.color : "text-slate-500",
+                                )}
+                              >
+                                {det.pct}%
+                              </span>
                             </div>
                             {/* Info */}
                             <div className="flex-1 min-w-0">
-                              <p className={cn('text-sm font-bold', i === 0 ? sevConf.color : 'text-slate-600')}>{det.name}</p>
+                              <p
+                                className={cn(
+                                  "text-sm font-bold",
+                                  i === 0 ? sevConf.color : "text-slate-600",
+                                )}
+                              >
+                                {det.name}
+                              </p>
                               <p className="text-[10px] text-slate-400">
-                                {det.severity === 'ringan' ? 'Risiko rendah' : det.severity === 'sedang' ? 'Risiko sedang — pantau' : 'Perlu perhatian medis'}
+                                {det.severity === "ringan"
+                                  ? "Risiko rendah"
+                                  : det.severity === "sedang"
+                                    ? "Risiko sedang — pantau"
+                                    : "Perlu perhatian medis"}
                               </p>
                             </div>
                             {/* Severity badge */}
-                            <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', i === 0 ? cn(sevConf.bgColor, sevConf.color) : 'bg-slate-100 text-slate-500 border-slate-200')}>
+                            <span
+                              className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                                i === 0
+                                  ? cn(sevConf.bgColor, sevConf.color)
+                                  : "bg-slate-100 text-slate-500 border-slate-200",
+                              )}
+                            >
                               {sevConf.label}
                             </span>
                           </motion.div>
-                        )
+                        );
                       })}
                     </AnimatePresence>
                   </div>
 
                   {/* Card Footer */}
                   {scanProgress >= 100 && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-4 border-t border-slate-100 flex gap-3">
-                      <button onClick={stopCamera} className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="px-5 py-4 border-t border-slate-100 flex gap-3"
+                    >
+                      <button
+                        onClick={stopCamera}
+                        className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
                         Stop Kamera
                       </button>
-                      <button onClick={captureAndAnalyze} className="flex-1 rounded-xl bg-pink-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-pink-700 transition-colors shadow-md shadow-pink-600/20">
+                      <button
+                        onClick={captureAndAnalyze}
+                        className="flex-1 rounded-xl bg-pink-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-pink-700 transition-colors shadow-md shadow-pink-600/20"
+                      >
                         <ScanLine className="h-4 w-4 inline mr-1.5" /> Analisis Detail
                       </button>
                     </motion.div>
@@ -785,24 +1064,33 @@ function DermatologiPage() {
         )}
 
         {/* ═══════════════════ ANALYZING ═══════════════════ */}
-        {viewMode === 'analyzing' && (
-          <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+        {viewMode === "analyzing" && (
+          <motion.div
+            key="analyzing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-6"
+          >
             <div className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-12 text-center">
               <div className="flex flex-col items-center gap-6">
                 {/* Scanning Animation */}
                 <div className="relative">
                   <div className="h-32 w-32 rounded-2xl bg-gradient-to-br from-pink-100 to-pink-50 border-2 border-pink-200 flex items-center justify-center overflow-hidden">
                     {uploadedImage ? (
-                      <img src={uploadedImage} alt="Scanning" className="h-full w-full object-cover" />
+                      <img
+                        src={uploadedImage}
+                        alt="Scanning"
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <ImageIcon className="h-16 w-16 text-pink-300" />
                     )}
                     {/* Scanning line */}
                     <motion.div
-                      animate={{ top: ['0%', '100%', '0%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                      animate={{ top: ["0%", "100%", "0%"] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                       className="absolute left-0 right-0 h-0.5 bg-pink-500"
-                      style={{ boxShadow: '0 0 10px rgba(236, 72, 153, 0.8)' }}
+                      style={{ boxShadow: "0 0 10px rgba(236, 72, 153, 0.8)" }}
                     />
                   </div>
                 </div>
@@ -811,17 +1099,19 @@ function DermatologiPage() {
                   <Loader2 className="h-8 w-8 text-pink-600 animate-spin mx-auto" />
                   <h3 className="text-lg font-bold text-slate-800">AI Sedang Menganalisis</h3>
                   <p className="text-sm text-slate-500">
-                    {OPENROUTER_KEY ? 'Sembuhin AI 1.2 menganalisis kondisi kulit Anda...' : 'Mengenali pola, tekstur, dan karakteristik kulit...'}
+                    {OPENROUTER_KEY
+                      ? "Sembuhin AI 1.2 menganalisis kondisi kulit Anda..."
+                      : "Mengenali pola, tekstur, dan karakteristik kulit..."}
                   </p>
                 </div>
 
                 {/* Analysis steps */}
                 <div className="space-y-2 w-full max-w-sm">
                   {[
-                    OPENROUTER_KEY ? 'Mengirim ke Sembuhin AI 1.2' : 'Deteksi area kulit',
-                    'Analisis pola & tekstur kulit',
-                    'Pencocokan dengan database dermatologi',
-                    'Generate diagnosis & rekomendasi',
+                    OPENROUTER_KEY ? "Mengirim ke Sembuhin AI 1.2" : "Deteksi area kulit",
+                    "Analisis pola & tekstur kulit",
+                    "Pencocokan dengan database dermatologi",
+                    "Generate diagnosis & rekomendasi",
                   ].map((step, i) => (
                     <motion.div
                       key={step}
@@ -847,55 +1137,81 @@ function DermatologiPage() {
         )}
 
         {/* ═══════════════════ RESULT ═══════════════════ */}
-        {viewMode === 'result' && scanResult && (
-          <motion.div key="result" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+        {viewMode === "result" && scanResult && (
+          <motion.div
+            key="result"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
             {/* Status Badge: Sehat / Sakit */}
-            <div className={cn(
-              'rounded-2xl border overflow-hidden shadow-lg',
-              scanResult.condition === 'Kulit Normal' 
-                ? 'bg-emerald-50 border-emerald-200' 
-                : SEVERITY_CONFIG[scanResult.severity].bgColor
-            )}>
+            <div
+              className={cn(
+                "rounded-2xl border overflow-hidden shadow-lg",
+                scanResult.condition === "Kulit Normal"
+                  ? "bg-emerald-50 border-emerald-200"
+                  : SEVERITY_CONFIG[scanResult.severity].bgColor,
+              )}
+            >
               <div className="p-6 sm:p-8">
                 <div className="flex items-start gap-4">
                   {(() => {
-                    const isHealthy = scanResult.condition === 'Kulit Normal'
-                    const Icon = isHealthy ? CheckCircle2 : SEVERITY_CONFIG[scanResult.severity].icon
+                    const isHealthy = scanResult.condition === "Kulit Normal";
+                    const Icon = isHealthy
+                      ? CheckCircle2
+                      : SEVERITY_CONFIG[scanResult.severity].icon;
                     return (
-                      <div className={cn(
-                        'flex h-14 w-14 items-center justify-center rounded-2xl shrink-0',
-                        isHealthy ? 'bg-emerald-100 border border-emerald-200' : ''
-                      )}>
-                        <Icon className={cn(
-                          'h-8 w-8',
-                          isHealthy ? 'text-emerald-600' : SEVERITY_CONFIG[scanResult.severity].color
-                        )} />
+                      <div
+                        className={cn(
+                          "flex h-14 w-14 items-center justify-center rounded-2xl shrink-0",
+                          isHealthy ? "bg-emerald-100 border border-emerald-200" : "",
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            "h-8 w-8",
+                            isHealthy
+                              ? "text-emerald-600"
+                              : SEVERITY_CONFIG[scanResult.severity].color,
+                          )}
+                        />
                       </div>
-                    )
+                    );
                   })()}
                   <div className="flex-1">
                     {/* Sehat/Sakit Label */}
                     <div className="flex items-center gap-2 mb-1">
-                      {scanResult.condition === 'Kulit Normal' ? (
+                      {scanResult.condition === "Kulit Normal" ? (
                         <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-lg">
                           <CheckCircle2 className="h-5 w-5" />
                           Sehat
                         </span>
                       ) : (
-                        <span className={cn('inline-flex items-center gap-1.5 text-lg font-bold', SEVERITY_CONFIG[scanResult.severity].color)}>
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 text-lg font-bold",
+                            SEVERITY_CONFIG[scanResult.severity].color,
+                          )}
+                        >
                           <AlertTriangle className="h-5 w-5" />
                           Terdeteksi
                         </span>
                       )}
-                      <span className="text-xs text-slate-500">• Akurasi {scanResult.confidence}%</span>
-                      {scanResult.aiSource === 'sembuhin' && (
+                      <span className="text-xs text-slate-500">
+                        • Akurasi {scanResult.confidence}%
+                      </span>
+                      {scanResult.aiSource === "sembuhin" && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">
                           <Sparkles className="h-3 w-3" /> Sembuhin AI 1.3
                         </span>
                       )}
                     </div>
-                    <h2 className="text-xl font-bold text-slate-900 mb-2">{scanResult.condition}</h2>
-                    <p className="text-sm text-slate-700 leading-relaxed">{scanResult.description}</p>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">
+                      {scanResult.condition}
+                    </h2>
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                      {scanResult.description}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -916,16 +1232,23 @@ function DermatologiPage() {
                 />
               </div>
               <p className="text-xs text-slate-400 mt-2">
-                {scanResult.confidence >= 80 ? 'Keyakinan tinggi. Disarankan konsultasi untuk konfirmasi.' : 'Keyakinan sedang. Foto tambahan dari sudut berbeda dapat meningkatkan akurasi.'}
+                {scanResult.confidence >= 80
+                  ? "Keyakinan tinggi. Disarankan konsultasi untuk konfirmasi."
+                  : "Keyakinan sedang. Foto tambahan dari sudut berbeda dapat meningkatkan akurasi."}
               </p>
             </div>
 
             {/* Characteristics */}
             <div className="rounded-2xl bg-white border border-white/60 shadow-lg shadow-slate-200/60 p-6">
-              <p className="text-sm font-semibold text-slate-800 mb-4">Karakteristik yang Terdeteksi</p>
+              <p className="text-sm font-semibold text-slate-800 mb-4">
+                Karakteristik yang Terdeteksi
+              </p>
               <div className="space-y-2">
                 {scanResult.characteristics.map((char, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  >
                     <CheckCircle2 className="h-4 w-4 text-pink-500 shrink-0 mt-0.5" />
                     <p className="text-sm text-slate-600">{char}</p>
                   </div>
@@ -944,7 +1267,10 @@ function DermatologiPage() {
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={resetAll} className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+              <button
+                onClick={resetAll}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+              >
                 <RotateCcw className="h-4 w-4" />
                 Scan Baru
               </button>
@@ -958,15 +1284,22 @@ function DermatologiPage() {
             <div className="flex gap-3 rounded-xl bg-white/80 border border-slate-200/80 p-4 shadow-sm">
               <Info className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <p className="text-xs text-slate-500 leading-relaxed">
-                Hasil ini bersifat pre-screening dan BUKAN pengganti diagnosis medis profesional. Selalu konsultasikan kondisi kulit Anda dengan dermatologis untuk diagnosis dan penanganan yang tepat.
+                Hasil ini bersifat pre-screening dan BUKAN pengganti diagnosis medis profesional.
+                Selalu konsultasikan kondisi kulit Anda dengan dermatologis untuk diagnosis dan
+                penanganan yang tepat.
               </p>
             </div>
           </motion.div>
         )}
 
         {/* ═══════════════════ HISTORY ═══════════════════ */}
-        {viewMode === 'history' && (
-          <motion.div key="history" initial={{opacity:0}} animate={{opacity:1}} className="space-y-4">
+        {viewMode === "history" && (
+          <motion.div
+            key="history"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-4"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100">
@@ -974,10 +1307,16 @@ function DermatologiPage() {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-slate-800">Riwayat Scan</h2>
-                  <p className="text-[11px] text-slate-400">{pastScans.length>0?`${pastScans.length} scan tercatat`:'Belum ada scan'}</p>
+                  <p className="text-[11px] text-slate-400">
+                    {pastScans.length > 0 ? `${pastScans.length} scan tercatat` : "Belum ada scan"}
+                  </p>
                 </div>
               </div>
-              {pastScans.length>0 && <span className="text-[10px] font-semibold text-pink-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full">Sembuhin AI 1.2</span>}
+              {pastScans.length > 0 && (
+                <span className="text-[10px] font-semibold text-pink-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full">
+                  Sembuhin AI 1.2
+                </span>
+              )}
             </div>
 
             {/* Login gate */}
@@ -987,11 +1326,15 @@ function DermatologiPage() {
                   <LogIn className="h-8 w-8 text-pink-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">Login untuk melihat riwayat</p>
-                  <p className="text-xs text-slate-500 mt-1">Riwayat scan tersimpan per akun pengguna</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    Login untuk melihat riwayat
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Riwayat scan tersimpan per akun pengguna
+                  </p>
                 </div>
                 <button
-                  onClick={() => navigate({ to: '/auth' })}
+                  onClick={() => navigate({ to: "/auth" })}
                   className="inline-flex items-center gap-2 rounded-xl bg-pink-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-pink-700 transition-colors shadow-md"
                 >
                   <LogIn className="h-4 w-4" /> Login / Daftar
@@ -1008,7 +1351,7 @@ function DermatologiPage() {
                 <p className="text-sm font-semibold text-slate-700">Belum ada riwayat scan</p>
                 <p className="text-xs text-slate-400">Lakukan scan kulit pertamamu!</p>
                 <button
-                  onClick={() => setViewMode('upload')}
+                  onClick={() => setViewMode("upload")}
                   className="inline-flex items-center gap-2 rounded-xl bg-pink-600 px-5 py-2 text-sm font-bold text-white hover:bg-pink-700 transition-colors"
                 >
                   <ScanLine className="h-4 w-4" /> Scan Sekarang
@@ -1016,41 +1359,72 @@ function DermatologiPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {pastScans.map((scan,i)=>{
+                {pastScans.map((scan, i) => {
                   return (
-                    <motion.div key={scan.id} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*0.05}}
-                      className="rounded-2xl bg-white border border-white/60 shadow-lg p-5 flex items-center gap-4">
+                    <motion.div
+                      key={scan.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="rounded-2xl bg-white border border-white/60 shadow-lg p-5 flex items-center gap-4"
+                    >
                       <div className="relative shrink-0">
                         <div className="text-3xl leading-none">{scan.thumbnail}</div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className={cn('text-sm font-bold',SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
-                          <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border',SEVERITY_CONFIG[scan.severity].bgColor,SEVERITY_CONFIG[scan.severity].color)}>{SEVERITY_CONFIG[scan.severity].label}</span>
+                          <span
+                            className={cn(
+                              "text-sm font-bold",
+                              SEVERITY_CONFIG[scan.severity].color,
+                            )}
+                          >
+                            {SEVERITY_CONFIG[scan.severity].label}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+                              SEVERITY_CONFIG[scan.severity].bgColor,
+                              SEVERITY_CONFIG[scan.severity].color,
+                            )}
+                          >
+                            {SEVERITY_CONFIG[scan.severity].label}
+                          </span>
                         </div>
                         <p className="text-xs text-slate-400 flex items-center gap-1">
-                          <Clock className="h-3 w-3 shrink-0" />{scan.date}
+                          <Clock className="h-3 w-3 shrink-0" />
+                          {scan.date}
                         </p>
                       </div>
                       <div className="hidden sm:flex flex-col items-end gap-1 shrink-0 w-24">
                         <span className="text-[10px] text-slate-400">Akurasi</span>
                         <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                          <div className={cn('h-full rounded-full',
-                            scan.severity==='ringan'?'bg-emerald-400':scan.severity==='sedang'?'bg-amber-400':'bg-red-400'
-                          )} style={{width:`${scan.confidence}%`}} />
+                          <div
+                            className={cn(
+                              "h-full rounded-full",
+                              scan.severity === "ringan"
+                                ? "bg-emerald-400"
+                                : scan.severity === "sedang"
+                                  ? "bg-amber-400"
+                                  : "bg-red-400",
+                            )}
+                            style={{ width: `${scan.confidence}%` }}
+                          />
                         </div>
-                        <span className={cn('text-xs font-bold',SEVERITY_CONFIG[scan.severity].color)}>{scan.confidence}%</span>
+                        <span
+                          className={cn("text-xs font-bold", SEVERITY_CONFIG[scan.severity].color)}
+                        >
+                          {scan.confidence}%
+                        </span>
                       </div>
                     </motion.div>
-                  )
+                  );
                 })}
               </div>
             )}
           </motion.div>
         )}
-
-
       </div>
     </div>
-  )
+  );
 }

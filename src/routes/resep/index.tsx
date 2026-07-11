@@ -95,7 +95,10 @@ export function ResepPage() {
           </div>
           <h2 className="text-xl font-semibold text-slate-900 mb-2">Resep Tidak Ditemukan</h2>
           <p className="text-slate-500 text-sm mb-6">{error}</p>
-          <a href="/" className="inline-block px-6 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800">
+          <a
+            href="/"
+            className="inline-block px-6 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800"
+          >
             Kembali ke Beranda
           </a>
         </div>
@@ -217,7 +220,9 @@ export function ResepPage() {
             <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-green-900 text-sm">Resep Terverifikasi</h4>
-              <p className="text-sm text-green-700 mt-1">Resep ini adalah dokumen digital resmi dari Sembuhin.</p>
+              <p className="text-sm text-green-700 mt-1">
+                Resep ini adalah dokumen digital resmi dari Sembuhin.
+              </p>
             </div>
           </div>
         </div>

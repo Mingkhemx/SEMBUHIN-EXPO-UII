@@ -31,6 +31,7 @@ cp .env.example .env
 ```
 
 Edit `.env`:
+
 ```env
 SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_SERVICE_KEY=your-service-role-key
@@ -52,22 +53,27 @@ Server akan berjalan di `http://localhost:5001`
 ## API Endpoints
 
 ### 1. Doctor Registration
+
 - **POST** `/api/doctor-registration` - Submit pendaftaran dokter baru
 
 ### 2. Admin Panel
+
 - **GET** `/api/admin/doctor-registrations` - Ambil semua pendaftaran
 - **PUT** `/api/admin/doctor-registrations/<id>` - Update status pendaftaran
 - **POST** `/api/admin/sql` - Eksekusi SQL query (untuk SQL Editor)
 
 ### 3. Health Check
+
 - **GET** `/api/health` - Cek status server dan koneksi Supabase
 
 ### 4. Face Analysis (existing)
+
 - **POST** `/analyze` - Analisis wajah dengan DeepFace
 
 ## Catatan Keamanan
 
 ⚠️ **Penting**:
+
 1. Gunakan `SUPABASE_SERVICE_KEY` hanya di backend, JANGAN pernah expose di frontend
 2. Batasi akses ke endpoint admin dengan autentikasi di produksi
 3. RPC function `execute_sql` sebaiknya dibatasi di produksi

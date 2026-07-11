@@ -138,7 +138,9 @@ export function DoctorSettings() {
       });
       setLoadingProfile(false);
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   // ── Schedule state ──

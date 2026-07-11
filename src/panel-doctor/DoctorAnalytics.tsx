@@ -52,10 +52,38 @@ export function DoctorAnalytics() {
   const [error, setError] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     stats: [
-      { label: "Total Konsultasi", value: "0", trend: "0%", trendUp: true, icon: ClipboardList, color: "bg-sky-50 text-sky-700 border-sky-100" },
-      { label: "Tingkat Kepuasan", value: "0/5", trend: "0", trendUp: true, icon: Star, color: "bg-amber-50 text-amber-700 border-amber-100" },
-      { label: "Rata-rata Durasi", value: "0 mnt", trend: "0 mnt", trendUp: false, icon: Clock, color: "bg-violet-50 text-violet-700 border-violet-100" },
-      { label: "Pasien Baru", value: "0", trend: "0", trendUp: true, icon: UserPlus, color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+      {
+        label: "Total Konsultasi",
+        value: "0",
+        trend: "0%",
+        trendUp: true,
+        icon: ClipboardList,
+        color: "bg-sky-50 text-sky-700 border-sky-100",
+      },
+      {
+        label: "Tingkat Kepuasan",
+        value: "0/5",
+        trend: "0",
+        trendUp: true,
+        icon: Star,
+        color: "bg-amber-50 text-amber-700 border-amber-100",
+      },
+      {
+        label: "Rata-rata Durasi",
+        value: "0 mnt",
+        trend: "0 mnt",
+        trendUp: false,
+        icon: Clock,
+        color: "bg-violet-50 text-violet-700 border-violet-100",
+      },
+      {
+        label: "Pasien Baru",
+        value: "0",
+        trend: "0",
+        trendUp: true,
+        icon: UserPlus,
+        color: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      },
     ],
     weekly_data: [
       { day: "Sen", value: 0, max: 15 },
@@ -84,16 +112,18 @@ export function DoctorAnalytics() {
         .maybeSingle();
 
       if (docError) throw docError;
-      
+
       if (!doc) {
         setLoading(false);
         return;
       }
 
       // 2. Fetch from backend
-      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/analytics?doctor_id=${doc.id}`);
+      const res = await fetch(
+        `https://sembuhin-expo-uii-production.up.railway.app/api/doctor/analytics?doctor_id=${doc.id}`,
+      );
       if (!res.ok) throw new Error("Gagal mengambil data analitik dari server");
-      
+
       const data = await res.json();
 
       if (data.success) {
@@ -111,16 +141,16 @@ export function DoctorAnalytics() {
 
         const activitiesWithIcons = data.analytics.activities.map((a: any) => ({
           ...a,
-          icon: a.type === 'consultation' ? CheckCircle : ClipboardList,
+          icon: a.type === "consultation" ? CheckCircle : ClipboardList,
           iconColor: "text-emerald-600",
           iconBg: "bg-emerald-50",
-          time: formatDistanceToNow(new Date(a.time), { addSuffix: true, locale: idLocale })
+          time: formatDistanceToNow(new Date(a.time), { addSuffix: true, locale: idLocale }),
         }));
 
         setAnalytics({
           ...data.analytics,
           stats: statsWithIcons,
-          activities: activitiesWithIcons
+          activities: activitiesWithIcons,
         });
       }
     } catch (err: any) {
@@ -153,7 +183,7 @@ export function DoctorAnalytics() {
           <AlertCircle className="h-10 w-10 text-rose-500" />
           <p className="text-slate-900 font-semibold">Gagal Memuat Data</p>
           <p className="text-slate-500 text-sm max-w-xs">{error}</p>
-          <button 
+          <button
             onClick={fetchAnalytics}
             className="mt-2 px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-lg hover:bg-sky-700 transition-colors"
           >

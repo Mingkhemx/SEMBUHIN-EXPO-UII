@@ -11,7 +11,7 @@ export function HealthParticles() {
     const newParticles = Array.from({ length: particleCount }).map((_, i) => {
       const cellWidth = 100 / particleCount;
       const baseLeft = i * cellWidth;
-      const jitter = (Math.random() * cellWidth) - (cellWidth / 2);
+      const jitter = Math.random() * cellWidth - cellWidth / 2;
 
       return {
         id: i,

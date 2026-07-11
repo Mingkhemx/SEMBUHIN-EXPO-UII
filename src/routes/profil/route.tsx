@@ -1,31 +1,56 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState, useEffect, useRef } from 'react';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
 import {
-  User, Mail, Phone, LogOut, ChevronLeft, ChevronRight,
-  Shield, Bell, Globe, Heart, Activity, Calendar, MapPin,
-  Droplets, AlertTriangle, PhoneCall, Edit3, Camera, Clock,
-  MessageSquare, Award, Lock, Stethoscope, UserCircle, Loader2, CheckCircle2, XCircle, ArrowRight, Brain
-} from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+  User,
+  Mail,
+  Phone,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Shield,
+  Bell,
+  Globe,
+  Heart,
+  Activity,
+  Calendar,
+  MapPin,
+  Droplets,
+  AlertTriangle,
+  PhoneCall,
+  Edit3,
+  Camera,
+  Clock,
+  MessageSquare,
+  Award,
+  Lock,
+  Stethoscope,
+  UserCircle,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
+  Brain,
+} from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-export const Route = createFileRoute('/profil')({
+export const Route = createFileRoute("/profil")({
   head: () => ({
-    title: 'Profil Saya — Sembuhin',
-    meta: [{ name: 'description', content: 'Kelola profil dan akun Sembuhin Anda' }],
+    title: "Profil Saya — Sembuhin",
+    meta: [{ name: "description", content: "Kelola profil dan akun Sembuhin Anda" }],
   }),
   component: ProfilPage,
 });
 
-type ToastType = 'success' | 'error' | null;
+type ToastType = "success" | "error" | null;
 
 interface MentalScreening {
-  id: string
-  screening_type: 'phq9' | 'gad7'
-  total_score: number
-  severity: string
-  created_at: string
+  id: string;
+  screening_type: "phq9" | "gad7";
+  total_score: number;
+  severity: string;
+  created_at: string;
 }
 
 function ProfilPage() {
@@ -44,45 +69,51 @@ function ProfilPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+        const {
+          data: { user: supabaseUser },
+        } = await supabase.auth.getUser();
         if (supabaseUser) {
           setUser(supabaseUser);
           try {
             const { count } = await supabase
-              .from('chat_history')
-              .select('*', { count: 'exact', head: true })
-              .eq('user_id', supabaseUser.id);
+              .from("chat_history")
+              .select("*", { count: "exact", head: true })
+              .eq("user_id", supabaseUser.id);
             setChatCount(count || 0);
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
           // Fetch mental health screening history
           try {
             const { data: screenings, error: fetchError } = await supabase
-              .from('mental_health_screenings')
-              .select('id, screening_type, total_score, severity, created_at')
-              .eq('user_id', supabaseUser.id)
-              .order('created_at', { ascending: false })
+              .from("mental_health_screenings")
+              .select("id, screening_type, total_score, severity, created_at")
+              .eq("user_id", supabaseUser.id)
+              .order("created_at", { ascending: false })
               .limit(10);
-            
+
             if (fetchError) {
-              console.error('Fetch screenings error:', fetchError);
+              console.error("Fetch screenings error:", fetchError);
             }
             setMentalScreenings(screenings || []);
-          } catch (err) { 
-            console.error('Catch screenings error:', err);
+          } catch (err) {
+            console.error("Catch screenings error:", err);
           }
         } else {
-          const dummyUserStr = localStorage.getItem('dummy_user');
+          const dummyUserStr = localStorage.getItem("dummy_user");
           if (dummyUserStr) setUser(JSON.parse(dummyUserStr));
         }
       } catch {
-        const dummyUserStr = localStorage.getItem('dummy_user');
+        const dummyUserStr = localStorage.getItem("dummy_user");
         if (dummyUserStr) setUser(JSON.parse(dummyUserStr));
       } finally {
         setLoading(false);
       }
     };
     fetchUser();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
@@ -97,18 +128,18 @@ function ProfilPage() {
   }, [toast]);
 
   // Debug: Tampilkan avatar URL di console setiap berubah
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Pengguna';
-  const userEmail = user?.email || 'email@contoh.com';
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Pengguna";
+  const userEmail = user?.email || "email@contoh.com";
   const userPhone = user?.user_metadata?.phone || t("profil.phone_not_added");
   const userAvatar = user?.user_metadata?.avatar_url
-    ? user.user_metadata.avatar_url.split('?')[0] + `?t=${user.updated_at || ''}` 
-    : '';
+    ? user.user_metadata.avatar_url.split("?")[0] + `?t=${user.updated_at || ""}`
+    : "";
   const createdAt = user?.created_at ? new Date(user.created_at) : new Date();
-  const memberSince = createdAt.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  const memberSince = createdAt.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
   const daysSinceJoin = Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
 
   useEffect(() => {
-    console.log('🖼️ Current Avatar URL:', userAvatar);
+    console.log("🖼️ Current Avatar URL:", userAvatar);
   }, [userAvatar]);
 
   const showToast = (type: ToastType, message: string) => {
@@ -117,8 +148,8 @@ function ProfilPage() {
 
   const handleLogout = async () => {
     await signOut();
-    localStorage.removeItem('dummy_user');
-    navigate({ to: '/' });
+    localStorage.removeItem("dummy_user");
+    navigate({ to: "/" });
   };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +158,7 @@ function ProfilPage() {
       setImageError(false);
       if (!event.target.files || event.target.files.length === 0) return;
       if (!user?.id) {
-        showToast('error', t("profil.login_required"));
+        showToast("error", t("profil.login_required"));
         return;
       }
 
@@ -135,25 +166,23 @@ function ProfilPage() {
 
       // Validasi ukuran (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        showToast('error', t("profil.max_size_error"));
+        showToast("error", t("profil.max_size_error"));
         return;
       }
 
-      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
       // Path: {user_id}/avatar.{ext} — folder = user_id agar sesuai policy RLS
       const filePath = `${user.id}/avatar.${fileExt}`;
 
       // Upload dengan upsert — timpa file lama
       const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, file, { cacheControl: '3600', upsert: true });
+        .from("profiles")
+        .upload(filePath, file, { cacheControl: "3600", upsert: true });
 
       if (uploadError) throw uploadError;
 
       // Ambil public URL — tambahkan cache buster agar browser tidak pakai cache lama
-      const { data } = supabase.storage
-        .from('profiles')
-        .getPublicUrl(filePath);
+      const { data } = supabase.storage.from("profiles").getPublicUrl(filePath);
 
       const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
 
@@ -168,7 +197,9 @@ function ProfilPage() {
       await refreshUser();
 
       // Refresh state lokal juga
-      const { data: { user: updatedUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: updatedUser },
+      } = await supabase.auth.getUser();
       setUser(updatedUser);
       setImageError(false);
 
@@ -176,20 +207,20 @@ function ProfilPage() {
       if (updatedUser && isDoctor) {
         // Update by user_id (lebih reliable) atau fallback ke email
         const { error: syncErr } = await supabase
-          .from('doctors')
+          .from("doctors")
           .update({ avatar_url: avatarUrl })
           .or(`user_id.eq.${updatedUser.id},email.eq.${updatedUser.email}`);
-        if (syncErr) console.warn('Gagal sync avatar ke doctors:', syncErr.message);
+        if (syncErr) console.warn("Gagal sync avatar ke doctors:", syncErr.message);
       }
 
-      showToast('success', t("profil.upload_success"));
+      showToast("success", t("profil.upload_success"));
     } catch (error: any) {
       const msg = error?.message || t("profil.upload_error");
-      showToast('error', msg);
+      showToast("error", msg);
     } finally {
       setUploading(false);
       // Reset input agar bisa upload file yang sama lagi
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -209,13 +240,17 @@ function ProfilPage() {
       {/* Toast Notification */}
       {toast && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999]">
-          <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl shadow-slate-100 border ${toast.type === 'success' ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
-            {toast.type === 'success' ? (
+          <div
+            className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl shadow-slate-100 border ${toast.type === "success" ? "bg-emerald-50 border-emerald-100" : "bg-rose-50 border-rose-100"}`}
+          >
+            {toast.type === "success" ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             ) : (
               <XCircle className="w-5 h-5 text-rose-600" />
             )}
-            <span className={`text-sm font-semibold ${toast.type === 'success' ? 'text-emerald-800' : 'text-rose-800'}`}>
+            <span
+              className={`text-sm font-semibold ${toast.type === "success" ? "text-emerald-800" : "text-rose-800"}`}
+            >
               {toast.message}
             </span>
             <button onClick={() => setToast(null)} className="ml-2">
@@ -225,20 +260,18 @@ function ProfilPage() {
         </div>
       )}
 
-
-
       <div className="relative overflow-hidden rounded-3xl bg-white border border-sky-100 shadow-xl shadow-sky-100/50 mb-6">
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-sky-500 via-blue-500 to-teal-500 opacity-10"></div>
         <div className="relative p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             <div className="relative flex-shrink-0">
               {userAvatar && !imageError ? (
-                <img 
-                  src={userAvatar} 
-                  alt={userName} 
+                <img
+                  src={userAvatar}
+                  alt={userName}
                   className="w-28 h-28 rounded-3xl object-cover shadow-2xl border-4 border-white"
                   onError={() => {
-                    console.error('❌ Error loading avatar image!');
+                    console.error("❌ Error loading avatar image!");
                     setImageError(true);
                   }}
                 />
@@ -247,18 +280,22 @@ function ProfilPage() {
                   {userName.charAt(0).toUpperCase()}
                 </div>
               )}
-              <button 
+              <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-emerald-500 border-4 border-white flex items-center justify-center shadow-lg hover:bg-emerald-600 transition-all duration-300 hover:scale-110 disabled:opacity-50"
               >
-                {uploading ? <Loader2 className="w-4.5 h-4.5 text-white animate-spin" /> : <Camera className="w-4.5 h-4.5 text-white" />}
+                {uploading ? (
+                  <Loader2 className="w-4.5 h-4.5 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-4.5 h-4.5 text-white" />
+                )}
               </button>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleAvatarUpload} 
-                accept="image/*" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarUpload}
+                accept="image/*"
                 className="hidden"
               />
             </div>
@@ -292,24 +329,58 @@ function ProfilPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.personal_info")}</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              {t("profil.personal_info")}
+            </h3>
             <button className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all duration-300 hover:bg-emerald-50 px-3 py-1.5 rounded-xl">
               <Edit3 className="w-3.5 h-3.5" /> {t("profil.edit")}
             </button>
           </div>
           <div className="px-6 pb-6 space-y-1">
-            <InfoRow icon={<User className="w-4 h-4" />} label={t("profil.full_name")} value={userName} />
-            <InfoRow icon={<Mail className="w-4 h-4" />} label={t("profil.email")} value={userEmail} accent />
-            <InfoRow icon={<Phone className="w-4 h-4" />} label={t("profil.phone")} value={userPhone} warn={userPhone === t("profil.phone_not_added")} />
-            <InfoRow icon={<Calendar className="w-4 h-4" />} label={t("profil.birth_date")} value={t("profil.not_added")} warn />
-            <InfoRow icon={<MapPin className="w-4 h-4" />} label={t("profil.address")} value={t("profil.not_added")} warn />
-            <InfoRow icon={<UserCircle className="w-4 h-4" />} label={t("profil.gender")} value={t("profil.not_added")} warn last />
+            <InfoRow
+              icon={<User className="w-4 h-4" />}
+              label={t("profil.full_name")}
+              value={userName}
+            />
+            <InfoRow
+              icon={<Mail className="w-4 h-4" />}
+              label={t("profil.email")}
+              value={userEmail}
+              accent
+            />
+            <InfoRow
+              icon={<Phone className="w-4 h-4" />}
+              label={t("profil.phone")}
+              value={userPhone}
+              warn={userPhone === t("profil.phone_not_added")}
+            />
+            <InfoRow
+              icon={<Calendar className="w-4 h-4" />}
+              label={t("profil.birth_date")}
+              value={t("profil.not_added")}
+              warn
+            />
+            <InfoRow
+              icon={<MapPin className="w-4 h-4" />}
+              label={t("profil.address")}
+              value={t("profil.not_added")}
+              warn
+            />
+            <InfoRow
+              icon={<UserCircle className="w-4 h-4" />}
+              label={t("profil.gender")}
+              value={t("profil.not_added")}
+              warn
+              last
+            />
           </div>
         </div>
 
         <div className="rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.health_info")}</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              {t("profil.health_info")}
+            </h3>
             <button className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all duration-300 hover:bg-emerald-50 px-3 py-1.5 rounded-xl">
               <Edit3 className="w-3.5 h-3.5" /> {t("profil.edit")}
             </button>
@@ -358,27 +429,29 @@ function ProfilPage() {
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
             <div className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-violet-500" />
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.mental_health_history")}</h3>
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                {t("profil.mental_health_history")}
+              </h3>
             </div>
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={async () => {
                   setLoading(true);
                   try {
                     const { data: screenings, error } = await supabase
-                      .from('mental_health_screenings')
-                      .select('id, screening_type, total_score, severity, created_at')
-                      .eq('user_id', user.id)
-                      .order('created_at', { ascending: false })
+                      .from("mental_health_screenings")
+                      .select("id, screening_type, total_score, severity, created_at")
+                      .eq("user_id", user.id)
+                      .order("created_at", { ascending: false })
                       .limit(10);
                     if (error) {
-                      showToast('error', `${t("profil.load_failed")}: ${error.message}`);
+                      showToast("error", `${t("profil.load_failed")}: ${error.message}`);
                     } else {
                       setMentalScreenings(screenings || []);
-                      showToast('success', t("profil.history_updated"));
+                      showToast("success", t("profil.history_updated"));
                     }
                   } catch (err) {
-                    showToast('error', t("profil.history_update_failed"));
+                    showToast("error", t("profil.history_update_failed"));
                   } finally {
                     setLoading(false);
                   }
@@ -388,8 +461,8 @@ function ProfilPage() {
                 {t("profil.refresh")}
               </button>
 
-              <button 
-                onClick={() => navigate({ to: '/mental-health' })}
+              <button
+                onClick={() => navigate({ to: "/mental-health" })}
                 className="text-xs font-medium text-violet-600 hover:text-violet-700 flex items-center gap-1 transition-all duration-300 hover:bg-violet-50 px-3 py-1.5 rounded-xl"
               >
                 {t("profil.new_screening")} <ArrowRight className="w-3.5 h-3.5" />
@@ -408,47 +481,69 @@ function ProfilPage() {
             ) : (
               <div className="space-y-3">
                 {mentalScreenings.map((s) => {
-                  const maxScore = s.screening_type === 'phq9' ? 27 : 21;
-                  const typeLabel = s.screening_type === 'phq9' ? t("profil.depression_phq9") : t("profil.anxiety_gad7");
-                  const typeColor = s.screening_type === 'phq9' 
-                    ? 'bg-violet-50 border-violet-100 text-violet-700'
-                    : 'bg-rose-50 border-rose-100 text-rose-700';
+                  const maxScore = s.screening_type === "phq9" ? 27 : 21;
+                  const typeLabel =
+                    s.screening_type === "phq9"
+                      ? t("profil.depression_phq9")
+                      : t("profil.anxiety_gad7");
+                  const typeColor =
+                    s.screening_type === "phq9"
+                      ? "bg-violet-50 border-violet-100 text-violet-700"
+                      : "bg-rose-50 border-rose-100 text-rose-700";
                   const severityColors: Record<string, string> = {
-                    'minimal': 'bg-emerald-50 text-emerald-700 border-emerald-100',
-                    'mild': 'bg-sky-50 text-sky-700 border-sky-100',
-                    'moderate': 'bg-amber-50 text-amber-700 border-amber-100',
-                    'mod-severe': 'bg-orange-50 text-orange-700 border-orange-100',
-                    'severe': 'bg-red-50 text-red-700 border-red-100',
+                    minimal: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                    mild: "bg-sky-50 text-sky-700 border-sky-100",
+                    moderate: "bg-amber-50 text-amber-700 border-amber-100",
+                    "mod-severe": "bg-orange-50 text-orange-700 border-orange-100",
+                    severe: "bg-red-50 text-red-700 border-red-100",
                   };
                   const severityLabels: Record<string, string> = {
-                    'minimal': t("profil.minimal"),
-                    'mild': t("profil.mild"),
-                    'moderate': t("profil.moderate"),
-                    'mod-severe': t("profil.mod_severe"),
-                    'severe': t("profil.severe"),
+                    minimal: t("profil.minimal"),
+                    mild: t("profil.mild"),
+                    moderate: t("profil.moderate"),
+                    "mod-severe": t("profil.mod_severe"),
+                    severe: t("profil.severe"),
                   };
-                  const dateStr = new Date(s.created_at).toLocaleDateString('id-ID', {
-                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                  const dateStr = new Date(s.created_at).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   });
                   return (
-                    <div key={s.id} className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+                    <div
+                      key={s.id}
+                      className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4"
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${typeColor}`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${typeColor}`}
+                        >
                           <Brain className="w-3 h-3" /> {typeLabel}
                         </span>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${severityColors[s.severity] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${severityColors[s.severity] || "bg-slate-50 text-slate-500 border-slate-100"}`}
+                        >
                           {severityLabels[s.severity] || s.severity}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div>
-                            <p className="text-lg font-bold text-slate-800">{s.total_score}<span className="text-xs font-normal text-slate-400">/{maxScore}</span></p>
+                            <p className="text-lg font-bold text-slate-800">
+                              {s.total_score}
+                              <span className="text-xs font-normal text-slate-400">
+                                /{maxScore}
+                              </span>
+                            </p>
                           </div>
                           <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden max-w-[120px]">
-                            <div 
+                            <div
                               className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all"
-                              style={{ width: `${Math.min((s.total_score / maxScore) * 100, 100)}%` }}
+                              style={{
+                                width: `${Math.min((s.total_score / maxScore) * 100, 100)}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -467,26 +562,67 @@ function ProfilPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-1 rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.activity_stats")}</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              {t("profil.activity_stats")}
+            </h3>
           </div>
           <div className="px-6 pb-6">
             <div className="grid grid-cols-3 gap-3">
-              <StatCard value={chatCount.toString()} label={t("profil.total_chat")} icon={<MessageSquare className="w-5 h-5" />} />
-              <StatCard value={daysSinceJoin.toString()} label={t("profil.active_days_label")} icon={<Calendar className="w-5 h-5" />} />
-              <StatCard value="0" label={t("profil.prescriptions")} icon={<Stethoscope className="w-5 h-5" />} />
+              <StatCard
+                value={chatCount.toString()}
+                label={t("profil.total_chat")}
+                icon={<MessageSquare className="w-5 h-5" />}
+              />
+              <StatCard
+                value={daysSinceJoin.toString()}
+                label={t("profil.active_days_label")}
+                icon={<Calendar className="w-5 h-5" />}
+              />
+              <StatCard
+                value="0"
+                label={t("profil.prescriptions")}
+                icon={<Stethoscope className="w-5 h-5" />}
+              />
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-2 rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden">
           <div className="px-6 pt-6 pb-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{t("profil.account_settings")}</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              {t("profil.account_settings")}
+            </h3>
           </div>
           <div className="px-2 pb-2">
-            <MenuButton icon={<User className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label={t("profil.edit_profile")} desc={t("profil.edit_profile_desc")} />
-            <MenuButton icon={<Bell className="w-5 h-5" />} iconBg="bg-amber-50" iconColor="text-amber-600" label={t("profil.notifications")} desc={t("profil.notifications_desc")} />
-            <MenuButton icon={<Shield className="w-5 h-5" />} iconBg="bg-emerald-50" iconColor="text-emerald-600" label={t("profil.security")} desc={t("profil.security_desc")} />
-            <MenuButton icon={<Globe className="w-5 h-5" />} iconBg="bg-violet-50" iconColor="text-violet-600" label={t("profil.language")} desc={t("profil.language_desc")} last />
+            <MenuButton
+              icon={<User className="w-5 h-5" />}
+              iconBg="bg-slate-100"
+              iconColor="text-slate-600"
+              label={t("profil.edit_profile")}
+              desc={t("profil.edit_profile_desc")}
+            />
+            <MenuButton
+              icon={<Bell className="w-5 h-5" />}
+              iconBg="bg-amber-50"
+              iconColor="text-amber-600"
+              label={t("profil.notifications")}
+              desc={t("profil.notifications_desc")}
+            />
+            <MenuButton
+              icon={<Shield className="w-5 h-5" />}
+              iconBg="bg-emerald-50"
+              iconColor="text-emerald-600"
+              label={t("profil.security")}
+              desc={t("profil.security_desc")}
+            />
+            <MenuButton
+              icon={<Globe className="w-5 h-5" />}
+              iconBg="bg-violet-50"
+              iconColor="text-violet-600"
+              label={t("profil.language")}
+              desc={t("profil.language_desc")}
+              last
+            />
           </div>
         </div>
       </div>
@@ -494,15 +630,28 @@ function ProfilPage() {
       {/* Tentang & Doctor Panel */}
       <div className="rounded-3xl bg-white border border-slate-100 shadow-lg shadow-slate-50/50 overflow-hidden mb-6">
         <div className="px-2 pt-2 pb-2">
-          <MenuButton icon={<Activity className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label={t("profil.about_sembuhin")} desc={t("profil.about_desc")} />
-          <MenuButton icon={<Lock className="w-5 h-5" />} iconBg="bg-slate-100" iconColor="text-slate-600" label={t("profil.privacy_policy")} desc={t("profil.privacy_desc")} last />
+          <MenuButton
+            icon={<Activity className="w-5 h-5" />}
+            iconBg="bg-slate-100"
+            iconColor="text-slate-600"
+            label={t("profil.about_sembuhin")}
+            desc={t("profil.about_desc")}
+          />
+          <MenuButton
+            icon={<Lock className="w-5 h-5" />}
+            iconBg="bg-slate-100"
+            iconColor="text-slate-600"
+            label={t("profil.privacy_policy")}
+            desc={t("profil.privacy_desc")}
+            last
+          />
         </div>
       </div>
 
       {/* Doctor Panel Button */}
       {isDoctor && (
         <button
-          onClick={() => navigate({ to: '/doctor' })}
+          onClick={() => navigate({ to: "/doctor" })}
           className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 text-white p-5 flex items-center justify-center gap-3 shadow-xl shadow-sky-200 hover:from-sky-600 hover:to-blue-700 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] mb-6"
         >
           <Stethoscope className="w-6 h-6" />
@@ -522,7 +671,14 @@ function ProfilPage() {
   );
 }
 
-function InfoRow({ icon, label, value, accent, warn, last }: {
+function InfoRow({
+  icon,
+  label,
+  value,
+  accent,
+  warn,
+  last,
+}: {
   icon: React.ReactNode;
   label: string;
   value: string;
@@ -531,21 +687,31 @@ function InfoRow({ icon, label, value, accent, warn, last }: {
   last?: boolean;
 }) {
   return (
-    <div className={`flex items-center justify-between py-3.5 ${!last ? 'border-b border-slate-50' : ''}`}>
+    <div
+      className={`flex items-center justify-between py-3.5 ${!last ? "border-b border-slate-50" : ""}`}
+    >
       <div className="flex items-center gap-3">
         <span className="text-slate-400">{icon}</span>
         <span className="text-sm font-medium text-slate-500">{label}</span>
       </div>
-      <span className={`text-sm font-semibold ${
-        warn ? 'text-slate-400 italic' : accent ? 'text-emerald-600' : 'text-slate-800'
-      }`}>
+      <span
+        className={`text-sm font-semibold ${
+          warn ? "text-slate-400 italic" : accent ? "text-emerald-600" : "text-slate-800"
+        }`}
+      >
         {value}
       </span>
     </div>
   );
 }
 
-function HealthCard({ icon, label, value, bg, border }: {
+function HealthCard({
+  icon,
+  label,
+  value,
+  bg,
+  border,
+}: {
   icon: React.ReactNode;
   label: string;
   value: string;
@@ -573,7 +739,14 @@ function StatCard({ value, label, icon }: { value: string; label: string; icon: 
   );
 }
 
-function MenuButton({ icon, iconBg, iconColor, label, desc, last }: {
+function MenuButton({
+  icon,
+  iconBg,
+  iconColor,
+  label,
+  desc,
+  last,
+}: {
   icon: React.ReactNode;
   iconBg: string;
   iconColor: string;
@@ -582,8 +755,12 @@ function MenuButton({ icon, iconBg, iconColor, label, desc, last }: {
   last?: boolean;
 }) {
   return (
-    <button className={`w-full flex items-center gap-4 px-4 py-4 hover:bg-slate-50 transition-all duration-300 ${!last ? 'border-b border-slate-50' : ''}`}>
-      <div className={`w-11 h-11 rounded-2xl ${iconBg} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+    <button
+      className={`w-full flex items-center gap-4 px-4 py-4 hover:bg-slate-50 transition-all duration-300 ${!last ? "border-b border-slate-50" : ""}`}
+    >
+      <div
+        className={`w-11 h-11 rounded-2xl ${iconBg} flex items-center justify-center flex-shrink-0 shadow-sm`}
+      >
         <span className={iconColor}>{icon}</span>
       </div>
       <div className="flex-1 text-left min-w-0">

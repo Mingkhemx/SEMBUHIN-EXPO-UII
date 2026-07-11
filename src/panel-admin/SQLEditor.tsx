@@ -16,12 +16,12 @@ export function SQLEditor() {
     try {
       // First try to execute a regular SELECT query
       if (sql.trim().toUpperCase().startsWith("SELECT")) {
-        const { data, error: dbError } = await supabase.rpc('execute_sql', { sql_query: sql });
+        const { data, error: dbError } = await supabase.rpc("execute_sql", { sql_query: sql });
         if (dbError) throw dbError;
         setResult(data);
       } else {
         // For other queries, use RPC
-        const { data, error: dbError } = await supabase.rpc('execute_sql', { sql_query: sql });
+        const { data, error: dbError } = await supabase.rpc("execute_sql", { sql_query: sql });
         if (dbError) throw dbError;
         setResult(data);
       }

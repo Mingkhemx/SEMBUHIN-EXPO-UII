@@ -11,9 +11,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // Palet aksen
 const ACCENTS = [
   { accent: "from-sky-500 to-cyan-400", light: "bg-sky-50 text-sky-600 border-sky-200" },
-  { accent: "from-violet-500 to-purple-400", light: "bg-violet-50 text-violet-600 border-violet-200" },
+  {
+    accent: "from-violet-500 to-purple-400",
+    light: "bg-violet-50 text-violet-600 border-violet-200",
+  },
   { accent: "from-rose-400 to-pink-400", light: "bg-rose-50 text-rose-500 border-rose-200" },
-  { accent: "from-emerald-500 to-teal-400", light: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+  {
+    accent: "from-emerald-500 to-teal-400",
+    light: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  },
   { accent: "from-amber-400 to-orange-400", light: "bg-amber-50 text-amber-600 border-amber-200" },
 ];
 
@@ -49,7 +55,9 @@ function mapDbDoctor(row: any, index: number): Doctor {
     img: row.avatar_url || "",
     accent: palette.accent,
     accentLight: palette.light,
-    desc: row.description || `Dokter spesialis ${row.specialty || "medis"} dengan pengalaman ${expYears} tahun.`,
+    desc:
+      row.description ||
+      `Dokter spesialis ${row.specialty || "medis"} dengan pengalaman ${expYears} tahun.`,
   };
 }
 
@@ -81,7 +89,9 @@ export function DoctorSection() {
       }
       setLoading(false);
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Check if section is visible in viewport
@@ -90,7 +100,7 @@ export function DoctorSection() {
       ([entry]) => {
         setIsInView(entry.isIntersecting);
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     if (sectionRef.current) {
@@ -120,11 +130,16 @@ export function DoctorSection() {
       const container = timelineRef.current;
       const containerRect = container.getBoundingClientRect();
       const doctorRect = activeDoctor.getBoundingClientRect();
-      const scrollLeft = container.scrollLeft + doctorRect.left - containerRect.left - (containerRect.width / 2) + (doctorRect.width / 2);
+      const scrollLeft =
+        container.scrollLeft +
+        doctorRect.left -
+        containerRect.left -
+        containerRect.width / 2 +
+        doctorRect.width / 2;
 
       container.scrollTo({
         left: scrollLeft,
-        behavior: "smooth"
+        behavior: "smooth",
       });
     }
   }, [activeIdx]);
@@ -184,11 +199,13 @@ export function DoctorSection() {
             {[
               ["500+", t("doctor_section.stats.doctors")],
               ["4.9", t("doctor_section.stats.rating")],
-              ["15+", t("doctor_section.stats.hospitals")]
+              ["15+", t("doctor_section.stats.hospitals")],
             ].map(([v, l]) => (
               <div key={l} className="text-right">
                 <div className="text-2xl font-bold text-foreground font-display">{v}</div>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-widest">{l}</div>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                  {l}
+                </div>
               </div>
             ))}
           </motion.div>
@@ -223,7 +240,9 @@ export function DoctorSection() {
             <div key={doc.id} className="flex items-center shrink-0">
               {/* Node */}
               <button
-                ref={(el: HTMLButtonElement | null) => { doctorRefs.current[idx] = el; }}
+                ref={(el: HTMLButtonElement | null) => {
+                  doctorRefs.current[idx] = el;
+                }}
                 onClick={() => setActiveIdx(idx)}
                 className="relative flex flex-col items-center group"
               >
@@ -309,7 +328,9 @@ export function DoctorSection() {
 
                 {/* Badge */}
                 <div className="absolute top-5 left-5">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border backdrop-blur-sm bg-white/90 ${active.accentLight}`}>
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border backdrop-blur-sm bg-white/90 ${active.accentLight}`}
+                  >
                     {active.badge}
                   </span>
                 </div>
@@ -326,8 +347,12 @@ export function DoctorSection() {
               <div className="flex-1 p-8 lg:p-12 flex flex-col justify-between">
                 <div>
                   {/* Specialty */}
-                  <div className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${active.accentLight} px-3 py-1 rounded-full border`}>
-                    <span className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${active.accent}`} />
+                  <div
+                    className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${active.accentLight} px-3 py-1 rounded-full border`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${active.accent}`}
+                    />
                     {active.spec}
                   </div>
 
@@ -344,32 +369,50 @@ export function DoctorSection() {
                   {/* Meta info */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                     <div className="flex items-center gap-3 glass rounded-xl px-4 py-3 border border-sky-100/50">
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${active.accent} flex items-center justify-center shrink-0`}>
+                      <div
+                        className={`w-8 h-8 rounded-lg bg-gradient-to-br ${active.accent} flex items-center justify-center shrink-0`}
+                      >
                         <MapPin className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("doctor_section.hospital")}</div>
-                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">{active.hospital}</div>
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                          {t("doctor_section.hospital")}
+                        </div>
+                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">
+                          {active.hospital}
+                        </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 glass rounded-xl px-4 py-3 border border-sky-100/50">
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${active.accent} flex items-center justify-center shrink-0`}>
+                      <div
+                        className={`w-8 h-8 rounded-lg bg-gradient-to-br ${active.accent} flex items-center justify-center shrink-0`}
+                      >
                         <Clock className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("doctor_section.schedule")}</div>
-                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">{active.available}</div>
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                          {t("doctor_section.schedule")}
+                        </div>
+                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">
+                          {active.available}
+                        </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 glass rounded-xl px-4 py-3 border border-sky-100/50">
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${active.accent} flex items-center justify-center shrink-0`}>
+                      <div
+                        className={`w-8 h-8 rounded-lg bg-gradient-to-br ${active.accent} flex items-center justify-center shrink-0`}
+                      >
                         <Star className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("doctor_section.rating_label")}</div>
-                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">{active.rating} / 5 · {active.reviews} {t("doctor_section.reviews")}</div>
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                          {t("doctor_section.rating_label")}
+                        </div>
+                        <div className="text-xs font-semibold text-foreground leading-tight mt-0.5">
+                          {active.rating} / 5 · {active.reviews} {t("doctor_section.reviews")}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -397,7 +440,9 @@ export function DoctorSection() {
                     <button className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass border border-sky-200/60 text-foreground text-sm font-semibold hover:bg-white/80 hover:border-sky-300/60 transition-all">
                       {t("doctor_section.view_profile")}
                     </button>
-                    <button className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl text-sm font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95 bg-gradient-to-r ${active.accent} shadow-sky-400/20`}>
+                    <button
+                      className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl text-sm font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95 bg-gradient-to-r ${active.accent} shadow-sky-400/20`}
+                    >
                       {t("doctor_section.book_appointment")} <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>

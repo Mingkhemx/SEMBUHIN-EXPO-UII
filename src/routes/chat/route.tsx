@@ -131,19 +131,21 @@ function ChatPage() {
 
   // Consultations list
   const [consultations, setConsultations] = useState<Consultation[]>([]);
-  const [consultationMessages, setConsultationMessages] = useState<Record<string, ChatMessage[]>>({});
+  const [consultationMessages, setConsultationMessages] = useState<Record<string, ChatMessage[]>>(
+    {},
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // UI state
   const [selectedConsultationId, setSelectedConsultationId] = useState<string | null>(
-    searchParams.consultationId || null
+    searchParams.consultationId || null,
   );
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const [sending, setSending] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">(
-    searchParams.consultationId ? "chat" : "list"
+    searchParams.consultationId ? "chat" : "list",
   );
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -190,7 +192,7 @@ function ChatPage() {
           .select("*")
           .eq("consultation_id", c.id)
           .order("created_at", { ascending: true })
-          .limit(50)
+          .limit(50),
       );
 
       const messageResults = await Promise.all(messagePromises);
@@ -248,7 +250,7 @@ function ChatPage() {
               [newMsg.consultation_id]: [...existing, newMsg],
             };
           });
-        }
+        },
       )
       .subscribe();
 
@@ -268,9 +270,7 @@ function ChatPage() {
   const doctorListItems: DoctorListItem[] = consultations.map((c) => {
     const msgs = consultationMessages[c.id] || [];
     const lastMessage = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-    const unreadCount = msgs.filter(
-      (m) => m.sender_type === "doctor" && m.read_at === null
-    ).length;
+    const unreadCount = msgs.filter((m) => m.sender_type === "doctor" && m.read_at === null).length;
     return { consultation: c, lastMessage, unreadCount };
   });
 
@@ -278,7 +278,7 @@ function ChatPage() {
     (item) =>
       item.consultation.doctor_name.toLowerCase().includes(search.toLowerCase()) ||
       (item.consultation.doctor_specialty || "").toLowerCase().includes(search.toLowerCase()) ||
-      (item.consultation.complaint || "").toLowerCase().includes(search.toLowerCase())
+      (item.consultation.complaint || "").toLowerCase().includes(search.toLowerCase()),
   );
 
   // ── Send message ──
@@ -339,7 +339,9 @@ function ChatPage() {
           <MessageCircle className="h-10 w-10 text-sky-400" />
         </div>
         <h3 className="text-xl font-bold text-slate-700">Login untuk Chat</h3>
-        <p className="text-sm text-slate-500">Silakan login untuk melihat dan membalas pesan konsultasi.</p>
+        <p className="text-sm text-slate-500">
+          Silakan login untuk melihat dan membalas pesan konsultasi.
+        </p>
         <button
           onClick={() => navigate({ to: "/auth" })}
           className="px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 transition-all"
@@ -360,21 +362,15 @@ function ChatPage() {
         )}
       >
         {/* Sidebar Header */}
-        <div className="relative overflow-hidden px-5 py-4"
-          style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)" }}>
-          <div className="absolute inset-0 opacity-[0.07]"
-            style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
-          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-          <div className="absolute bottom-0 left-8 w-20 h-12 rounded-full bg-sky-300/20 blur-xl pointer-events-none" />
-
-          <div className="relative flex items-center justify-between mb-1">
-            <h2 className="text-xl font-bold text-white">Konsultasi</h2>
-            <span className="text-xs font-medium text-sky-100 bg-white/20 border border-white/30 px-2.5 py-1 rounded-full">
-              {filteredDoctors.length}
+        <div className="px-5 pt-5 pb-4 bg-gradient-to-br from-sky-50 via-cyan-50 to-white border-b border-slate-100">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-xl font-bold text-slate-800">Pesan</h2>
+            <span className="text-xs font-medium text-sky-600 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full">
+              {filteredDoctors.length} konsultasi
             </span>
           </div>
-          <p className="text-xs text-sky-100 mb-4">
-            Chat dengan dokter Anda
+          <p className="text-xs text-slate-500 mb-4">
+            Chat langsung dengan dokter setelah pembayaran
           </p>
           {/* Search */}
           <div className="relative">
@@ -445,10 +441,13 @@ function ChatPage() {
                       <div
                         className={cn(
                           "h-12 w-12 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm",
-                          defaultAvatar(c.doctor_name)
+                          defaultAvatar(c.doctor_name),
                         )}
                       >
-                        {c.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 2).toUpperCase()}
+                        {c.doctor_name
+                          .replace(/^(Dr\.\s*)?/, "")
+                          .slice(0, 2)
+                          .toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -473,7 +472,8 @@ function ChatPage() {
                     <div className="flex items-center justify-between gap-1 mt-0.5">
                       <span className="text-xs text-slate-500 truncate">
                         {lastMessage
-                          ? (lastMessage.sender_type === "patient" ? "Anda: " : "") + lastMessage.message_text
+                          ? (lastMessage.sender_type === "patient" ? "Anda: " : "") +
+                            lastMessage.message_text
                           : c.consultation_type + " · " + c.doctor_specialty}
                       </span>
                       {unreadCount > 0 && (
@@ -500,57 +500,52 @@ function ChatPage() {
         {selectedConsultation ? (
           <>
             {/* Chat Header */}
-            <div className="relative overflow-hidden px-5 py-4"
-              style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)" }}>
-              <div className="absolute inset-0 opacity-[0.07]"
-                style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
-              <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-              <div className="absolute bottom-0 left-8 w-20 h-12 rounded-full bg-sky-300/20 blur-xl pointer-events-none" />
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 bg-white shadow-sm z-10">
+              {/* Back button (mobile) */}
+              <button
+                onClick={() => setMobileView("list")}
+                className="md:hidden p-2 -ml-1 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors flex-shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
 
-              <div className="relative flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-shrink-0">
-                    {selectedConsultation.doctor_avatar_url ? (
-                      <img
-                        src={selectedConsultation.doctor_avatar_url}
-                        alt={selectedConsultation.doctor_name}
-                        className="h-11 w-11 rounded-2xl object-cover border-2 border-white/30 shadow-sm"
-                      />
-                    ) : (
-                      <div
-                        className={cn(
-                          "h-11 w-11 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm border-2 border-white/30",
-                          defaultAvatar(selectedConsultation.doctor_name)
-                        )}
-                      >
-                        {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 1)}
-                      </div>
-                    )}
-                    <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-400 border-2 border-white">
-                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                    </span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-white text-sm leading-tight">{selectedConsultation.doctor_name}</span>
-                    </div>
-                    <span className="text-[11px] text-white/75">
-                      Online • {selectedConsultation.doctor_specialty || "Dokter"}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setMobileView("list")}
-                  className="md:hidden flex h-8 w-8 items-center justify-center rounded-xl hover:bg-white/15 transition-colors text-white/80 hover:text-white flex-shrink-0"
+              {selectedConsultation.doctor_avatar_url ? (
+                <img
+                  src={selectedConsultation.doctor_avatar_url}
+                  alt={selectedConsultation.doctor_name}
+                  className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
+                />
+              ) : (
+                <div
+                  className={cn(
+                    "h-10 w-10 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0",
+                    defaultAvatar(selectedConsultation.doctor_name),
+                  )}
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                </button>
+                  {selectedConsultation.doctor_name
+                    .replace(/^(Dr\.\s*)?/, "")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </div>
+              )}
 
-                <div className="hidden md:flex items-center gap-1 flex-shrink-0">
-                  <button
-                    className="p-2 rounded-xl hover:bg-white/15 text-white/80 hover:text-white transition-colors"
-                    title="Telepon"
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-slate-800 truncate">
+                  {selectedConsultation.doctor_name}
+                </h3>
+                <p className="text-xs truncate">
+                  <span className="text-emerald-600 font-medium">● Online</span>
+                  <span className="text-slate-400">
+                    {" "}
+                    · {selectedConsultation.doctor_specialty || "Dokter"}
+                  </span>
+                </p>
+              </div>
+
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button
+                  className="p-2 rounded-xl hover:bg-sky-50 text-slate-500 hover:text-sky-600 transition-colors"
+                  title="Telepon"
                 >
                   <Phone className="h-4 w-4" />
                 </button>
@@ -586,8 +581,12 @@ function ChatPage() {
                     <Users className="h-10 w-10 text-sky-400" />
                   </div>
                   <div className="text-center">
-                    <p className="font-bold text-slate-700 text-base">{selectedConsultation.doctor_name}</p>
-                    <p className="text-sm text-slate-500 mt-0.5">{selectedConsultation.doctor_specialty || "Dokter Spesialis"}</p>
+                    <p className="font-bold text-slate-700 text-base">
+                      {selectedConsultation.doctor_name}
+                    </p>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                      {selectedConsultation.doctor_specialty || "Dokter Spesialis"}
+                    </p>
                     {selectedConsultation.complaint && (
                       <span className="inline-block mt-2 text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
                         Keluhan: {selectedConsultation.complaint}
@@ -663,10 +662,12 @@ function ChatPage() {
                                   <div
                                     className={cn(
                                       "h-7 w-7 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-[9px] font-bold",
-                                      defaultAvatar(selectedConsultation.doctor_name)
+                                      defaultAvatar(selectedConsultation.doctor_name),
                                     )}
                                   >
-                                    {selectedConsultation.doctor_name.replace(/^(Dr\.\s*)?/, "").slice(0, 1)}
+                                    {selectedConsultation.doctor_name
+                                      .replace(/^(Dr\.\s*)?/, "")
+                                      .slice(0, 1)}
                                   </div>
                                 )
                               ) : (
@@ -792,7 +793,8 @@ function ChatPage() {
               <div>
                 <h3 className="text-xl font-bold text-slate-700">Pilih Konsultasi</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                  Chat tersedia setelah pembayaran berhasil. Pilih konsultasi di sebelah kiri untuk memulai chat dengan dokter.
+                  Chat tersedia setelah pembayaran berhasil. Pilih konsultasi di sebelah kiri untuk
+                  memulai chat dengan dokter.
                 </p>
               </div>
 

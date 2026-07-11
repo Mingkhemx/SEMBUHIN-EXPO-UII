@@ -51,7 +51,7 @@ interface RecentUser {
 
 interface SystemActivity {
   id: string;
-  type: 'success' | 'info' | 'error' | 'warning';
+  type: "success" | "info" | "error" | "warning";
   label: string;
   time: string;
   icon: any;
@@ -163,10 +163,16 @@ export function AdminDashboard() {
 
       // Fetch stats count
       const [usersCount, doctorsCount, pendingDocs, activeConsultations] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('doctors').select('*', { count: 'exact', head: true }),
-        supabase.from('doctor_registrations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-        supabase.from('consultations').select('*', { count: 'exact', head: true }).eq('payment_status', 'paid')
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("doctors").select("*", { count: "exact", head: true }),
+        supabase
+          .from("doctor_registrations")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending"),
+        supabase
+          .from("consultations")
+          .select("*", { count: "exact", head: true })
+          .eq("payment_status", "paid"),
       ]);
 
       setStats({
@@ -180,35 +186,43 @@ export function AdminDashboard() {
 
       // Fetch Recent Doctor Requests
       const { data: docs } = await supabase
-        .from('doctor_registrations')
-        .select('id, name, specialty, created_at, status')
-        .order('created_at', { ascending: false })
+        .from("doctor_registrations")
+        .select("id, name, specialty, created_at, status")
+        .order("created_at", { ascending: false })
         .limit(5);
-      
+
       if (docs) {
-        setDoctorRequests(docs.map(d => ({
-          id: d.id,
-          full_name: d.name,
-          specialty: d.specialty,
-          created_at: d.created_at,
-          status: d.status
-        })));
+        setDoctorRequests(
+          docs.map((d) => ({
+            id: d.id,
+            full_name: d.name,
+            specialty: d.specialty,
+            created_at: d.created_at,
+            status: d.status,
+          })),
+        );
       }
 
       // Fetch Recent Users
       const { data: users } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, created_at, is_active')
-        .order('created_at', { ascending: false })
+        .from("profiles")
+        .select("id, full_name, email, created_at, is_active")
+        .order("created_at", { ascending: false })
         .limit(5);
-      
+
       if (users) setRecentUsers(users);
 
       const initialActivities: SystemActivity[] = [
-        { id: '1', type: 'info', label: 'Dashboard Admin dimuat', time: 'Baru saja', icon: Activity, color: 'text-sky-400' }
+        {
+          id: "1",
+          type: "info",
+          label: "Dashboard Admin dimuat",
+          time: "Baru saja",
+          icon: Activity,
+          color: "text-sky-400",
+        },
       ];
       setActivities(initialActivities);
-
     } catch (err) {
       console.error("Error fetching dashboard:", err);
       // Set default empty stats
@@ -231,75 +245,94 @@ export function AdminDashboard() {
 
     // Subscribe to Doctors (Requests)
     const doctorChannel = supabase
-      .channel('admin-doctors-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'doctors' }, (payload) => {
-        console.log('Realtime Doctor Change:', payload);
+      .channel("admin-doctors-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "doctors" }, (payload) => {
+        console.log("Realtime Doctor Change:", payload);
         setIsLive(true);
         setTimeout(() => setIsLive(false), 2000);
-        
+
         // Refresh requests and stats
         fetchDashboardData();
-        
-            // Add activity
-            if (payload.eventType === 'INSERT') {
-              const newDoc = payload.new as DoctorRequest;
-              setActivities(prev => [{
+
+        // Add activity
+        if (payload.eventType === "INSERT") {
+          const newDoc = payload.new as DoctorRequest;
+          setActivities((prev) =>
+            [
+              {
                 id: Math.random().toString(),
-                type: 'warning' as const,
+                type: "warning" as const,
                 label: `Pendaftaran baru: ${newDoc.full_name}`,
-                time: 'Baru saja',
+                time: "Baru saja",
                 icon: UserPlus,
-                color: 'text-amber-400'
-              }, ...prev].slice(0, 10));
-            }
-          })
-          .subscribe();
-    
-        // Subscribe to Profiles (Users)
-        const profileChannel = supabase
-          .channel('admin-profiles-realtime')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
-            console.log('Realtime Profile Change:', payload);
-            setIsLive(true);
-            setTimeout(() => setIsLive(false), 2000);
-            
-            fetchDashboardData();
-    
-            if (payload.eventType === 'INSERT') {
-              const newUser = payload.new as RecentUser;
-              setActivities(prev => [{
+                color: "text-amber-400",
+              },
+              ...prev,
+            ].slice(0, 10),
+          );
+        }
+      })
+      .subscribe();
+
+    // Subscribe to Profiles (Users)
+    const profileChannel = supabase
+      .channel("admin-profiles-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, (payload) => {
+        console.log("Realtime Profile Change:", payload);
+        setIsLive(true);
+        setTimeout(() => setIsLive(false), 2000);
+
+        fetchDashboardData();
+
+        if (payload.eventType === "INSERT") {
+          const newUser = payload.new as RecentUser;
+          setActivities((prev) =>
+            [
+              {
                 id: Math.random().toString(),
-                type: 'success' as const,
+                type: "success" as const,
                 label: `User baru bergabung: ${newUser.full_name}`,
-                time: 'Baru saja',
+                time: "Baru saja",
                 icon: UserPlus,
-                color: 'text-sky-400'
-              }, ...prev].slice(0, 10));
-            }
-          })
-          .subscribe();
+                color: "text-sky-400",
+              },
+              ...prev,
+            ].slice(0, 10),
+          );
+        }
+      })
+      .subscribe();
 
     // Subscribe to Doctor Registrations (Requests)
     const registrationChannel = supabase
-      .channel('admin-registrations-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'doctor_registrations' }, (payload) => {
-        console.log('Realtime Registration Change:', payload);
-        setIsLive(true);
-        setTimeout(() => setIsLive(false), 2000);
-        fetchDashboardData();
-        
-        if (payload.eventType === 'INSERT') {
-          const newReg = payload.new as any;
-          setActivities(prev => [{
-            id: Math.random().toString(),
-            type: 'warning' as const,
-            label: `Pendaftaran baru: ${newReg.name}`,
-            time: 'Baru saja',
-            icon: UserPlus,
-            color: 'text-amber-400'
-          }, ...prev].slice(0, 10));
-        }
-      })
+      .channel("admin-registrations-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "doctor_registrations" },
+        (payload) => {
+          console.log("Realtime Registration Change:", payload);
+          setIsLive(true);
+          setTimeout(() => setIsLive(false), 2000);
+          fetchDashboardData();
+
+          if (payload.eventType === "INSERT") {
+            const newReg = payload.new as any;
+            setActivities((prev) =>
+              [
+                {
+                  id: Math.random().toString(),
+                  type: "warning" as const,
+                  label: `Pendaftaran baru: ${newReg.name}`,
+                  time: "Baru saja",
+                  icon: UserPlus,
+                  color: "text-amber-400",
+                },
+                ...prev,
+              ].slice(0, 10),
+            );
+          }
+        },
+      )
       .subscribe();
 
     return () => {
@@ -310,8 +343,8 @@ export function AdminDashboard() {
   }, []);
 
   return (
-    <AdminLayout 
-      title="Dashboard" 
+    <AdminLayout
+      title="Dashboard"
       subtitle="Ringkasan aktivitas & statistik sistem Sembuhin"
       rightElement={
         <div className="flex items-center gap-2">
@@ -324,11 +357,13 @@ export function AdminDashboard() {
                 className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20"
               >
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Live Update</span>
+                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
+                  Live Update
+                </span>
               </motion.div>
             )}
           </AnimatePresence>
-          <button 
+          <button
             onClick={() => fetchDashboardData()}
             className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all active:scale-95"
           >
@@ -414,7 +449,9 @@ export function AdminDashboard() {
                           key={doc.id}
                           className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                         >
-                          <td className="px-5 py-3.5 text-slate-900 font-medium">{doc.full_name}</td>
+                          <td className="px-5 py-3.5 text-slate-900 font-medium">
+                            {doc.full_name}
+                          </td>
                           <td className="px-5 py-3.5 text-slate-600">{doc.specialty}</td>
                           <td className="px-5 py-3.5 text-slate-600">
                             {format(new Date(doc.created_at), "dd MMM yyyy", { locale: idLocale })}

@@ -2,10 +2,28 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  MessageCircle, X, Send, Bot, User, Phone, Calendar,
-  FileText, Sparkles, Stethoscope, ChevronDown, Heart,
-  Shield, Clock, LogIn, Star, MessageSquare, Loader2,
-  Headphones, CreditCard, Settings, AlertCircle
+  MessageCircle,
+  X,
+  Send,
+  Bot,
+  User,
+  Phone,
+  Calendar,
+  FileText,
+  Sparkles,
+  Stethoscope,
+  ChevronDown,
+  Heart,
+  Shield,
+  Clock,
+  LogIn,
+  Star,
+  MessageSquare,
+  Loader2,
+  Headphones,
+  CreditCard,
+  Settings,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,10 +41,30 @@ interface ChatMessage {
 }
 
 const QUICK_REPLIES = [
-  { icon: User,        text: "Masalah Akun",      color: "from-sky-500 to-sky-600", bg: "bg-sky-50 hover:bg-sky-100 border-sky-200 hover:border-sky-300" },
-  { icon: CreditCard,  text: "Kendala Pembayaran", color: "from-emerald-500 to-emerald-600", bg: "bg-emerald-50 hover:bg-emerald-100 border-emerald-200 hover:border-emerald-300" },
-  { icon: AlertCircle, text: "Laporan Bug",       color: "from-violet-500 to-violet-600", bg: "bg-violet-50 hover:bg-violet-100 border-violet-200 hover:border-violet-300" },
-  { icon: Headphones,  text: "Butuh Bantuan",     color: "from-amber-500 to-amber-600", bg: "bg-amber-50 hover:bg-amber-100 border-amber-200 hover:border-amber-300" },
+  {
+    icon: User,
+    text: "Masalah Akun",
+    color: "from-sky-500 to-sky-600",
+    bg: "bg-sky-50 hover:bg-sky-100 border-sky-200 hover:border-sky-300",
+  },
+  {
+    icon: CreditCard,
+    text: "Kendala Pembayaran",
+    color: "from-emerald-500 to-emerald-600",
+    bg: "bg-emerald-50 hover:bg-emerald-100 border-emerald-200 hover:border-emerald-300",
+  },
+  {
+    icon: AlertCircle,
+    text: "Laporan Bug",
+    color: "from-violet-500 to-violet-600",
+    bg: "bg-violet-50 hover:bg-violet-100 border-violet-200 hover:border-violet-300",
+  },
+  {
+    icon: Headphones,
+    text: "Butuh Bantuan",
+    color: "from-amber-500 to-amber-600",
+    bg: "bg-amber-50 hover:bg-amber-100 border-amber-200 hover:border-amber-300",
+  },
 ];
 
 const INITIAL_MESSAGES = [
@@ -66,7 +104,8 @@ const windowVariants: Variants = {
 const msgVariants: Variants = {
   hidden: { opacity: 0, y: 8 },
   visible: {
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { duration: 0.25, ease: "easeOut" },
   },
 };
@@ -79,7 +118,7 @@ export function LiveChat() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
-  
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
@@ -88,16 +127,16 @@ export function LiveChat() {
   // Load or create consultation
   const loadConsultation = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       // Find active consultation for this user (support type)
       const { data, error } = await supabase
-        .from('consultations')
-        .select('id')
-        .eq('patient_id', user.id)
-        .eq('type', 'support')
-        .eq('consultation_status', 'in_progress')
-        .order('created_at', { ascending: false })
+        .from("consultations")
+        .select("id")
+        .eq("patient_id", user.id)
+        .eq("type", "support")
+        .eq("consultation_status", "in_progress")
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -114,10 +153,10 @@ export function LiveChat() {
     setLoadingMessages(true);
     try {
       const { data, error } = await supabase
-        .from('consultation_messages')
-        .select('*')
-        .eq('consultation_id', id)
-        .order('created_at', { ascending: true });
+        .from("consultation_messages")
+        .select("*")
+        .eq("consultation_id", id)
+        .order("created_at", { ascending: true });
 
       if (data) {
         setMessages([...INITIAL_MESSAGES, ...data]);
@@ -142,24 +181,24 @@ export function LiveChat() {
     const channel = supabase
       .channel(`chat:${consultationId}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'consultation_messages',
-          filter: `consultation_id=eq.${consultationId}`
+          event: "INSERT",
+          schema: "public",
+          table: "consultation_messages",
+          filter: `consultation_id=eq.${consultationId}`,
         },
         (payload) => {
           const newMsg = payload.new as any;
-          setMessages(prev => {
-            if (prev.find(m => m.id === newMsg.id)) return prev;
+          setMessages((prev) => {
+            if (prev.find((m) => m.id === newMsg.id)) return prev;
             return [...prev, newMsg];
           });
-          
-          if (!isOpen && newMsg.sender_type !== 'patient') {
-            setUnread(prev => prev + 1);
+
+          if (!isOpen && newMsg.sender_type !== "patient") {
+            setUnread((prev) => prev + 1);
           }
-        }
+        },
       )
       .subscribe();
 
@@ -181,7 +220,7 @@ export function LiveChat() {
 
   const send = async (text: string) => {
     if (!text.trim() || !user || sending) return;
-    
+
     const messageText = text.trim();
     setInput("");
     setSending(true);
@@ -196,17 +235,20 @@ export function LiveChat() {
           patient_id: user.id,
           patient_name: user.user_metadata?.full_name || user.email,
           patient_phone: user.user_metadata?.phone || "0000000000",
-          consultation_status: 'in_progress',
-          type: 'support',
+          consultation_status: "in_progress",
+          type: "support",
           // Dummy values for required fields in case SQL hasn't been run yet
-          doctor_name: 'Admin Support',
-          appointment_date: new Date().toISOString().split('T')[0],
-          appointment_time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-          consultation_type: 'Chat'
+          doctor_name: "Admin Support",
+          appointment_date: new Date().toISOString().split("T")[0],
+          appointment_time: new Date().toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          consultation_type: "Chat",
         };
 
         const { data: newConsult, error: consultError } = await supabase
-          .from('consultations')
+          .from("consultations")
           .insert(consultData)
           .select()
           .single();
@@ -217,17 +259,14 @@ export function LiveChat() {
       }
 
       // 2. Insert message
-      const { error: msgError } = await supabase
-        .from('consultation_messages')
-        .insert({
-          consultation_id: currentId,
-          sender_id: user.id,
-          sender_type: 'patient',
-          message_text: messageText
-        });
+      const { error: msgError } = await supabase.from("consultation_messages").insert({
+        consultation_id: currentId,
+        sender_id: user.id,
+        sender_type: "patient",
+        message_text: messageText,
+      });
 
       if (msgError) throw msgError;
-
     } catch (err) {
       console.error("Error sending message:", err);
       setInput(messageText); // restore input on error
@@ -253,7 +292,7 @@ export function LiveChat() {
         transition={{ delay: 1.8, type: "spring", stiffness: 260, damping: 26 }}
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.94 }}
-        onClick={() => setIsOpen(v => !v)}
+        onClick={() => setIsOpen((v) => !v)}
         aria-label={isOpen ? "Tutup chat" : "Buka chat"}
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-400/50"
         style={{
@@ -268,17 +307,17 @@ export function LiveChat() {
         {!isOpen && (
           <motion.span
             className="absolute inset-0 rounded-full pointer-events-none"
-            animate={{ boxShadow: [
-              "0 0 0 0px rgba(14,165,233,0.35)",
-              "0 0 0 10px rgba(14,165,233,0.0)",
-            ]}}
+            animate={{
+              boxShadow: ["0 0 0 0px rgba(14,165,233,0.35)", "0 0 0 10px rgba(14,165,233,0.0)"],
+            }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
           />
         )}
 
         <AnimatePresence mode="wait">
           {isOpen ? (
-            <motion.span key="x"
+            <motion.span
+              key="x"
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.7 }}
@@ -287,7 +326,8 @@ export function LiveChat() {
               <X className="h-6 w-6 text-white" />
             </motion.span>
           ) : (
-            <motion.span key="chat"
+            <motion.span
+              key="chat"
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.7 }}
@@ -316,7 +356,8 @@ export function LiveChat() {
             className="fixed right-6 z-50 w-[calc(100vw-3rem)] max-w-[420px] rounded-3xl overflow-hidden"
             style={{
               bottom: 88,
-              boxShadow: "0 32px 80px -12px rgba(14, 165, 233, 0.22), 0 8px 32px -8px rgba(0,0,0,0.12)",
+              boxShadow:
+                "0 32px 80px -12px rgba(14, 165, 233, 0.22), 0 8px 32px -8px rgba(0,0,0,0.12)",
             }}
           >
             <div
@@ -328,10 +369,19 @@ export function LiveChat() {
               }}
             >
               {/* ── Header ──────────────────────────────────────── */}
-              <div className="relative overflow-hidden px-5 py-4"
-                style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)" }}>
-                <div className="absolute inset-0 opacity-[0.07]"
-                  style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
+              <div
+                className="relative overflow-hidden px-5 py-4"
+                style={{
+                  background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)",
+                }}
+              >
+                <div
+                  className="absolute inset-0 opacity-[0.07]"
+                  style={{
+                    backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+                    backgroundSize: "18px 18px",
+                  }}
+                />
                 <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10 blur-2xl pointer-events-none" />
                 <div className="absolute bottom-0 left-8 w-20 h-12 rounded-full bg-sky-300/20 blur-xl pointer-events-none" />
 
@@ -347,12 +397,12 @@ export function LiveChat() {
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-white text-sm leading-tight">Bantuan Admin</span>
+                        <span className="font-bold text-white text-sm leading-tight">
+                          Bantuan Admin
+                        </span>
                         <Shield className="h-3 w-3 text-white/80" />
                       </div>
-                      <span className="text-[11px] text-white/75">
-                        Online • Siap membantu
-                      </span>
+                      <span className="text-[11px] text-white/75">Online • Siap membantu</span>
                     </div>
                   </div>
 
@@ -377,7 +427,8 @@ export function LiveChat() {
                     Login untuk Chat
                   </h3>
                   <p className="text-muted-foreground text-sm mb-6">
-                    Silakan login untuk mulai berkonsultasi dengan tim Admin kami jika Anda membutuhkan bantuan.
+                    Silakan login untuk mulai berkonsultasi dengan tim Admin kami jika Anda
+                    membutuhkan bantuan.
                   </p>
                   <Link
                     to="/auth"
@@ -401,7 +452,7 @@ export function LiveChat() {
                     }}
                   >
                     <AnimatePresence initial={false}>
-                      {messages.map(msg => {
+                      {messages.map((msg) => {
                         const isPatient = msg.sender_type === "patient";
                         return (
                           <motion.div
@@ -409,7 +460,10 @@ export function LiveChat() {
                             variants={msgVariants}
                             initial="hidden"
                             animate="visible"
-                            className={cn("flex items-end gap-2", isPatient ? "justify-end" : "justify-start")}
+                            className={cn(
+                              "flex items-end gap-2",
+                              isPatient ? "justify-end" : "justify-start",
+                            )}
                           >
                             {!isPatient && (
                               <div className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-xl bg-sky-100 text-sky-600 mb-0.5">
@@ -417,15 +471,23 @@ export function LiveChat() {
                               </div>
                             )}
                             <div className="max-w-[78%]">
-                              <div className={cn(
-                                "px-3.5 py-2.5 rounded-2xl",
-                                isPatient
-                                  ? "rounded-br-sm bg-sky-500 text-white shadow-lg shadow-sky-500/20"
-                                  : "rounded-bl-sm bg-white border border-sky-100 shadow-md"
-                              )}>
-                                <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.message_text}</p>
-                                <p className={cn("text-[10px] mt-1 select-none",
-                                  isPatient ? "text-white/60" : "text-muted-foreground")}>
+                              <div
+                                className={cn(
+                                  "px-3.5 py-2.5 rounded-2xl",
+                                  isPatient
+                                    ? "rounded-br-sm bg-sky-500 text-white shadow-lg shadow-sky-500/20"
+                                    : "rounded-bl-sm bg-white border border-sky-100 shadow-md",
+                                )}
+                              >
+                                <p className="text-[13px] leading-relaxed whitespace-pre-wrap">
+                                  {msg.message_text}
+                                </p>
+                                <p
+                                  className={cn(
+                                    "text-[10px] mt-1 select-none",
+                                    isPatient ? "text-white/60" : "text-muted-foreground",
+                                  )}
+                                >
                                   {fmt(msg.created_at)}
                                 </p>
                               </div>
@@ -450,13 +512,20 @@ export function LiveChat() {
                             onClick={() => send(r.text)}
                             className={cn(
                               "flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all duration-200",
-                              r.bg
+                              r.bg,
                             )}
                           >
-                            <div className={cn("flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm", r.color)}>
+                            <div
+                              className={cn(
+                                "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm",
+                                r.color,
+                              )}
+                            >
                               <r.icon className="h-3.5 w-3.5" />
                             </div>
-                            <span className="text-[11px] font-semibold text-foreground/80 leading-tight">{r.text}</span>
+                            <span className="text-[11px] font-semibold text-foreground/80 leading-tight">
+                              {r.text}
+                            </span>
                           </motion.button>
                         ))}
                       </div>
@@ -480,8 +549,8 @@ export function LiveChat() {
                         ref={inputRef}
                         type="text"
                         value={input}
-                        onChange={e => setInput(e.target.value)}
-                        onKeyDown={e => e.key === "Enter" && send(input)}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && send(input)}
                         placeholder="Tanya admin bantuan…"
                         disabled={sending}
                         className="flex-1 rounded-2xl border border-sky-200 bg-sky-50/50 px-4 py-2.5 text-[13px] placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-sky-400/40 focus:border-sky-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"

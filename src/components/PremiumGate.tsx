@@ -59,9 +59,12 @@ export function PremiumGate({ children }: { children: React.ReactNode }) {
                 <LogIn className="h-10 w-10 text-sky-500" />
               </div>
             </div>
-            <h2 className="text-2xl font-display font-bold text-slate-900 mb-3">Login untuk Melanjutkan</h2>
+            <h2 className="text-2xl font-display font-bold text-slate-900 mb-3">
+              Login untuk Melanjutkan
+            </h2>
             <p className="text-sm text-slate-600 mb-8 leading-relaxed">
-              Buat akun gratis atau login untuk mengakses fitur ini dan mulai perjalanan kesehatanmu.
+              Buat akun gratis atau login untuk mengakses fitur ini dan mulai perjalanan
+              kesehatanmu.
             </p>
             <button
               onClick={() => navigate({ to: "/auth" })}
@@ -102,9 +105,12 @@ export function PremiumGate({ children }: { children: React.ReactNode }) {
                   Fitur Eksklusif Premium
                 </span>
               </div>
-              <h2 className="text-2xl font-display font-bold text-slate-900 mb-3">Tingkatkan ke Premium</h2>
+              <h2 className="text-2xl font-display font-bold text-slate-900 mb-3">
+                Tingkatkan ke Premium
+              </h2>
               <p className="text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
-                Fitur ini hanya untuk member Premium. Upgrade sekarang dan nikmati akses tanpa batas!
+                Fitur ini hanya untuk member Premium. Upgrade sekarang dan nikmati akses tanpa
+                batas!
               </p>
             </div>
             <div className="px-8 py-7">
@@ -141,7 +147,9 @@ export function PremiumGate({ children }: { children: React.ReactNode }) {
                 <span className="bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">
                   HEMAT 50%
                 </span>
-                <span className="text-slate-900 text-xl font-display font-extrabold">Rp 49.000</span>
+                <span className="text-slate-900 text-xl font-display font-extrabold">
+                  Rp 49.000
+                </span>
                 <span className="text-slate-500 text-sm">/bln</span>
               </div>
               <button

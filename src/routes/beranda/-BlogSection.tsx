@@ -9,7 +9,8 @@ const BLOGS = [
     tagColor: "bg-sky-500",
     accentGlass: "from-sky-900/80 via-sky-800/60 to-sky-700/40",
     title: "Mengoptimalkan Health Twin 3D Anda untuk Pencegahan Penyakit Genetik",
-    excerpt: "Pelajari bagaimana data biometrik real-time dapat memprediksi risiko penyakit genetik sebelum gejala muncul.",
+    excerpt:
+      "Pelajari bagaimana data biometrik real-time dapat memprediksi risiko penyakit genetik sebelum gejala muncul.",
     date: "24 Apr 2026",
     readTime: "5 menit",
     img: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800",
@@ -31,7 +32,8 @@ const BLOGS = [
     tagColor: "bg-violet-500",
     accentGlass: "from-violet-900/80 via-violet-800/60 to-violet-700/40",
     title: "Panduan Meditasi Frekuensi Delta dengan Bantuan AI Sembuhin",
-    excerpt: "AI Sembuhin kini bisa memandu sesi meditasi frekuensi delta untuk pemulihan lebih cepat.",
+    excerpt:
+      "AI Sembuhin kini bisa memandu sesi meditasi frekuensi delta untuk pemulihan lebih cepat.",
     date: "18 Apr 2026",
     readTime: "6 menit",
     img: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&q=80&w=800",
@@ -42,7 +44,8 @@ const BLOGS = [
     tagColor: "bg-amber-500",
     accentGlass: "from-amber-900/80 via-amber-800/60 to-amber-700/40",
     title: "Memahami Metrik Biometrik Real-Time Anda di Dashboard Holografik",
-    excerpt: "Dashboard holografik Sembuhin kini hadir dengan visualisasi metrik kesehatan yang lebih intuitif.",
+    excerpt:
+      "Dashboard holografik Sembuhin kini hadir dengan visualisasi metrik kesehatan yang lebih intuitif.",
     date: "15 Apr 2026",
     readTime: "3 menit",
     img: "https://images.unsplash.com/photo-1511295742362-92c96b12add7?auto=format&fit=crop&q=80&w=800",
@@ -55,18 +58,21 @@ export function BlogSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
-  
+
   const blobY = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  
+
   const featured = BLOGS[0];
   const rest = BLOGS.slice(1);
 
   return (
     <section ref={sectionRef} className="px-4 max-w-7xl mx-auto mt-32 mb-24 relative">
       {/* Ambient */}
-      <motion.div style={{ y: blobY }} className="absolute -top-20 left-1/3 w-[500px] h-[400px] rounded-full bg-gradient-to-r from-sky-200/20 via-cyan-100/15 to-transparent blur-[80px] pointer-events-none" />
+      <motion.div
+        style={{ y: blobY }}
+        className="absolute -top-20 left-1/3 w-[500px] h-[400px] rounded-full bg-gradient-to-r from-sky-200/20 via-cyan-100/15 to-transparent blur-[80px] pointer-events-none"
+      />
 
       {/* Header */}
       <div className="flex justify-between items-end mb-10">
@@ -92,8 +98,10 @@ export function BlogSection() {
       </div>
 
       {/* Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-2 gap-5" style={{ height: "clamp(520px, 60vh, 640px)" }}>
-
+      <div
+        className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-2 gap-5"
+        style={{ height: "clamp(520px, 60vh, 640px)" }}
+      >
         {/* Featured Card — spans 7 cols, 2 rows */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -115,7 +123,9 @@ export function BlogSection() {
           <div className="absolute inset-0 flex flex-col justify-end p-8">
             {/* Tag + meta */}
             <div className="flex items-center gap-3 mb-4">
-              <span className={`${featured.tagColor} text-white text-[9px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full`}>
+              <span
+                className={`${featured.tagColor} text-white text-[9px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full`}
+              >
                 {featured.tag}
               </span>
               <span className="flex items-center gap-1 text-white/50 text-[10px]">
@@ -165,7 +175,9 @@ export function BlogSection() {
 
             {/* Tag */}
             <div className="absolute top-4 left-4">
-              <span className={`${blog.tagColor} text-white text-[9px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full shadow`}>
+              <span
+                className={`${blog.tagColor} text-white text-[9px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full shadow`}
+              >
                 {blog.tag}
               </span>
             </div>

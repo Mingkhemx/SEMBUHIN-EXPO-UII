@@ -1,7 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  FileText, Plus, Search, CheckCircle, XCircle,
-  Loader2, Trash2, Eye, X, User, Calendar, AlertCircle,
+  FileText,
+  Plus,
+  Search,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  Trash2,
+  Eye,
+  X,
+  User,
+  Calendar,
+  AlertCircle,
 } from "lucide-react";
 import { DoctorLayout } from "@/panel-doctor/DoctorLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,13 +50,7 @@ interface Prescription {
 
 // ─── Prescription Detail Modal ────────────────────────────────────────────────
 
-function PrescriptionModal({
-  presc,
-  onClose,
-}: {
-  presc: Prescription;
-  onClose: () => void;
-}) {
+function PrescriptionModal({ presc, onClose }: { presc: Prescription; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center">
       {/* Backdrop */}
@@ -73,8 +77,12 @@ function PrescriptionModal({
               <FileText className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Resep Digital</p>
-              <p className="text-[14px] font-bold text-slate-900">#{presc.id.slice(0, 8).toUpperCase()}</p>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Resep Digital
+              </p>
+              <p className="text-[14px] font-bold text-slate-900">
+                #{presc.id.slice(0, 8).toUpperCase()}
+              </p>
             </div>
           </div>
           <button
@@ -107,24 +115,30 @@ function PrescriptionModal({
 
           {/* Status */}
           <div className="flex items-center gap-2">
-            <span className={cn(
-              "text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border",
-              presc.status === "Dispensed"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+            <span
+              className={cn(
+                "text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border",
+                presc.status === "Dispensed"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                  : presc.status === "Pending"
+                    ? "bg-amber-50 text-amber-700 border-amber-100"
+                    : "bg-rose-50 text-rose-700 border-rose-100",
+              )}
+            >
+              {presc.status === "Dispensed"
+                ? "Sudah Diambil"
                 : presc.status === "Pending"
-                  ? "bg-amber-50 text-amber-700 border-amber-100"
-                  : "bg-rose-50 text-rose-700 border-rose-100"
-            )}>
-              {presc.status === "Dispensed" ? "Sudah Diambil"
-                : presc.status === "Pending" ? "Menunggu"
-                : "Dibatalkan"}
+                  ? "Menunggu"
+                  : "Dibatalkan"}
             </span>
           </div>
 
           {/* Diagnosis */}
           {presc.diagnosis && (
             <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnosis</p>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Diagnosis
+              </p>
               <p className="text-[13px] text-slate-600 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 leading-relaxed">
                 {presc.diagnosis}
               </p>
@@ -133,7 +147,9 @@ function PrescriptionModal({
 
           {/* Medicines */}
           <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Daftar Obat ({presc.medicines.length})</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+              Daftar Obat ({presc.medicines.length})
+            </p>
             <div className="space-y-2">
               {presc.medicines.map((med, i) => (
                 <div key={i} className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
@@ -144,9 +160,15 @@ function PrescriptionModal({
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 mt-3 text-[11px]">
-                    <span className="bg-white px-2 py-1 rounded border border-slate-100"><strong>Qty:</strong> {med.quantity} {med.unit}</span>
-                    <span className="bg-white px-2 py-1 rounded border border-slate-100"><strong>Frek:</strong> {med.frequency}</span>
-                    <span className="bg-white px-2 py-1 rounded border border-slate-100"><strong>Durasi:</strong> {med.duration}</span>
+                    <span className="bg-white px-2 py-1 rounded border border-slate-100">
+                      <strong>Qty:</strong> {med.quantity} {med.unit}
+                    </span>
+                    <span className="bg-white px-2 py-1 rounded border border-slate-100">
+                      <strong>Frek:</strong> {med.frequency}
+                    </span>
+                    <span className="bg-white px-2 py-1 rounded border border-slate-100">
+                      <strong>Durasi:</strong> {med.duration}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -156,7 +178,9 @@ function PrescriptionModal({
           {/* Notes */}
           {presc.notes && (
             <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Catatan</p>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Catatan
+              </p>
               <p className="text-[13px] text-slate-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 leading-relaxed">
                 {presc.notes}
               </p>
@@ -194,7 +218,7 @@ export function DoctorPrescriptions() {
   const [selectedPatientId, setSelectedPatientId] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [newMedicines, setNewMedicines] = useState<Medicine[]>([
-    { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" }
+    { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" },
   ]);
   const [newNotes, setNewNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -229,7 +253,7 @@ export function DoctorPrescriptions() {
 
       // Fetch patient details in batch
       if (prescData && prescData.length > 0) {
-        const patientIds = [...new Set(prescData.map(p => p.patient_id))];
+        const patientIds = [...new Set(prescData.map((p) => p.patient_id))];
         const { data: profilesData } = await supabase
           .from("profiles")
           .select("id, full_name, email")
@@ -237,15 +261,15 @@ export function DoctorPrescriptions() {
 
         const profileMap: Record<string, { full_name: string; email?: string }> = {};
         if (profilesData) {
-          profilesData.forEach(p => {
+          profilesData.forEach((p) => {
             profileMap[p.id] = {
               full_name: p.full_name || "Pasien",
-              email: p.email
+              email: p.email,
             };
           });
         }
 
-        const transformed: Prescription[] = prescData.map(p => ({
+        const transformed: Prescription[] = prescData.map((p) => ({
           id: p.id,
           patient_id: p.patient_id,
           patient_name: profileMap[p.patient_id]?.full_name || "Pasien",
@@ -275,7 +299,7 @@ export function DoctorPrescriptions() {
     if (!user) return;
     try {
       console.log("🔍 Fetching patients...");
-      
+
       // Fetch ALL profiles without any filter first
       const { data: allProfiles, error: profileError } = await supabase
         .from("profiles")
@@ -290,13 +314,11 @@ export function DoctorPrescriptions() {
 
       if (allProfiles && allProfiles.length > 0) {
         // Filter out doctors and admins manually
-        const regularUsers = allProfiles.filter(
-          p => p.role !== "doctor" && p.role !== "admin"
-        );
+        const regularUsers = allProfiles.filter((p) => p.role !== "doctor" && p.role !== "admin");
 
         console.log("👥 Regular users:", regularUsers.length);
 
-        const patientList = regularUsers.map(p => ({
+        const patientList = regularUsers.map((p) => ({
           id: p.id,
           full_name: p.full_name || p.email || "User",
         }));
@@ -377,9 +399,7 @@ export function DoctorPrescriptions() {
         doctor_specialty: doctorData?.specialization || "Umum",
       };
 
-      const { error } = await supabase
-        .from("prescriptions")
-        .insert([prescriptionData]);
+      const { error } = await supabase.from("prescriptions").insert([prescriptionData]);
 
       if (error) throw error;
 
@@ -388,7 +408,7 @@ export function DoctorPrescriptions() {
       setSelectedPatientId("");
       setDiagnosis("");
       setNewMedicines([
-        { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" }
+        { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" },
       ]);
       setNewNotes("");
       fetchPrescriptions();
@@ -422,7 +442,7 @@ export function DoctorPrescriptions() {
   const addMedicineRow = () =>
     setNewMedicines([
       ...newMedicines,
-      { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" }
+      { name: "", dosage: "", quantity: 1, unit: "tablet", frequency: "", duration: "" },
     ]);
 
   const removeMedicineRow = (i: number) =>
@@ -435,7 +455,7 @@ export function DoctorPrescriptions() {
   };
 
   const filtered = prescriptions.filter((p) =>
-    p.patient_name.toLowerCase().includes(searchQuery.toLowerCase())
+    p.patient_name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -474,7 +494,9 @@ export function DoctorPrescriptions() {
           <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
             <FileText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
             <p className="text-slate-600 font-medium">Belum ada resep</p>
-            <p className="text-slate-400 text-sm mt-1">Daftar resep yang Anda buat akan muncul di sini.</p>
+            <p className="text-slate-400 text-sm mt-1">
+              Daftar resep yang Anda buat akan muncul di sini.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -499,7 +521,7 @@ export function DoctorPrescriptions() {
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                                 : presc.status === "Pending"
                                   ? "bg-amber-50 text-amber-700 border-amber-100"
-                                  : "bg-rose-50 text-rose-700 border-rose-100"
+                                  : "bg-rose-50 text-rose-700 border-rose-100",
                             )}
                           >
                             {presc.status === "Dispensed"
@@ -569,9 +591,7 @@ export function DoctorPrescriptions() {
 
       {/* ── Prescription Detail Modal ── */}
       <AnimatePresence>
-        {viewPresc && (
-          <PrescriptionModal presc={viewPresc} onClose={() => setViewPresc(null)} />
-        )}
+        {viewPresc && <PrescriptionModal presc={viewPresc} onClose={() => setViewPresc(null)} />}
       </AnimatePresence>
 
       {/* ── Create Prescription Modal ── */}
@@ -614,9 +634,7 @@ export function DoctorPrescriptions() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Pilih Pasien
-                </label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Pilih Pasien</label>
                 <select
                   value={selectedPatientId}
                   onChange={(e) => setSelectedPatientId(e.target.value)}
@@ -624,9 +642,7 @@ export function DoctorPrescriptions() {
                   required
                 >
                   <option value="">-- Pilih Pasien --</option>
-                  {patients.length === 0 && (
-                    <option disabled>Loading patients...</option>
-                  )}
+                  {patients.length === 0 && <option disabled>Loading patients...</option>}
                   {patients.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.full_name}
@@ -634,8 +650,8 @@ export function DoctorPrescriptions() {
                   ))}
                 </select>
                 <p className="text-xs text-slate-500 mt-1.5">
-                  {patients.length > 0 
-                    ? `${patients.length} pasien tersedia` 
+                  {patients.length > 0
+                    ? `${patients.length} pasien tersedia`
                     : "Sedang memuat daftar pasien..."}
                 </p>
               </div>
@@ -692,7 +708,9 @@ export function DoctorPrescriptions() {
                           type="number"
                           min="1"
                           value={med.quantity}
-                          onChange={(e) => updateMedicine(idx, "quantity", parseInt(e.target.value) || 1)}
+                          onChange={(e) =>
+                            updateMedicine(idx, "quantity", parseInt(e.target.value) || 1)
+                          }
                           className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
                           required
                         />

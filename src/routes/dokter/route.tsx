@@ -54,14 +54,23 @@ interface Doctor {
 // Palet aksen yang diputar agar tiap dokter punya warna berbeda
 const ACCENTS = [
   { accent: "from-sky-500 to-cyan-400", light: "bg-sky-50 text-sky-600 border-sky-200" },
-  { accent: "from-violet-500 to-purple-400", light: "bg-violet-50 text-violet-600 border-violet-200" },
+  {
+    accent: "from-violet-500 to-purple-400",
+    light: "bg-violet-50 text-violet-600 border-violet-200",
+  },
   { accent: "from-rose-400 to-pink-400", light: "bg-rose-50 text-rose-600 border-rose-200" },
-  { accent: "from-emerald-500 to-teal-400", light: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+  {
+    accent: "from-emerald-500 to-teal-400",
+    light: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  },
   { accent: "from-amber-400 to-orange-400", light: "bg-amber-50 text-amber-600 border-amber-200" },
   { accent: "from-blue-500 to-sky-400", light: "bg-blue-50 text-blue-600 border-blue-200" },
   { accent: "from-pink-400 to-rose-400", light: "bg-pink-50 text-pink-600 border-pink-200" },
   { accent: "from-teal-500 to-cyan-400", light: "bg-teal-50 text-teal-600 border-teal-200" },
-  { accent: "from-fuchsia-400 to-purple-400", light: "bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200" },
+  {
+    accent: "from-fuchsia-400 to-purple-400",
+    light: "bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200",
+  },
 ];
 
 // Format angka Rupiah: 150000 -> "Rp 150.000"
@@ -156,7 +165,7 @@ function DokterPage() {
         (d) =>
           d.name.toLowerCase().includes(q) ||
           d.spec.toLowerCase().includes(q) ||
-          d.hospital.toLowerCase().includes(q)
+          d.hospital.toLowerCase().includes(q),
       );
     }
 
@@ -200,7 +209,8 @@ function DokterPage() {
               {t("dokter.badge")}
             </div>
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tighter leading-[0.95]">
-              {t("dokter.title")} <span className="text-sky-300">{t("dokter.title_accent")}</span> <br />
+              {t("dokter.title")} <span className="text-sky-300">{t("dokter.title_accent")}</span>{" "}
+              <br />
               {t("dokter.subtitle")}
             </h1>
             <p className="mt-4 text-white/75 text-sm md:text-base max-w-lg leading-relaxed">
@@ -254,7 +264,9 @@ function DokterPage() {
         >
           <option value={t("dokter.sort_highest_rating")}>{t("dokter.sort_highest_rating")}</option>
           <option value={t("dokter.sort_most_reviews")}>{t("dokter.sort_most_reviews")}</option>
-          <option value={t("dokter.sort_most_experience")}>{t("dokter.sort_most_experience")}</option>
+          <option value={t("dokter.sort_most_experience")}>
+            {t("dokter.sort_most_experience")}
+          </option>
         </select>
 
         {/* Filter toggle */}
@@ -309,10 +321,12 @@ function DokterPage() {
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {t("dokter.showing")}{" "}
-            <span className="font-semibold text-foreground">{filtered.length}</span> {t("dokter.doctors")}
+            <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
+            {t("dokter.doctors")}
             {activeCategory !== t("dokter.all") && (
               <>
-                {" "}·{" "}
+                {" "}
+                ·{" "}
                 <button
                   onClick={() => setActiveCategory(t("dokter.all"))}
                   className="text-sky-600 font-semibold hover:underline inline-flex items-center gap-1"
@@ -349,9 +363,15 @@ function DokterPage() {
           <p className="font-semibold mb-1">{t("dokter.error_title")}</p>
           <p className="text-rose-600 text-xs">{fetchError}</p>
           <p className="text-rose-600 text-xs mt-2">
-            {t("dokter.error_hint")} <code className="font-mono bg-rose-100 px-1 rounded">doctors</code> {t("dokter.error_hint_2")}
-            <code className="font-mono bg-rose-100 px-1 rounded">supabase-doctors-columns.sql</code> {t("dokter.error_hint_3")}{" "}
-            <code className="font-mono bg-rose-100 px-1 rounded">supabase-consultations.sql</code> {t("dokter.error_hint_4")}
+            {t("dokter.error_hint")}{" "}
+            <code className="font-mono bg-rose-100 px-1 rounded">doctors</code>{" "}
+            {t("dokter.error_hint_2")}
+            <code className="font-mono bg-rose-100 px-1 rounded">
+              supabase-doctors-columns.sql
+            </code>{" "}
+            {t("dokter.error_hint_3")}{" "}
+            <code className="font-mono bg-rose-100 px-1 rounded">supabase-consultations.sql</code>{" "}
+            {t("dokter.error_hint_4")}
           </p>
         </div>
       ) : doctors.length === 0 ? (
@@ -364,52 +384,42 @@ function DokterPage() {
           <h3 className="font-display text-2xl font-bold text-foreground mb-2">
             {t("dokter.no_doctors_title")}
           </h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            {t("dokter.no_doctors_desc")}
-          </p>
+          <p className="text-muted-foreground max-w-md mx-auto">{t("dokter.no_doctors_desc")}</p>
+        </motion.div>
+      ) : filtered.length === 0 ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 text-center">
+          <div className="text-5xl mb-4">🔍</div>
+          <h3 className="font-display text-2xl font-bold text-foreground mb-2">
+            {t("dokter.not_found_title")}
+          </h3>
+          <p className="text-muted-foreground">{t("dokter.not_found_desc")}</p>
+          <button
+            onClick={() => {
+              setSearch("");
+              setActiveCategory(t("dokter.all"));
+            }}
+            className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold text-sm hover:bg-sky-600 transition-all"
+          >
+            {t("dokter.reset_search")}
+          </button>
         </motion.div>
       ) : (
-        filtered.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="py-24 text-center"
-          >
-            <div className="text-5xl mb-4">🔍</div>
-            <h3 className="font-display text-2xl font-bold text-foreground mb-2">
-              {t("dokter.not_found_title")}
-            </h3>
-            <p className="text-muted-foreground">
-              {t("dokter.not_found_desc")}
-            </p>
-            <button
-              onClick={() => { setSearch(""); setActiveCategory(t("dokter.all")); }}
-              className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold text-sm hover:bg-sky-600 transition-all"
-            >
-              {t("dokter.reset_search")}
-            </button>
-          </motion.div>
-        ) : (
-          <motion.div
-            layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            <AnimatePresence mode="popLayout">
-              {filtered.map((doc, idx) => (
-                <motion.div
-                  key={doc.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.25, delay: idx * 0.04 }}
-                >
-                  <DoctorCard doc={doc} onView={() => setSelectedDoctor(doc)} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )
+        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((doc, idx) => (
+              <motion.div
+                key={doc.id}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.25, delay: idx * 0.04 }}
+              >
+                <DoctorCard doc={doc} onView={() => setSelectedDoctor(doc)} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
 
       {/* ── Modal Detail ── */}
@@ -447,13 +457,7 @@ function DoctorAvatar({
   );
 }
 
-function DoctorCard({
-  doc,
-  onView,
-}: {
-  doc: Doctor;
-  onView: () => void;
-}) {
+function DoctorCard({ doc, onView }: { doc: Doctor; onView: () => void }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   return (
@@ -469,7 +473,9 @@ function DoctorCard({
 
         {/* Badge */}
         <div className="absolute top-4 left-4">
-          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide border-0 backdrop-blur-md bg-white/95 shadow-sm ${doc.accentLight}`}>
+          <span
+            className={`inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide border-0 backdrop-blur-md bg-white/95 shadow-sm ${doc.accentLight}`}
+          >
             {doc.badge}
           </span>
         </div>
@@ -485,7 +491,9 @@ function DoctorCard({
       {/* Content */}
       <div className="p-6 flex flex-col flex-1">
         {/* Specialty pill */}
-        <div className={`inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider mb-3 ${doc.accentLight} px-3 py-1.5 rounded-full border-0 w-fit`}>
+        <div
+          className={`inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider mb-3 ${doc.accentLight} px-3 py-1.5 rounded-full border-0 w-fit`}
+        >
           <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${doc.accent}`} />
           {doc.spec}
         </div>
@@ -505,14 +513,13 @@ function DoctorCard({
             {doc.available}
           </div>
           <div className="text-xs text-slate-500">
-            {t("dokter.experience")} <span className="font-semibold text-slate-900">{doc.experience}</span>
+            {t("dokter.experience")}{" "}
+            <span className="font-semibold text-slate-900">{doc.experience}</span>
           </div>
         </div>
 
         <div className="mb-4">
-          <span className="text-2xl font-bold font-display text-slate-900">
-            {doc.price}
-          </span>
+          <span className="text-2xl font-bold font-display text-slate-900">{doc.price}</span>
           <span className="text-xs text-slate-400 ml-1">{t("dokter.per_consultation")}</span>
         </div>
 
@@ -524,9 +531,23 @@ function DoctorCard({
           >
             {t("dokter.view_profile")}
           </button>
-          <button 
+          <button
             className={`flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${doc.accent} shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all`}
-            onClick={() => navigate({ to: '/booking', search: { doctorId: doc.id, doctorName: doc.name, doctorSpec: doc.spec, doctorHospital: doc.hospital, doctorExperience: doc.experience, doctorImg: doc.img, doctorAccent: doc.accent, doctorPrice: doc.price } })}
+            onClick={() =>
+              navigate({
+                to: "/booking",
+                search: {
+                  doctorId: doc.id,
+                  doctorName: doc.name,
+                  doctorSpec: doc.spec,
+                  doctorHospital: doc.hospital,
+                  doctorExperience: doc.experience,
+                  doctorImg: doc.img,
+                  doctorAccent: doc.accent,
+                  doctorPrice: doc.price,
+                },
+              })
+            }
           >
             {t("dokter.book_appointment")}
           </button>
@@ -538,13 +559,7 @@ function DoctorCard({
 
 // ─── Doctor Modal ─────────────────────────────────────────────────────────────
 
-function DoctorModal({
-  doc,
-  onClose,
-}: {
-  doc: Doctor;
-  onClose: () => void;
-}) {
+function DoctorModal({ doc, onClose }: { doc: Doctor; onClose: () => void }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   return (
@@ -582,17 +597,23 @@ function DoctorModal({
 
           {/* Badge */}
           <div className="absolute top-4 left-4">
-            <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-white/95 shadow-sm ${doc.accentLight}`}>
+            <span
+              className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-white/95 shadow-sm ${doc.accentLight}`}
+            >
               {doc.badge}
             </span>
           </div>
 
           {/* Name overlay */}
           <div className="absolute bottom-6 left-6">
-            <div className={`text-[10px] font-semibold uppercase tracking-wider mb-2 text-white/80`}>
+            <div
+              className={`text-[10px] font-semibold uppercase tracking-wider mb-2 text-white/80`}
+            >
               {doc.spec}
             </div>
-            <h2 className="text-2xl font-bold font-display text-white tracking-tight">{doc.name}</h2>
+            <h2 className="text-2xl font-bold font-display text-white tracking-tight">
+              {doc.name}
+            </h2>
           </div>
         </div>
 
@@ -613,21 +634,18 @@ function DoctorModal({
               },
               { icon: Stethoscope, label: t("dokter.experience"), value: doc.experience },
             ].map(({ icon: Icon, label, value }) => (
-              <div
-                key={label}
-                className="bg-slate-50 rounded-xl p-4 border border-slate-100"
-              >
+              <div key={label} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${doc.accent} flex items-center justify-center shrink-0`}>
+                  <div
+                    className={`w-7 h-7 rounded-lg bg-gradient-to-br ${doc.accent} flex items-center justify-center shrink-0`}
+                  >
                     <Icon className="w-3.5 h-3.5 text-white" />
                   </div>
                   <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
                     {label}
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-slate-800 leading-tight pl-9">
-                  {value}
-                </p>
+                <p className="text-sm font-semibold text-slate-800 leading-tight pl-9">{value}</p>
               </div>
             ))}
           </div>
@@ -635,7 +653,9 @@ function DoctorModal({
           {/* Price */}
           <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
             <div className="flex items-center gap-2 mb-2">
-              <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${doc.accent} flex items-center justify-center shrink-0`}>
+              <div
+                className={`w-7 h-7 rounded-lg bg-gradient-to-br ${doc.accent} flex items-center justify-center shrink-0`}
+              >
                 <span className="text-white text-xs">💲</span>
               </div>
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
@@ -653,14 +673,14 @@ function DoctorModal({
               <Star
                 key={s}
                 className={`w-5 h-5 ${
-                  s <= Math.round(doc.rating)
-                    ? "fill-amber-400 text-amber-400"
-                    : "text-slate-200"
+                  s <= Math.round(doc.rating) ? "fill-amber-400 text-amber-400" : "text-slate-200"
                 }`}
               />
             ))}
             <span className="ml-2 text-sm font-bold text-slate-800">{doc.rating}</span>
-            <span className="text-sm text-slate-500">({doc.reviews} {t("dokter.reviews")})</span>
+            <span className="text-sm text-slate-500">
+              ({doc.reviews} {t("dokter.reviews")})
+            </span>
           </div>
 
           {/* CTA */}
@@ -673,7 +693,21 @@ function DoctorModal({
             </button>
             <button
               className={`flex-1 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${doc.accent} shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all inline-flex items-center justify-center gap-2`}
-              onClick={() => navigate({ to: '/booking', search: { doctorId: doc.id, doctorName: doc.name, doctorSpec: doc.spec, doctorHospital: doc.hospital, doctorExperience: doc.experience, doctorImg: doc.img, doctorAccent: doc.accent, doctorPrice: doc.price } })}
+              onClick={() =>
+                navigate({
+                  to: "/booking",
+                  search: {
+                    doctorId: doc.id,
+                    doctorName: doc.name,
+                    doctorSpec: doc.spec,
+                    doctorHospital: doc.hospital,
+                    doctorExperience: doc.experience,
+                    doctorImg: doc.img,
+                    doctorAccent: doc.accent,
+                    doctorPrice: doc.price,
+                  },
+                })
+              }
             >
               {t("dokter.book_meeting")} <ArrowRight className="h-4 w-4" />
             </button>

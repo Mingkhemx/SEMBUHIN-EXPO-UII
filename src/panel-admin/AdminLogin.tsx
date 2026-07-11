@@ -14,15 +14,17 @@ export function AdminLogin() {
   // Redirect if already logged in as admin
   useEffect(() => {
     const checkExistingAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
           .single();
-        
-        if (profile?.role === 'admin') {
+
+        if (profile?.role === "admin") {
           navigate({ to: "/admin" });
         }
       }
@@ -47,12 +49,12 @@ export function AdminLogin() {
       if (data.user) {
         // 2. Check if user has 'admin' role in profiles table
         const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
+          .from("profiles")
+          .select("role")
+          .eq("id", data.user.id)
           .single();
 
-        if (profileError || profile?.role !== 'admin') {
+        if (profileError || profile?.role !== "admin") {
           // If not admin, sign out immediately
           await supabase.auth.signOut();
           throw new Error("Akses ditolak. Anda bukan Administrator.");
@@ -80,7 +82,9 @@ export function AdminLogin() {
             <img src="/gif_logo/icon.png" alt="Sembuhin" className="h-10 w-10 object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Panel</h1>
-          <p className="text-sm text-slate-500 mt-1 font-medium">Masuk untuk mengelola sistem Sembuhin</p>
+          <p className="text-sm text-slate-500 mt-1 font-medium">
+            Masuk untuk mengelola sistem Sembuhin
+          </p>
         </div>
 
         {/* Login Card */}

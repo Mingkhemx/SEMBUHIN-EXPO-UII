@@ -1,9 +1,16 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
-  ShoppingCart, Heart, Star, Pill, AlertCircle,
-  TrendingUp, Package, RotateCcw, Check,
-} from 'lucide-react';
+  ShoppingCart,
+  Heart,
+  Star,
+  Pill,
+  AlertCircle,
+  TrendingUp,
+  Package,
+  RotateCcw,
+  Check,
+} from "lucide-react";
 
 interface Medicine {
   id: string;
@@ -57,11 +64,7 @@ export function PrescriptionMedicineCard({
       {/* Image Container */}
       <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 aspect-square flex items-center justify-center overflow-hidden">
         {medicine.image ? (
-          <img
-            src={medicine.image}
-            alt={medicine.name}
-            className="h-full w-full object-cover"
-          />
+          <img src={medicine.image} alt={medicine.name} className="h-full w-full object-cover" />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2">
             <Pill className="h-12 w-12 text-slate-300" />
@@ -105,7 +108,7 @@ export function PrescriptionMedicineCard({
         >
           <Heart
             className={`h-5 w-5 transition-colors ${
-              isFavourite ? 'text-red-500 fill-red-500' : 'text-slate-300'
+              isFavourite ? "text-red-500 fill-red-500" : "text-slate-300"
             }`}
           />
         </button>
@@ -136,8 +139,8 @@ export function PrescriptionMedicineCard({
                 key={i}
                 className={`h-3.5 w-3.5 ${
                   i < Math.floor(medicine.rating)
-                    ? 'text-amber-400 fill-amber-400'
-                    : 'text-slate-300'
+                    ? "text-amber-400 fill-amber-400"
+                    : "text-slate-300"
                 }`}
               />
             ))}
@@ -151,11 +154,11 @@ export function PrescriptionMedicineCard({
         <div className="space-y-1">
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-slate-900">
-              Rp {medicine.price.toLocaleString('id-ID')}
+              Rp {medicine.price.toLocaleString("id-ID")}
             </span>
             {medicine.originalPrice && (
               <span className="text-xs text-slate-500 line-through">
-                Rp {medicine.originalPrice.toLocaleString('id-ID')}
+                Rp {medicine.originalPrice.toLocaleString("id-ID")}
               </span>
             )}
           </div>
@@ -182,8 +185,8 @@ export function PrescriptionMedicineCard({
           disabled={!medicine.inStock}
           className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
             medicine.inStock
-              ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-500/20'
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-500/20"
+              : "bg-slate-100 text-slate-400 cursor-not-allowed"
           }`}
         >
           {medicine.inStock ? (

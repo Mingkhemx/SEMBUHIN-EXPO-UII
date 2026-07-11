@@ -1,12 +1,6 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  CheckCircle2,
-  ArrowRight,
-  MapPin,
-  Clock,
-  Loader2,
-} from "lucide-react";
+import { CheckCircle2, ArrowRight, MapPin, Clock, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { Avatar } from "@/components/Avatar";
@@ -44,7 +38,8 @@ function PaymentPage() {
   // Nilai tampilan: pakai data konsultasi bila ada, fallback ke search params
   const doctorName = consultation?.doctor_name || search.doctorName || "Dr. Sarah Wijaya";
   const doctorSpec = consultation?.doctor_specialty || search.doctorSpec || "Bedah Kardiovaskular";
-  const doctorHospital = consultation?.doctor_hospital || search.doctorHospital || "RS Jantung Harapan Kita";
+  const doctorHospital =
+    consultation?.doctor_hospital || search.doctorHospital || "RS Jantung Harapan Kita";
   const doctorImg = consultation?.doctor_avatar_url || search.doctorImg;
   const doctorExperience = search.doctorExperience || "12 Tahun";
 
@@ -79,7 +74,6 @@ function PaymentPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left: Payment Form */}
         <div className="lg:col-span-2 space-y-6">
@@ -166,9 +160,7 @@ function PaymentPage() {
                   <h3 className="text-2xl font-bold font-display text-slate-900">
                     Pembayaran Berhasil!
                   </h3>
-                  <p className="text-slate-600 mt-2">
-                    Janji konsultasi Anda telah dikonfirmasi.
-                  </p>
+                  <p className="text-slate-600 mt-2">Janji konsultasi Anda telah dikonfirmasi.</p>
                 </div>
                 <button
                   onClick={() => navigate({ to: "/chat", search: { consultationId } })}
@@ -196,12 +188,8 @@ function PaymentPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
             <div className="p-6">
-              <h3 className="text-xl font-bold font-display text-slate-900">
-                {doctorName}
-              </h3>
-              <p className="text-sm text-slate-500 mt-1 font-semibold">
-                {doctorSpec}
-              </p>
+              <h3 className="text-xl font-bold font-display text-slate-900">{doctorName}</h3>
+              <p className="text-sm text-slate-500 mt-1 font-semibold">{doctorSpec}</p>
               <div className="flex items-center gap-3 mt-4 text-sm text-slate-600">
                 <MapPin className="h-4 w-4 text-sky-500" />
                 <span>{doctorHospital}</span>
@@ -215,9 +203,7 @@ function PaymentPage() {
 
           {/* Price Summary */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-6">
-            <h4 className="text-base font-bold text-slate-900 mb-4">
-              Ringkasan Pesanan
-            </h4>
+            <h4 className="text-base font-bold text-slate-900 mb-4">Ringkasan Pesanan</h4>
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-slate-600">Biaya Konsultasi</span>
@@ -227,9 +213,7 @@ function PaymentPage() {
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-slate-600">Biaya Layanan</span>
-                <span className="text-sm font-semibold text-slate-900">
-                  {formatRp(feeNum)}
-                </span>
+                <span className="text-sm font-semibold text-slate-900">{formatRp(feeNum)}</span>
               </div>
               <div className="border-t border-slate-200 my-3" />
               <div className="flex items-center justify-between py-2">

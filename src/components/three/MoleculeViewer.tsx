@@ -22,11 +22,26 @@ function Molecule() {
   ];
 
   const bonds: [[number, number, number], [number, number, number]][] = [
-    [[0, 0, 0], [1, 0.5, 0]],
-    [[0, 0, 0], [-1, 0.4, 0.3]],
-    [[0, 0, 0], [0.4, -0.9, 0.5]],
-    [[0, 0, 0], [-0.6, -0.8, -0.4]],
-    [[0, 0, 0], [0, 1.1, -0.2]],
+    [
+      [0, 0, 0],
+      [1, 0.5, 0],
+    ],
+    [
+      [0, 0, 0],
+      [-1, 0.4, 0.3],
+    ],
+    [
+      [0, 0, 0],
+      [0.4, -0.9, 0.5],
+    ],
+    [
+      [0, 0, 0],
+      [-0.6, -0.8, -0.4],
+    ],
+    [
+      [0, 0, 0],
+      [0, 1.1, -0.2],
+    ],
   ];
 
   return (
@@ -51,7 +66,7 @@ function Molecule() {
         const len = dir.length();
         const quat = new THREE.Quaternion().setFromUnitVectors(
           new THREE.Vector3(0, 1, 0),
-          dir.clone().normalize()
+          dir.clone().normalize(),
         );
         return (
           <mesh key={i} position={mid} quaternion={quat}>

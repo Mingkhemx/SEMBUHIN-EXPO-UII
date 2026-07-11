@@ -1,6 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { Search, ShoppingCart, Star, Plus, Loader2, X, Minus, Trash2, Filter, ChevronDown } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  Star,
+  Plus,
+  Loader2,
+  X,
+  Minus,
+  Trash2,
+  Filter,
+  ChevronDown,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -38,7 +49,19 @@ type Product = {
   stock: number;
 };
 
-const CATEGORIES = ["Semua", "Obat", "Vitamin", "Suplemen", "Alat Kesehatan", "Kebersihan", "Herbal", "Demam", "Lambung", "Alergi", "Higienis"];
+const CATEGORIES = [
+  "Semua",
+  "Obat",
+  "Vitamin",
+  "Suplemen",
+  "Alat Kesehatan",
+  "Kebersihan",
+  "Herbal",
+  "Demam",
+  "Lambung",
+  "Alergi",
+  "Higienis",
+];
 
 function Marketplace() {
   const { user } = useAuth();
@@ -57,8 +80,8 @@ function Marketplace() {
 
     // Subscribe to realtime product changes
     const productSub = supabase
-      .channel('public:products:user')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+      .channel("public:products:user")
+      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => {
         fetchProducts();
       })
       .subscribe();
@@ -70,51 +93,49 @@ function Marketplace() {
 
   async function fetchProducts() {
     const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('name', { ascending: true });
-    
+      .from("products")
+      .select("*")
+      .order("name", { ascending: true });
+
     if (!error && data) {
       setProducts(data);
     }
     setIsLoading(false);
   }
 
-  const filtered = useMemo(
-    () => {
-      let result = products.filter(
-        (p) =>
-          (cat === "Semua" || p.category === cat) &&
-          p.name.toLowerCase().includes(q.toLowerCase())
-      );
+  const filtered = useMemo(() => {
+    let result = products.filter(
+      (p) =>
+        (cat === "Semua" || p.category === cat) && p.name.toLowerCase().includes(q.toLowerCase()),
+    );
 
-      if (sortBy === "Harga Terendah") {
-        result.sort((a, b) => a.price - b.price);
-      } else if (sortBy === "Harga Tertinggi") {
-        result.sort((a, b) => b.price - a.price);
-      } else if (sortBy === "Rating Tertinggi") {
-        result.sort((a, b) => b.rating - a.rating);
-      }
-      
-      return result;
-    },
-    [q, cat, products, sortBy]
-  );
+    if (sortBy === "Harga Terendah") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "Harga Tertinggi") {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "Rating Tertinggi") {
+      result.sort((a, b) => b.rating - a.rating);
+    }
+
+    return result;
+  }, [q, cat, products, sortBy]);
 
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
-  const cartItems = Object.entries(cart).map(([id, quantity]) => {
-    const product = products.find(p => p.id === id);
-    return { ...product, quantity };
-  }).filter(item => item.id);
+  const cartItems = Object.entries(cart)
+    .map(([id, quantity]) => {
+      const product = products.find((p) => p.id === id);
+      return { ...product, quantity };
+    })
+    .filter((item) => item.id);
 
-  const cartTotal = cartItems.reduce((sum, item) => sum + (item.price! * item.quantity), 0);
+  const cartTotal = cartItems.reduce((sum, item) => sum + item.price! * item.quantity, 0);
 
   const addToCart = (p: Product) => {
-    if (p.status === 'habis' || p.stock <= 0) {
+    if (p.status === "habis" || p.stock <= 0) {
       toast.error("Maaf, stok produk ini sedang habis");
       return;
     }
-    
+
     const currentQty = cart[p.id] || 0;
     if (currentQty >= p.stock) {
       toast.error("Maaf, jumlah pesanan melebihi stok yang tersedia");
@@ -155,20 +176,20 @@ function Marketplace() {
     try {
       // 1. Create order
       const { data: order, error: orderError } = await supabase
-        .from('orders')
+        .from("orders")
         .insert({
           user_id: user.id,
           patient_name: user.user_metadata?.full_name || user.email,
-          items: cartItems.map(item => ({
+          items: cartItems.map((item) => ({
             product_id: item.id,
             name: item.name,
             quantity: item.quantity,
             price: item.price,
             emoji: item.emoji,
-            image_url: item.image_url
+            image_url: item.image_url,
           })),
           total_amount: cartTotal,
-          status: 'Menunggu'
+          status: "Menunggu",
         })
         .select()
         .single();
@@ -178,13 +199,13 @@ function Marketplace() {
       // 2. Update product stocks
       for (const item of cartItems) {
         const { error: stockError } = await supabase
-          .from('products')
-          .update({ 
+          .from("products")
+          .update({
             stock: item.stock! - item.quantity,
-            status: (item.stock! - item.quantity) <= 0 ? 'habis' : 'tersedia'
+            status: item.stock! - item.quantity <= 0 ? "habis" : "tersedia",
           })
-          .eq('id', item.id);
-        
+          .eq("id", item.id);
+
         if (stockError) console.error(`Failed to update stock for ${item.id}:`, stockError);
       }
 
@@ -201,46 +222,53 @@ function Marketplace() {
   return (
     <div className="space-y-10 pb-20">
       {/* ── Hero Banner (Professional Light Photo Style) ────────────────── */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative mt-4 min-h-[360px] overflow-hidden rounded-[2rem] bg-white text-slate-900 shadow-xl border border-slate-100"
       >
         {/* Background Photo with Light Overlay */}
         <div className="absolute inset-0">
-          <img 
-            src="/images/pharmacy.jpg" 
-            alt="Pharmacy" 
+          <img
+            src="/images/pharmacy.jpg"
+            alt="Pharmacy"
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent" />
         </div>
-        
+
         <div className="relative z-10 flex h-full flex-col justify-center p-8 lg:p-12">
           <div className="max-w-2xl space-y-6">
             <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest border border-primary/20 text-primary w-fit">
               <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              {t('marketplace.hero_badge')}
+              {t("marketplace.hero_badge")}
             </div>
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-black leading-tight text-slate-900 tracking-tighter">
-              {t('marketplace.hero_title')} <span className="text-primary">{t('marketplace.hero_subtitle')}</span> <br />
+              {t("marketplace.hero_title")}{" "}
+              <span className="text-primary">{t("marketplace.hero_subtitle")}</span> <br />
               Sembuhin
             </h1>
             <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-lg font-medium">
-              {t('marketplace.hero_desc')}
+              {t("marketplace.hero_desc")}
             </p>
             <div className="flex flex-wrap gap-8 pt-8 border-t border-slate-200">
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl md:text-3xl font-black text-slate-900">1.000+</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('marketplace.active_products')}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  {t("marketplace.active_products")}
+                </p>
               </div>
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl md:text-3xl font-black text-slate-900">4.9</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('marketplace.rating')}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  {t("marketplace.rating")}
+                </p>
               </div>
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl md:text-3xl font-black text-slate-900">24/7</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('marketplace.standby')}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  {t("marketplace.standby")}
+                </p>
               </div>
             </div>
           </div>
@@ -248,7 +276,7 @@ function Marketplace() {
       </motion.div>
 
       {/* ── Search Bar & Filter (Professional Sync) ───────────────────── */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -265,7 +293,7 @@ function Marketplace() {
         </div>
 
         <div className="flex flex-1 items-center gap-3">
-          <select 
+          <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="px-4 py-3 rounded-xl bg-white/70 border border-sky-100/60 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-sky-400/40 cursor-pointer min-w-[180px]"
@@ -280,8 +308,8 @@ function Marketplace() {
             <Filter className="h-4 w-4" />
             Filter
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setIsCheckoutOpen(true)}
             className="group relative flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
           >
@@ -334,7 +362,7 @@ function Marketplace() {
           ))}
         </div>
       ) : (
-        <motion.div 
+        <motion.div
           layout
           className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
@@ -348,26 +376,26 @@ function Marketplace() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.25, delay: i * 0.04 }}
                 className={`group flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-slate-200 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden ${
-                  p.status === 'habis' ? 'opacity-75 grayscale-[0.5]' : ''
+                  p.status === "habis" ? "opacity-75 grayscale-[0.5]" : ""
                 }`}
               >
                 {/* Image Section */}
                 <div className="relative aspect-square w-full overflow-hidden bg-slate-50">
                   {p.image_url ? (
-                    <img 
-                      src={p.image_url} 
-                      alt={p.name} 
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    <img
+                      src={p.image_url}
+                      alt={p.name}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-slate-100 text-6xl">
                       {p.emoji}
                     </div>
                   )}
-                  
+
                   {/* Status Overlay */}
                   <div className="absolute left-3 top-3">
-                    {p.status === 'habis' ? (
+                    {p.status === "habis" ? (
                       <span className="rounded-lg bg-rose-500/95 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
                         Habis
                       </span>
@@ -395,28 +423,31 @@ function Marketplace() {
                       {p.category}
                     </span>
                   </div>
-                  
+
                   <h3 className="font-display text-base font-bold text-slate-900 tracking-tight mb-1.5 leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                     {p.name}
                   </h3>
-                  <p className="text-xs text-slate-500 line-clamp-2 mb-4">
-                    {p.description}
-                  </p>
-                  
+                  <p className="text-xs text-slate-500 line-clamp-2 mb-4">{p.description}</p>
+
                   <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Harga</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
+                        Harga
+                      </p>
                       <p className="font-display text-lg font-bold text-slate-900">
                         Rp{p.price.toLocaleString("id-ID")}
                       </p>
                     </div>
                     <button
-                      onClick={(e) => { e.stopPropagation(); addToCart(p); }}
-                      disabled={p.status === 'habis'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(p);
+                      }}
+                      disabled={p.status === "habis"}
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition-all hover:scale-105 active:scale-95 ${
-                        p.status === 'habis' 
-                          ? 'bg-slate-200 cursor-not-allowed shadow-none text-slate-400' 
-                          : 'bg-primary shadow-primary/20 hover:shadow-primary/40'
+                        p.status === "habis"
+                          ? "bg-slate-200 cursor-not-allowed shadow-none text-slate-400"
+                          : "bg-primary shadow-primary/20 hover:shadow-primary/40"
                       }`}
                     >
                       <Plus className="h-5 w-5 stroke-[2.5]" />
@@ -431,16 +462,23 @@ function Marketplace() {
 
       {/* Empty State */}
       {!isLoading && filtered.length === 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           className="py-24 text-center glass rounded-2xl border-2 border-dashed border-slate-200"
         >
           <div className="text-5xl mb-4">🔎</div>
-          <h3 className="font-display text-2xl font-bold text-foreground mb-2">Obat Tidak Ditemukan</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">Cari dengan kata kunci lain atau ubah filter.</p>
-          <button 
-            onClick={() => {setQ(""); setCat("Semua");}}
+          <h3 className="font-display text-2xl font-bold text-foreground mb-2">
+            Obat Tidak Ditemukan
+          </h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Cari dengan kata kunci lain atau ubah filter.
+          </p>
+          <button
+            onClick={() => {
+              setQ("");
+              setCat("Semua");
+            }}
             className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold text-sm hover:bg-sky-600 transition-all"
           >
             Reset Pencarian
@@ -484,7 +522,7 @@ function Marketplace() {
                     <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
                       <ShoppingCart className="mb-4 h-16 w-16 opacity-20" />
                       <p className="text-lg font-medium">Keranjangmu kosong</p>
-                      <button 
+                      <button
                         onClick={() => setIsCheckoutOpen(false)}
                         className="mt-4 text-sm font-bold text-primary hover:underline"
                       >
@@ -494,35 +532,46 @@ function Marketplace() {
                   ) : (
                     <div className="space-y-4">
                       {cartItems.map((item) => (
-                        <div key={item.id} className="flex items-center gap-4 rounded-2xl border p-3">
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-4 rounded-2xl border p-3"
+                        >
                           <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-slate-50 overflow-hidden">
                             {item.image_url ? (
-                              <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                              <img
+                                src={item.image_url}
+                                alt={item.name}
+                                className="h-full w-full object-cover"
+                              />
                             ) : (
                               <span className="text-3xl">{item.emoji}</span>
                             )}
                           </div>
                           <div className="flex-1">
                             <h4 className="font-bold leading-tight">{item.name}</h4>
-                            <p className="text-sm font-semibold text-primary">Rp{item.price?.toLocaleString("id-ID")}</p>
+                            <p className="text-sm font-semibold text-primary">
+                              Rp{item.price?.toLocaleString("id-ID")}
+                            </p>
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="flex items-center rounded-lg bg-slate-50 p-1">
-                              <button 
+                              <button
                                 onClick={() => removeFromCart(item.id!)}
                                 className="p-1 hover:text-primary"
                               >
                                 <Minus className="h-4 w-4" />
                               </button>
-                              <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                              <button 
+                              <span className="w-8 text-center text-sm font-bold">
+                                {item.quantity}
+                              </span>
+                              <button
                                 onClick={() => addToCart(item as Product)}
                                 className="p-1 hover:text-primary"
                               >
                                 <Plus className="h-4 w-4" />
                               </button>
                             </div>
-                            <button 
+                            <button
                               onClick={() => deleteFromCart(item.id!)}
                               className="text-rose-500 hover:text-rose-600"
                             >
@@ -554,9 +603,11 @@ function Marketplace() {
 
                     {!user ? (
                       <div className="rounded-xl bg-amber-50 p-4 text-center">
-                        <p className="mb-3 text-xs font-medium text-amber-800">Silakan masuk untuk melanjutkan checkout</p>
-                        <button 
-                          onClick={() => window.location.href = '/auth'}
+                        <p className="mb-3 text-xs font-medium text-amber-800">
+                          Silakan masuk untuk melanjutkan checkout
+                        </p>
+                        <button
+                          onClick={() => (window.location.href = "/auth")}
                           className="w-full rounded-xl bg-amber-500 py-3 text-sm font-bold text-white hover:bg-amber-600"
                         >
                           Login Sekarang
@@ -568,7 +619,11 @@ function Marketplace() {
                         onClick={handleCheckout}
                         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-primary py-4 text-lg font-bold text-white shadow-glow transition-transform active:scale-95 disabled:opacity-50"
                       >
-                        {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : "Pesan Sekarang"}
+                        {isSubmitting ? (
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        ) : (
+                          "Pesan Sekarang"
+                        )}
                       </button>
                     )}
                     <p className="mt-3 text-center text-[10px] text-muted-foreground uppercase tracking-widest">

@@ -7,7 +7,6 @@ Anda telah mengupdate hero section dengan desain yang lebih profesional dan mode
 ### Langkah-langkah:
 
 1. **Kunjungi Pexels Videos**: https://www.pexels.com/search/videos/
-   
 2. **Cari Video yang Sesuai**:
    - Search keywords: "medical", "healthcare", "doctor", "hospital", "health professional", atau "wellness"
    - Filter untuk video berkualitas tinggi (1080p atau lebih)
@@ -33,6 +32,7 @@ Anda telah mengupdate hero section dengan desain yang lebih profesional dan mode
 ### Video Quality Tips:
 
 ✅ **Baik untuk hero section:**
+
 - Video medis profesional dengan doctor/healthcare workers
 - Blurred background dengan subject jelas
 - Soft lighting dengan tone biru-putih
@@ -40,6 +40,7 @@ Anda telah mengupdate hero section dengan desain yang lebih profesional dan mode
 - Wellness atau fitness professionals
 
 ❌ **Hindari:**
+
 - Video yang terlalu cerah/terang
 - Video dengan terlalu banyak action/movement
 - Video dengan text overlay
@@ -48,12 +49,14 @@ Anda telah mengupdate hero section dengan desain yang lebih profesional dan mode
 ### File Size Optimization:
 
 Jika file terlalu besar (> 10MB), gunakan:
+
 - FFmpeg: `ffmpeg -i input.mp4 -b:v 2000k -b:a 128k output.mp4`
 - Online tool: https://www.freeconvert.com/video-compressor
 
 ### CSS Styling:
 
 Styling sudah di-setup untuk:
+
 - Multiple overlay gradients (professional look)
 - Responsive sizing untuk semua devices
 - Smooth fade dan transitions

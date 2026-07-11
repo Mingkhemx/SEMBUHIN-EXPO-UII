@@ -69,7 +69,9 @@ export function DoctorConsultations() {
       setDoctorId(data.id);
     })();
 
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   // Fetch consultations + realtime
@@ -80,7 +82,7 @@ export function DoctorConsultations() {
     const fetchConsultations = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch consultations directly from Supabase
         const { data: consultData, error: consultError } = await supabase
           .from("consultations")
@@ -98,25 +100,26 @@ export function DoctorConsultations() {
         }
 
         // Fetch patient details in batch
-        const patientIds = [...new Set(consultData.map(c => c.patient_id))];
+        const patientIds = [...new Set(consultData.map((c) => c.patient_id))];
         const { data: profilesData } = await supabase
           .from("profiles")
           .select("id, full_name, email, phone")
           .in("id", patientIds);
 
-        const profileMap: Record<string, { full_name: string; email?: string; phone?: string }> = {};
+        const profileMap: Record<string, { full_name: string; email?: string; phone?: string }> =
+          {};
         if (profilesData) {
-          profilesData.forEach(p => {
+          profilesData.forEach((p) => {
             profileMap[p.id] = {
               full_name: p.full_name || "Pasien",
               email: p.email,
-              phone: p.phone
+              phone: p.phone,
             };
           });
         }
 
         // Transform data
-        const transformed: Consultation[] = consultData.map(c => ({
+        const transformed: Consultation[] = consultData.map((c) => ({
           id: c.id,
           doctor_id: c.doctor_id,
           patient_id: c.patient_id,
@@ -157,7 +160,7 @@ export function DoctorConsultations() {
         },
         () => {
           fetchConsultations();
-        }
+        },
       )
       .subscribe();
 
@@ -199,7 +202,6 @@ export function DoctorConsultations() {
   return (
     <DoctorLayout title="Konsultasi">
       <div className="max-w-7xl mx-auto space-y-6">
-
         {/* Filters */}
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -285,9 +287,7 @@ export function DoctorConsultations() {
                           </div>
                           <div>
                             <p className="font-medium text-slate-900">{consult.patient_name}</p>
-                            <p className="text-xs text-slate-500">
-                              {consult.patient_phone}
-                            </p>
+                            <p className="text-xs text-slate-500">{consult.patient_phone}</p>
                           </div>
                         </div>
                       </td>
@@ -384,7 +384,6 @@ export function DoctorConsultations() {
             </div>
           </div>
         )}
-
       </div>
     </DoctorLayout>
   );

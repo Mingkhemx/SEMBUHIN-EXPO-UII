@@ -4,7 +4,23 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronDown, Eye, ShieldOff, Ban, Users, UserCheck, UserX, Loader2, RefreshCcw, X, Mail, Calendar, CreditCard, Shield } from "lucide-react";
+import {
+  Search,
+  ChevronDown,
+  Eye,
+  ShieldOff,
+  Ban,
+  Users,
+  UserCheck,
+  UserX,
+  Loader2,
+  RefreshCcw,
+  X,
+  Mail,
+  Calendar,
+  CreditCard,
+  Shield,
+} from "lucide-react";
 import { AdminLayout, StatusBadge } from "@/panel-admin/AdminLayout";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -61,7 +77,12 @@ function UserAvatar({ initials, index, src }: { initials: string; index: number;
       className={`h-9 w-9 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 overflow-hidden border border-slate-200`}
     >
       {src ? (
-        <img src={src} alt={initials} className="h-full w-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+        <img
+          src={src}
+          alt={initials}
+          className="h-full w-full object-cover"
+          onError={(e) => (e.currentTarget.style.display = "none")}
+        />
       ) : (
         <span className="text-[11px] font-bold text-white">{initials}</span>
       )}
@@ -149,16 +170,21 @@ function MiniStat({
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
 
-function Pagination({ current, total, onPageChange, totalItems }: { 
-  current: number; 
-  total: number; 
+function Pagination({
+  current,
+  total,
+  onPageChange,
+  totalItems,
+}: {
+  current: number;
+  total: number;
   onPageChange: (p: number) => void;
   totalItems: number;
 }) {
   if (total <= 1) return null;
-  
+
   const pages = Array.from({ length: Math.min(5, total) }, (_, i) => i + 1);
-  
+
   return (
     <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100">
       <p className="text-xs text-slate-500">
@@ -182,17 +208,17 @@ function Pagination({ current, total, onPageChange, totalItems }: {
         ))}
         {total > 5 && <span className="text-slate-400 px-1">...</span>}
         {total > 5 && (
-           <button
-             onClick={() => onPageChange(total)}
-             className={[
-               "h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors",
-               total === current
-                 ? "bg-sky-600 text-white"
-                 : "text-slate-500 hover:bg-slate-100 hover:text-slate-700",
-             ].join(" ")}
-           >
-             {total}
-           </button>
+          <button
+            onClick={() => onPageChange(total)}
+            className={[
+              "h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors",
+              total === current
+                ? "bg-sky-600 text-white"
+                : "text-slate-500 hover:bg-slate-100 hover:text-slate-700",
+            ].join(" ")}
+          >
+            {total}
+          </button>
         )}
       </div>
     </div>
@@ -201,15 +227,15 @@ function Pagination({ current, total, onPageChange, totalItems }: {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-function ActionModal({ 
-  user, 
-  type, 
-  onClose, 
-  onConfirm 
-}: { 
-  user: UserRow; 
-  type: 'suspend' | 'ban'; 
-  onClose: () => void; 
+function ActionModal({
+  user,
+  type,
+  onClose,
+  onConfirm,
+}: {
+  user: UserRow;
+  type: "suspend" | "ban";
+  onClose: () => void;
   onConfirm: (reason: string, durationHours?: number) => void;
 }) {
   const [reason, setReason] = useState("");
@@ -223,10 +249,10 @@ function ActionModal({
         exit={{ opacity: 0, scale: 0.95 }}
         className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
       >
-        <div className={`p-6 ${type === 'ban' ? 'bg-rose-600' : 'bg-amber-500'} text-white`}>
+        <div className={`p-6 ${type === "ban" ? "bg-rose-600" : "bg-amber-500"} text-white`}>
           <h3 className="text-xl font-bold flex items-center gap-2">
-            {type === 'ban' ? <Ban className="h-6 w-6" /> : <ShieldOff className="h-6 w-6" />}
-            {type === 'ban' ? 'Ban User' : 'Suspend User'}
+            {type === "ban" ? <Ban className="h-6 w-6" /> : <ShieldOff className="h-6 w-6" />}
+            {type === "ban" ? "Ban User" : "Suspend User"}
           </h3>
           <p className="text-white/80 text-sm mt-1">Konfirmasi tindakan untuk {user.full_name}</p>
         </div>
@@ -234,7 +260,7 @@ function ActionModal({
         <div className="p-6 space-y-4">
           <div>
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">
-              Alasan {type === 'ban' ? 'Ban' : 'Suspend'}
+              Alasan {type === "ban" ? "Ban" : "Suspend"}
             </label>
             <textarea
               autoFocus
@@ -245,7 +271,7 @@ function ActionModal({
             />
           </div>
 
-          {type === 'ban' && (
+          {type === "ban" && (
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">
                 Durasi Ban (Jam)
@@ -257,12 +283,12 @@ function ActionModal({
                     onClick={() => setDuration(h)}
                     className={cn(
                       "py-2 rounded-xl text-xs font-bold border transition-all",
-                      duration === h 
-                        ? "bg-rose-600 border-rose-600 text-white shadow-lg shadow-rose-600/20" 
-                        : "bg-white border-slate-200 text-slate-600 hover:border-rose-300"
+                      duration === h
+                        ? "bg-rose-600 border-rose-600 text-white shadow-lg shadow-rose-600/20"
+                        : "bg-white border-slate-200 text-slate-600 hover:border-rose-300",
                     )}
                   >
-                    {h >= 720 ? '1 Bln' : h >= 168 ? '1 Minggu' : `${h} Jam`}
+                    {h >= 720 ? "1 Bln" : h >= 168 ? "1 Minggu" : `${h} Jam`}
                   </button>
                 ))}
               </div>
@@ -285,11 +311,13 @@ function ActionModal({
             </button>
             <button
               disabled={!reason.trim()}
-              onClick={() => onConfirm(reason, type === 'ban' ? duration : undefined)}
+              onClick={() => onConfirm(reason, type === "ban" ? duration : undefined)}
               className={cn(
                 "flex-1 px-4 py-3 rounded-2xl text-sm font-bold text-white transition-all",
-                type === 'ban' ? "bg-rose-600 hover:bg-rose-700 shadow-rose-600/20" : "bg-amber-500 hover:bg-amber-600 shadow-amber-500/20",
-                !reason.trim() && "opacity-50 cursor-not-allowed"
+                type === "ban"
+                  ? "bg-rose-600 hover:bg-rose-700 shadow-rose-600/20"
+                  : "bg-amber-500 hover:bg-amber-600 shadow-amber-500/20",
+                !reason.trim() && "opacity-50 cursor-not-allowed",
               )}
             >
               Konfirmasi
@@ -301,8 +329,12 @@ function ActionModal({
   );
 }
 
-function UserDetailModal({ user, onClose, onUpdateStatus }: { 
-  user: UserRow; 
+function UserDetailModal({
+  user,
+  onClose,
+  onUpdateStatus,
+}: {
+  user: UserRow;
   onClose: () => void;
   onUpdateStatus: (userId: string, status: UserStatus, isActive: boolean) => void;
 }) {
@@ -326,7 +358,11 @@ function UserDetailModal({ user, onClose, onUpdateStatus }: {
             <div className="h-20 w-20 rounded-2xl bg-white p-1.5 shadow-xl">
               <div className="h-full w-full rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold overflow-hidden border border-slate-100">
                 {user.avatar_url ? (
-                  <img src={user.avatar_url} alt={user.full_name} className="h-full w-full object-cover" />
+                  <img
+                    src={user.avatar_url}
+                    alt={user.full_name}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   user.avatar
                 )}
@@ -371,29 +407,40 @@ function UserDetailModal({ user, onClose, onUpdateStatus }: {
           </div>
 
           <div className="space-y-3">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Aksi Manajemen</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
+              Aksi Manajemen
+            </p>
             <div className="flex gap-2">
-              {user.status !== 'active' && (
+              {user.status !== "active" && (
                 <button
-                  onClick={() => { onUpdateStatus(user.id, 'active', true); onClose(); }}
+                  onClick={() => {
+                    onUpdateStatus(user.id, "active", true);
+                    onClose();
+                  }}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-bold hover:bg-emerald-100 transition-colors"
                 >
                   <UserCheck className="h-4 w-4" />
                   Aktifkan
                 </button>
               )}
-              {user.status !== 'inactive' && (
+              {user.status !== "inactive" && (
                 <button
-                  onClick={() => { onUpdateStatus(user.id, 'inactive', false); onClose(); }}
+                  onClick={() => {
+                    onUpdateStatus(user.id, "inactive", false);
+                    onClose();
+                  }}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-sm font-bold hover:bg-amber-100 transition-colors"
                 >
                   <ShieldOff className="h-4 w-4" />
                   Suspend
                 </button>
               )}
-              {user.status !== 'banned' && (
+              {user.status !== "banned" && (
                 <button
-                  onClick={() => { onUpdateStatus(user.id, 'banned', false); onClose(); }}
+                  onClick={() => {
+                    onUpdateStatus(user.id, "banned", false);
+                    onClose();
+                  }}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-sm font-bold hover:bg-rose-100 transition-colors"
                 >
                   <Ban className="h-4 w-4" />
@@ -420,67 +467,59 @@ export function AdminUsers() {
   const [isLive, setIsLive] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [actionModal, setActionModal] = useState<{ user: UserRow; type: 'suspend' | 'ban' } | null>(null);
+  const [actionModal, setActionModal] = useState<{ user: UserRow; type: "suspend" | "ban" } | null>(
+    null,
+  );
 
-  // 1. Fetch Stats - Direct dari Supabase
+  // 1. Fetch Stats - Backend API
   const fetchStats = async () => {
     try {
-      const [usersRes, bannedRes] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'banned')
-      ]);
-
-      const activeCount = (usersRes.count || 0) - (bannedRes.count || 0);
-
-      setStats({
-        total: usersRes.count || 0,
-        active: activeCount,
-        banned: bannedRes.count || 0
-      });
+      const res = await fetch(
+        "https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/stats",
+      );
+      const data = await res.json();
+      if (data.success && data.stats) {
+        setStats({
+          total: data.stats.total || 0,
+          active: data.stats.active || 0,
+          banned: data.stats.banned || 0,
+        });
+      }
     } catch (err) {
       console.error("Error fetching user stats:", err);
       setStats({ total: 0, active: 0, banned: 0 });
     }
   };
 
-  // 2. Fetch Users - Direct dari Supabase
+  // 2. Fetch Users - Backend API
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      let query = supabase.from('profiles').select('*', { count: 'exact' });
+      const url = `https://sembuhin-expo-uii-production.up.railway.app/api/admin/users?search=${encodeURIComponent(search)}&status=${encodeURIComponent(filter)}&page=${page}&per_page=10`;
+      const res = await fetch(url);
+      const data = await res.json();
 
-      // Search
-      if (search) {
-        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+      if (data.success && data.data) {
+        setUsers(
+          data.data.map((u: any) => ({
+            ...u,
+            avatar: u.full_name
+              ? u.full_name
+                  .split(" ")
+                  .map((n: string) => n[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2)
+              : "??",
+          })),
+        );
+        setTotalItems(data.total || 0);
+      } else {
+        throw new Error(data.error || "Gagal memuat data user");
       }
-
-      // Filter status
-      if (filter === 'Aktif') {
-        query = query.eq('is_active', true).neq('status', 'banned');
-      } else if (filter === 'Banned') {
-        query = query.eq('status', 'banned');
-      } else if (filter === 'Premium') {
-        query = query.eq('is_premium', true);
-      }
-
-      // Pagination
-      const start = (page - 1) * 10;
-      const end = start + 10 - 1;
-
-      const result = await query
-        .order('created_at', { ascending: false })
-        .range(start, end);
-
-      if (result.data) {
-        setUsers(result.data.map((u: any) => ({
-          ...u,
-          avatar: u.full_name ? u.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : '??'
-        })));
-        setTotalItems(result.count || 0);
-      }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching users:", err);
-      toast.error("Gagal memuat data user");
+      toast.error(err.message || "Gagal memuat data user");
       setUsers([]);
       setTotalItems(0);
     } finally {
@@ -488,31 +527,37 @@ export function AdminUsers() {
     }
   };
 
-  // 3. Update User Status - Direct ke Supabase
+  // 3. Update User Status - Backend API
   const handleUpdateStatus = async (
-    userId: string, 
-    status: UserStatus, 
-    isActive: boolean, 
-    reason?: string, 
-    ban_until?: string
+    userId: string,
+    status: UserStatus,
+    isActive: boolean,
+    reason?: string,
+    ban_until?: string,
   ) => {
     try {
-      const updateData: any = {
-        status,
-        is_active: isActive,
-        status_reason: reason || null
-      };
+      const response = await fetch(
+        `https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/${userId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status,
+            is_active: isActive,
+            reason: reason || null,
+            ban_until: ban_until || null,
+          }),
+        },
+      );
 
-      if (ban_until) {
-        updateData.ban_until = ban_until;
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Gagal memperbarui status user");
       }
 
-      await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', userId);
-
-      toast.success('Status user berhasil diperbarui');
+      toast.success("Status user berhasil diperbarui");
       fetchUsers();
       fetchStats();
       setActionModal(null);
@@ -522,45 +567,20 @@ export function AdminUsers() {
     }
   };
 
-  // 4. Export CSV - Generate dari data local
+  // 4. Export CSV - Backend API
   const handleExportCSV = async () => {
     try {
       setIsExporting(true);
+      const res = await fetch(
+        "https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/export",
+      );
+      if (!res.ok) throw new Error("Gagal mengunduh data ekspor");
 
-      // Fetch semua data (tanpa pagination)
-      const result = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!result.data || result.data.length === 0) {
-        toast.error("Tidak ada data untuk diekspor");
-        return;
-      }
-
-      // Generate CSV
-      const headers = ['ID', 'Nama', 'Email', 'Role', 'Premium', 'Status', 'Bergabung'];
-      const rows = result.data.map((u: any) => [
-        u.id,
-        u.full_name || '',
-        u.email || '',
-        u.role || 'user',
-        u.is_premium ? 'Ya' : 'Tidak',
-        u.status || 'active',
-        format(new Date(u.created_at), 'dd MMM yyyy')
-      ]);
-
-      let csv = headers.join(',') + '\n';
-      rows.forEach((row: any) => {
-        csv += row.map((cell: any) => `"${cell}"`).join(',') + '\n';
-      });
-
-      // Download
-      const blob = new Blob([csv], { type: 'text/csv' });
+      const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `Sembuhin_Users_${format(new Date(), 'yyyyMMdd')}.csv`;
+      a.download = `Sembuhin_Users_${format(new Date(), "yyyyMMdd")}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -581,8 +601,8 @@ export function AdminUsers() {
 
     // Realtime subscription
     const channel = supabase
-      .channel('admin-users-page')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+      .channel("admin-users-page")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => {
         setIsLive(true);
         setTimeout(() => setIsLive(false), 2000);
         fetchUsers();
@@ -610,12 +630,17 @@ export function AdminUsers() {
                 className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20"
               >
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Live</span>
+                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
+                  Live
+                </span>
               </motion.div>
             )}
           </AnimatePresence>
-          <button 
-            onClick={() => { fetchUsers(); fetchStats(); }}
+          <button
+            onClick={() => {
+              fetchUsers();
+              fetchStats();
+            }}
             className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all active:scale-95"
           >
             <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
@@ -623,13 +648,17 @@ export function AdminUsers() {
         </div>
       }
       headerAction={
-        <button 
+        <button
           onClick={handleExportCSV}
           disabled={isExporting}
           className="flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-300 text-white text-sm font-semibold rounded-xl transition-colors"
         >
-          {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
-          {isExporting ? 'Mengekspor...' : 'Export CSV'}
+          {isExporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Users className="h-4 w-4" />
+          )}
+          {isExporting ? "Mengekspor..." : "Export CSV"}
         </button>
       }
     >
@@ -653,11 +682,11 @@ export function AdminUsers() {
             value={stats.active.toLocaleString()}
             color="bg-emerald-500/10 text-emerald-400"
           />
-          <MiniStat 
-            icon={UserX} 
-            label="Dibanned" 
-            value={stats.banned.toLocaleString()} 
-            color="bg-rose-500/10 text-rose-400" 
+          <MiniStat
+            icon={UserX}
+            label="Dibanned"
+            value={stats.banned.toLocaleString()}
+            color="bg-rose-500/10 text-rose-400"
           />
         </motion.div>
 
@@ -675,7 +704,10 @@ export function AdminUsers() {
               type="text"
               placeholder="Cari nama atau email..."
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-400 transition-colors"
             />
           </div>
@@ -798,14 +830,22 @@ export function AdminUsers() {
 
                       <td className="px-5 py-3.5">
                         <div className="flex flex-col items-center gap-1">
-                          <StatusBadge status={user.status || (user.is_active ? "active" : "inactive")} />
-                          {user.status === 'banned' && user.ban_until && (
+                          <StatusBadge
+                            status={user.status || (user.is_active ? "active" : "inactive")}
+                          />
+                          {user.status === "banned" && user.ban_until && (
                             <span className="text-[10px] text-rose-500 font-medium">
-                              Hingga: {format(new Date(user.ban_until), "dd MMM HH:mm", { locale: idLocale })}
+                              Hingga:{" "}
+                              {format(new Date(user.ban_until), "dd MMM HH:mm", {
+                                locale: idLocale,
+                              })}
                             </span>
                           )}
                           {user.status_reason && (
-                            <span className="text-[10px] text-slate-400 italic truncate max-w-[120px]" title={user.status_reason}>
+                            <span
+                              className="text-[10px] text-slate-400 italic truncate max-w-[120px]"
+                              title={user.status_reason}
+                            >
                               "{user.status_reason}"
                             </span>
                           )}
@@ -825,7 +865,7 @@ export function AdminUsers() {
                           </button>
                           <button
                             title="Suspend"
-                            onClick={() => setActionModal({ user, type: 'suspend' })}
+                            onClick={() => setActionModal({ user, type: "suspend" })}
                             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold hover:bg-amber-100 transition-colors"
                           >
                             <ShieldOff className="h-3.5 w-3.5" />
@@ -833,7 +873,7 @@ export function AdminUsers() {
                           </button>
                           <button
                             title="Ban"
-                            onClick={() => setActionModal({ user, type: 'ban' })}
+                            onClick={() => setActionModal({ user, type: "ban" })}
                             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-colors"
                           >
                             <Ban className="h-3.5 w-3.5" />
@@ -849,11 +889,11 @@ export function AdminUsers() {
           </div>
 
           {/* Pagination */}
-          <Pagination 
-            current={page} 
-            total={Math.ceil(totalItems / 10)} 
-            onPageChange={setPage} 
-            totalItems={totalItems} 
+          <Pagination
+            current={page}
+            total={Math.ceil(totalItems / 10)}
+            onPageChange={setPage}
+            totalItems={totalItems}
           />
         </motion.div>
       </div>
@@ -868,26 +908,26 @@ export function AdminUsers() {
           />
         )}
       </AnimatePresence>
-       {/* Action Modal (Suspend/Ban) */}
-       <AnimatePresence>
-         {actionModal && (
-           <ActionModal
-             user={actionModal.user}
-             type={actionModal.type}
-             onClose={() => setActionModal(null)}
-             onConfirm={(reason, duration) => {
-               const status = actionModal.type === 'ban' ? 'banned' : 'inactive';
-               let banUntil: string | undefined;
-               if (duration) {
-                 const date = new Date();
-                 date.setHours(date.getHours() + duration);
-                 banUntil = date.toISOString();
-               }
-               handleUpdateStatus(actionModal.user.id, status, false, reason, banUntil);
-             }}
-           />
-         )}
-       </AnimatePresence>
+      {/* Action Modal (Suspend/Ban) */}
+      <AnimatePresence>
+        {actionModal && (
+          <ActionModal
+            user={actionModal.user}
+            type={actionModal.type}
+            onClose={() => setActionModal(null)}
+            onConfirm={(reason, duration) => {
+              const status = actionModal.type === "ban" ? "banned" : "inactive";
+              let banUntil: string | undefined;
+              if (duration) {
+                const date = new Date();
+                date.setHours(date.getHours() + duration);
+                banUntil = date.toISOString();
+              }
+              handleUpdateStatus(actionModal.user.id, status, false, reason, banUntil);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </AdminLayout>
   );
 }

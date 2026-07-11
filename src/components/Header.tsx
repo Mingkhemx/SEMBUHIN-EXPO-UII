@@ -73,15 +73,10 @@ export function Header() {
 
   // Check if any Pelayanan Kesehatan routes are active
   const isPelayananActive =
-    matchRoute({ to: "/dokter" }) ||
-    matchRoute({ to: "/twin" }) ||
-    matchRoute({ to: "/cek-jantung" }) ||
-    matchRoute({ to: "/resep" });
+    matchRoute({ to: "/dokter" }) || matchRoute({ to: "/twin" }) || matchRoute({ to: "/resep" });
 
   // Check if any Edukasi Kesehatan routes are active
-  const isEdukasiActive =
-    matchRoute({ to: "/artikel" }) ||
-    matchRoute({ to: "/video-edukasi" });
+  const isEdukasiActive = matchRoute({ to: "/artikel" }) || matchRoute({ to: "/video-edukasi" });
 
   // Check if Beranda is active
   const isBerandaActive = matchRoute({ to: "/beranda" });
@@ -153,14 +148,6 @@ export function Header() {
                       color="sky"
                     >
                       {t("header.consultation_desc")}
-                    </ListItem>
-                    <ListItem
-                      to="/cek-jantung"
-                      title={t("nav.heart_check")}
-                      icon={<HeartPulse className="h-4 w-4" />}
-                      color="rose"
-                    >
-                      {t("header.heart_check_desc")}
                     </ListItem>
                     <ListItem
                       to="/symptom-triage"
@@ -420,7 +407,10 @@ export function Header() {
                     onError={(e) => {
                       // fallback ke inisial jika gambar gagal load
                       (e.currentTarget as HTMLImageElement).style.display = "none";
-                      (e.currentTarget.nextSibling as HTMLElement)?.style.setProperty("display", "flex");
+                      (e.currentTarget.nextSibling as HTMLElement)?.style.setProperty(
+                        "display",
+                        "flex",
+                      );
                     }}
                   />
                 ) : null}

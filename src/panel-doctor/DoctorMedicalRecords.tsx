@@ -5,9 +5,20 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  Search, Stethoscope, FileText, Microscope, Calendar,
-  User, Activity, ChevronRight, X, Loader2, AlertCircle,
-  RefreshCw, Pill, Filter,
+  Search,
+  Stethoscope,
+  FileText,
+  Microscope,
+  Calendar,
+  User,
+  Activity,
+  ChevronRight,
+  X,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Pill,
+  Filter,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DoctorLayout } from "@/panel-doctor/DoctorLayout";
@@ -52,14 +63,36 @@ interface Stats {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function safeDate(d: string) {
-  try { return parseISO(d); } catch { return new Date(); }
+  try {
+    return parseISO(d);
+  } catch {
+    return new Date();
+  }
 }
 
 function typeConfig(type: MedicalRecord["type"]) {
   switch (type) {
-    case "konsultasi": return { icon: Stethoscope, label: "Konsultasi", iconBg: "bg-sky-50 text-sky-600",    badge: "bg-sky-50 text-sky-700 border-sky-100"    };
-    case "lab":        return { icon: Microscope,  label: "Lab",        iconBg: "bg-violet-50 text-violet-600", badge: "bg-violet-50 text-violet-700 border-violet-100" };
-    case "resep":      return { icon: Pill,        label: "Resep",      iconBg: "bg-emerald-50 text-emerald-600", badge: "bg-emerald-50 text-emerald-700 border-emerald-100" };
+    case "konsultasi":
+      return {
+        icon: Stethoscope,
+        label: "Konsultasi",
+        iconBg: "bg-sky-50 text-sky-600",
+        badge: "bg-sky-50 text-sky-700 border-sky-100",
+      };
+    case "lab":
+      return {
+        icon: Microscope,
+        label: "Lab",
+        iconBg: "bg-violet-50 text-violet-600",
+        badge: "bg-violet-50 text-violet-700 border-violet-100",
+      };
+    case "resep":
+      return {
+        icon: Pill,
+        label: "Resep",
+        iconBg: "bg-emerald-50 text-emerald-600",
+        badge: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      };
   }
 }
 
@@ -77,7 +110,9 @@ function RecordModal({ record, onClose }: { record: MedicalRecord; onClose: () =
   return (
     <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
       <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         onClick={onClose}
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
       />
@@ -91,17 +126,27 @@ function RecordModal({ record, onClose }: { record: MedicalRecord; onClose: () =
         {/* Header */}
         <div className="flex items-start justify-between p-5 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", cfg.iconBg)}>
+            <div
+              className={cn("h-10 w-10 rounded-xl flex items-center justify-center", cfg.iconBg)}
+            >
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <span className={cn("text-[10px] font-bold uppercase tracking-wider border px-1.5 py-0.5 rounded-md block w-fit mb-0.5", cfg.badge)}>
+              <span
+                className={cn(
+                  "text-[10px] font-bold uppercase tracking-wider border px-1.5 py-0.5 rounded-md block w-fit mb-0.5",
+                  cfg.badge,
+                )}
+              >
                 {cfg.label}
               </span>
               <h3 className="text-[15px] font-bold text-slate-900">{record.title}</h3>
             </div>
           </div>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors">
+          <button
+            onClick={onClose}
+            className="h-8 w-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -110,23 +155,35 @@ function RecordModal({ record, onClose }: { record: MedicalRecord; onClose: () =
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-100">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Tanggal</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                Tanggal
+              </p>
               <p className="text-[14px] font-bold text-slate-900">
                 {format(safeDate(record.date), "dd MMM yyyy", { locale: idLocale })}
               </p>
             </div>
             <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-100">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Status</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                Status
+              </p>
               <p className="text-[13px] font-semibold text-slate-700 capitalize">{record.status}</p>
             </div>
           </div>
 
           {Object.keys(record.details).length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Detail</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Detail
+              </p>
               <div className="border border-slate-100 rounded-xl overflow-hidden">
                 {Object.entries(record.details).map(([k, v], i, arr) => (
-                  <div key={k} className={cn("flex justify-between gap-4 px-4 py-3", i < arr.length - 1 && "border-b border-slate-50")}>
+                  <div
+                    key={k}
+                    className={cn(
+                      "flex justify-between gap-4 px-4 py-3",
+                      i < arr.length - 1 && "border-b border-slate-50",
+                    )}
+                  >
                     <span className="text-[12px] text-slate-500">{k}</span>
                     <span className="text-[12px] font-semibold text-slate-800 text-right">{v}</span>
                   </div>
@@ -137,7 +194,9 @@ function RecordModal({ record, onClose }: { record: MedicalRecord; onClose: () =
 
           {record.summary && (
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Ringkasan</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Ringkasan
+              </p>
               <p className="text-[13px] text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
                 {record.summary}
               </p>
@@ -172,8 +231,14 @@ export function DoctorMedicalRecords() {
   // ── Resolve doctor ID ──
   useEffect(() => {
     if (!user) return;
-    supabase.from("doctors").select("id").eq("user_id", user.id).single()
-      .then(({ data }) => { if (data) setDoctorId(data.id); });
+    supabase
+      .from("doctors")
+      .select("id")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setDoctorId(data.id);
+      });
   }, [user]);
 
   // ── Fetch patients of this doctor ──
@@ -183,21 +248,30 @@ export function DoctorMedicalRecords() {
     try {
       const params = new URLSearchParams({ doctor_id: doctorId, per_page: "50" });
       if (searchPatient) params.set("search", searchPatient);
-      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?${params}`);
+      const res = await fetch(
+        `https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?${params}`,
+      );
       const data = await res.json();
       if (data.success) setPatients(data.data);
-    } catch (e) { console.error(e); }
-    finally { setPatientsLoading(false); }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPatientsLoading(false);
+    }
   }, [doctorId, searchPatient]);
 
-  useEffect(() => { fetchPatients(); }, [fetchPatients]);
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
 
   // ── Fetch records when a patient is selected ──
   const fetchRecords = useCallback(async (patientId: string) => {
     setRecordsLoading(true);
     setRecordsError(null);
     try {
-      const res = await fetch(`https://sembuhin-expo-uii-production.up.railway.app/api/patient/medical-records?patient_id=${patientId}`);
+      const res = await fetch(
+        `https://sembuhin-expo-uii-production.up.railway.app/api/patient/medical-records?patient_id=${patientId}`,
+      );
       const data = await res.json();
       if (data.success) {
         setRecords(data.data);
@@ -205,8 +279,11 @@ export function DoctorMedicalRecords() {
       } else {
         throw new Error(data.error || "Gagal mengambil data");
       }
-    } catch (e: any) { setRecordsError(e.message); }
-    finally { setRecordsLoading(false); }
+    } catch (e: any) {
+      setRecordsError(e.message);
+    } finally {
+      setRecordsLoading(false);
+    }
   }, []);
 
   const handleSelectPatient = (p: Patient) => {
@@ -215,21 +292,18 @@ export function DoctorMedicalRecords() {
     fetchRecords(p.id);
   };
 
-  const filteredRecords = records.filter((r) =>
-    activeTab === "semua" || r.type === activeTab
-  );
+  const filteredRecords = records.filter((r) => activeTab === "semua" || r.type === activeTab);
 
   const TABS: { key: RecordType; label: string; count: number }[] = [
-    { key: "semua",      label: "Semua",      count: stats.total      },
+    { key: "semua", label: "Semua", count: stats.total },
     { key: "konsultasi", label: "Konsultasi", count: stats.konsultasi },
-    { key: "resep",      label: "Resep",      count: stats.resep      },
+    { key: "resep", label: "Resep", count: stats.resep },
   ];
 
   return (
     <DoctorLayout title="Rekam Medis Pasien">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-5">
-
           {/* ── LEFT: Patient List ──────────────────────────────────── */}
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col h-fit lg:sticky lg:top-6">
             <div className="p-4 border-b border-slate-100">
@@ -263,19 +337,19 @@ export function DoctorMedicalRecords() {
                     onClick={() => handleSelectPatient(p)}
                     className={cn(
                       "w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-slate-50 last:border-0 transition-colors",
-                      selectedPatient?.id === p.id
-                        ? "bg-sky-50"
-                        : "hover:bg-slate-50"
+                      selectedPatient?.id === p.id ? "bg-sky-50" : "hover:bg-slate-50",
                     )}
                   >
                     <div className="h-9 w-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-slate-600">
                       {(p.full_name || p.email)[0]?.toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn(
-                        "text-[13px] font-semibold truncate",
-                        selectedPatient?.id === p.id ? "text-sky-700" : "text-slate-900"
-                      )}>
+                      <p
+                        className={cn(
+                          "text-[13px] font-semibold truncate",
+                          selectedPatient?.id === p.id ? "text-sky-700" : "text-slate-900",
+                        )}
+                      >
                         {p.full_name || "Tanpa Nama"}
                       </p>
                       <p className="text-[11px] text-slate-400 truncate">{p.email}</p>
@@ -321,17 +395,30 @@ export function DoctorMedicalRecords() {
                           </span>
                         )}
                         {selectedPatient.gender && (
-                          <span className="text-[12px] text-slate-400 capitalize">{selectedPatient.gender}</span>
+                          <span className="text-[12px] text-slate-400 capitalize">
+                            {selectedPatient.gender}
+                          </span>
                         )}
                       </div>
                     </div>
                     {/* Stats chips */}
                     <div className="hidden sm:flex items-center gap-2">
                       {[
-                        { label: "Konsultasi", value: stats.konsultasi, color: "bg-sky-50 text-sky-700 border-sky-100" },
-                        { label: "Resep",      value: stats.resep,      color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+                        {
+                          label: "Konsultasi",
+                          value: stats.konsultasi,
+                          color: "bg-sky-50 text-sky-700 border-sky-100",
+                        },
+                        {
+                          label: "Resep",
+                          value: stats.resep,
+                          color: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                        },
                       ].map((s) => (
-                        <div key={s.label} className={cn("border rounded-xl px-3 py-1.5 text-center", s.color)}>
+                        <div
+                          key={s.label}
+                          className={cn("border rounded-xl px-3 py-1.5 text-center", s.color)}
+                        >
                           <p className="text-[15px] font-bold leading-none">{s.value}</p>
                           <p className="text-[10px] mt-0.5">{s.label}</p>
                         </div>
@@ -350,14 +437,18 @@ export function DoctorMedicalRecords() {
                         "flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-all",
                         activeTab === tab.key
                           ? "bg-slate-900 text-white"
-                          : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300"
+                          : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300",
                       )}
                     >
                       {tab.label}
-                      <span className={cn(
-                        "text-[11px] px-1.5 py-0.5 rounded-md font-bold",
-                        activeTab === tab.key ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-[11px] px-1.5 py-0.5 rounded-md font-bold",
+                          activeTab === tab.key
+                            ? "bg-white/20 text-white"
+                            : "bg-slate-100 text-slate-500",
+                        )}
+                      >
                         {tab.count}
                       </span>
                     </button>
@@ -383,7 +474,9 @@ export function DoctorMedicalRecords() {
                 ) : filteredRecords.length === 0 ? (
                   <div className="bg-white border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center py-16 text-center">
                     <FileText className="h-8 w-8 text-slate-200 mb-2" />
-                    <p className="text-[13px] text-slate-400">Belum ada rekam medis untuk kategori ini.</p>
+                    <p className="text-[13px] text-slate-400">
+                      Belum ada rekam medis untuk kategori ini.
+                    </p>
                   </div>
                 ) : (
                   <AnimatePresence mode="popLayout">
@@ -403,25 +496,41 @@ export function DoctorMedicalRecords() {
                             className="w-full group bg-white border border-slate-200 rounded-2xl p-4 text-left hover:border-slate-300 hover:shadow-sm transition-all"
                           >
                             <div className="flex items-start gap-3">
-                              <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0", cfg.iconBg)}>
+                              <div
+                                className={cn(
+                                  "h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                                  cfg.iconBg,
+                                )}
+                              >
                                 <Icon className="h-5 w-5" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                                  <span className="text-[14px] font-semibold text-slate-900">{record.title}</span>
-                                  <span className={cn("text-[10px] font-bold uppercase tracking-wider border px-1.5 py-0.5 rounded-md", cfg.badge)}>
+                                  <span className="text-[14px] font-semibold text-slate-900">
+                                    {record.title}
+                                  </span>
+                                  <span
+                                    className={cn(
+                                      "text-[10px] font-bold uppercase tracking-wider border px-1.5 py-0.5 rounded-md",
+                                      cfg.badge,
+                                    )}
+                                  >
                                     {cfg.label}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-3 text-[12px] text-slate-400">
                                   <span className="flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
-                                    {format(safeDate(record.date), "dd MMM yyyy", { locale: idLocale })}
+                                    {format(safeDate(record.date), "dd MMM yyyy", {
+                                      locale: idLocale,
+                                    })}
                                   </span>
                                   <span className="capitalize">{record.status}</span>
                                 </div>
                                 {record.summary && (
-                                  <p className="text-[12px] text-slate-400 mt-1 line-clamp-1">{record.summary}</p>
+                                  <p className="text-[12px] text-slate-400 mt-1 line-clamp-1">
+                                    {record.summary}
+                                  </p>
                                 )}
                               </div>
                               <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all flex-shrink-0">

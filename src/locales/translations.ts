@@ -7,7 +7,6 @@ export const translations: Record<string, any> = {
       chatbot_ai: "Chatbot AI",
       pharmacy: "Apotekin",
       consultation: "Konsultasi Dokter",
-      heart_check: "Cek Jantung",
       symptom_triage: "AI Symptom Triage",
       mental_health: "Mental Health Care",
       community: "Komunitas Pasien",
@@ -28,9 +27,21 @@ export const translations: Record<string, any> = {
     },
     home: {
       hero_rotation: [
-        { topTitle: "Pendamping Setia", bottomTitle: "Fisik & Mental Anda", desc: "Platform ekosistem kesehatan holistik berskala penuh untuk mendampingi setiap keluhan fisik maupun mental Anda secara personal." },
-        { topTitle: "Akses Tanpa Antre:", bottomTitle: "Konsultasi Dokter Live", desc: "Bertanya langsung ke asisten AI cerdas kami atau mulai sesi darurat dengan Dokter spesialis secara live 24/7." },
-        { topTitle: "Navigasi Medis:", bottomTitle: "Cari RS Otomatis", desc: "Sistem geolokasi pintar kami akan merespons dan menemukan rumah sakit serta klinik terdekat dari lokasi Anda dalam hitungan detik." }
+        {
+          topTitle: "Pendamping Setia",
+          bottomTitle: "Fisik & Mental Anda",
+          desc: "Platform ekosistem kesehatan holistik berskala penuh untuk mendampingi setiap keluhan fisik maupun mental Anda secara personal.",
+        },
+        {
+          topTitle: "Akses Tanpa Antre:",
+          bottomTitle: "Konsultasi Dokter Live",
+          desc: "Bertanya langsung ke asisten AI cerdas kami atau mulai sesi darurat dengan Dokter spesialis secara live 24/7.",
+        },
+        {
+          topTitle: "Navigasi Medis:",
+          bottomTitle: "Cari RS Otomatis",
+          desc: "Sistem geolokasi pintar kami akan merespons dan menemukan rumah sakit serta klinik terdekat dari lokasi Anda dalam hitungan detik.",
+        },
       ],
       standard_badge: "Standard of Digital Care v4.0",
       brand_name: "Sembuhin",
@@ -39,33 +50,35 @@ export const translations: Record<string, any> = {
       stats: {
         ai_care: "AI Expert Care",
         pharmacy: "Express Pharmacy",
-        records: "Secure Digital Records"
+        records: "Secure Digital Records",
       },
       pilar_badge: "Ekosistem Kesehatan Smart",
       pilar_title: "Empat Pilar",
-      pilar_desc: "Semua kebutuhan kesehatan kamu terintegrasi dalam satu portal holografik bertenaga AI dengan desain futuristik.",
+      pilar_desc:
+        "Semua kebutuhan kesehatan kamu terintegrasi dalam satu portal holografik bertenaga AI dengan desain futuristik.",
       cards: {
         consultation: "Konsultasi Dokter",
-        consultation_desc: "Temukan & buat janji dengan dokter spesialis terpercaya secara langsung dari aplikasi.",
+        consultation_desc:
+          "Temukan & buat janji dengan dokter spesialis terpercaya secara langsung dari aplikasi.",
         consultation_btn: "Akses Konsultasi",
-        heart: "Cek Jantung",
-        heart_desc: "Pantau detak jantung real-time terhubung langsung dari HP Anda.",
-        heart_badge: "Heart Care",
         triage: "AI Symptom Triage",
         triage_desc: "Input gejala, AI klasifikasikan urgensi medis Anda.",
         triage_badge: "Symptom Check",
         mental: "Mental Health Care",
-        mental_desc: "Screening PHQ-9 & GAD-7 + modul CBT berbasis AI terhubung ke psikolog profesional.",
-        mental_btn: "Akses Mental Care"
+        mental_desc:
+          "Screening PHQ-9 & GAD-7 + modul CBT berbasis AI terhubung ke psikolog profesional.",
+        mental_btn: "Akses Mental Care",
       },
       doctor_badge: "BERGABUNGLAH BERSAMA KAMI",
       doctor_title: "Daftarkan Diri Menjadi",
       doctor_title_accent: "Dokter Mitra",
-      doctor_desc: "Bergabung dengan jaringan dokter profesional terpercaya dan bantu ribuan pasien mendapatkan perawatan medis terbaik.",
+      doctor_desc:
+        "Bergabung dengan jaringan dokter profesional terpercaya dan bantu ribuan pasien mendapatkan perawatan medis terbaik.",
       partner_badge: "Verified Partners",
       partner_title: "Dipercayai oleh Jaringan",
       partner_title_accent: "Medis Terkemuka",
-      partner_desc: "Kami bekerja sama dengan rumah sakit dan laboratorium terbaik untuk memastikan akurasi diagnosis Anda."
+      partner_desc:
+        "Kami bekerja sama dengan rumah sakit dan laboratorium terbaik untuk memastikan akurasi diagnosis Anda.",
     },
     doctor_section: {
       badge: "Pilihan Pakar",
@@ -74,7 +87,7 @@ export const translations: Record<string, any> = {
       stats: {
         doctors: "Doktor",
         rating: "Penilaian",
-        hospitals: "Hospital Rakan"
+        hospitals: "Hospital Rakan",
       },
       hospital: "Hospital",
       schedule: "Jadual",
@@ -82,13 +95,13 @@ export const translations: Record<string, any> = {
       reviews: "ulasan",
       view_profile: "Lihat Profil",
       book_appointment: "Buat Temu Janji",
-      view_all: "Lihat Semua Doktor"
+      view_all: "Lihat Semua Doktor",
     },
     testimonial: {
       badge: "Dipercaya Pengguna",
       title: "Cerita Nyata dari",
       title_accent: "Pengguna Kami",
-      desc: "Jutaan pengguna telah merasakan perbedaan nyata dengan ekosistem kesehatan Sembuhin."
+      desc: "Jutaan pengguna telah merasakan perbedaan nyata dengan ekosistem kesehatan Sembuhin.",
     },
     blog_section: {
       badge: "Neural Archive",
@@ -97,7 +110,7 @@ export const translations: Record<string, any> = {
       desc: "Artikel & riset terkini langsung dari jaringan medis global Sembuhin.",
       access_archive: "Akses Arsip",
       read_more: "Baca Selengkapnya",
-      access_all: "Akses Semua Arsip"
+      access_all: "Akses Semua Arsip",
     },
     konsul: {
       page_title: "Konsul Dokter AI — Sembuhin",
@@ -107,7 +120,8 @@ export const translations: Record<string, any> = {
       title: "Konsul",
       title_accent: "Dr. Sembuhin AI",
       subtitle: "Asisten kesehatan virtual berbasis AI 24/7 — chat atau voice, kamu pilih.",
-      warning: "⚠️ Ini adalah chat dengan AI, bukan dokter manusia. Untuk kondisi darurat, hubungi fasilitas kesehatan terdekat.",
+      warning:
+        "⚠️ Ini adalah chat dengan AI, bukan dokter manusia. Untuk kondisi darurat, hubungi fasilitas kesehatan terdekat.",
       remaining: "Sisa",
       of: "/",
       chats_today: "chat hari ini",
@@ -135,7 +149,8 @@ export const translations: Record<string, any> = {
       powered_by: "⚡ Powered by",
       elevenlabs: "ElevenLabs Conversational AI",
       streaming: "Real-time streaming",
-      welcome_message: "Halo! Saya **Dr. Sembuhin AI**, asisten kesehatan virtual berbasis kecerdasan buatan. Saya bukan dokter manusia, tapi saya siap membantu menjawab pertanyaan kesehatan Anda dengan informasi terpercaya! Apa yang ingin Anda tanyakan hari ini?",
+      welcome_message:
+        "Halo! Saya **Dr. Sembuhin AI**, asisten kesehatan virtual berbasis kecerdasan buatan. Saya bukan dokter manusia, tapi saya siap membantu menjawab pertanyaan kesehatan Anda dengan informasi terpercaya! Apa yang ingin Anda tanyakan hari ini?",
       limit_reached: "Maaf, Anda telah mencapai batas",
       error_message: "Maaf, terjadi kesalahan. Silakan coba lagi.",
       suggestions: ["Pusing & mual", "Demam tinggi", "Batuk pilek"],
@@ -147,7 +162,8 @@ export const translations: Record<string, any> = {
       press_to_speak: "Tekan tombol untuk bicara",
       speak_clearly: "Bicara jelas dan tekan 'Hentikan' saat selesai.",
       preparing_answer: "Dr. Sembuhin sedang menyiapkan jawaban...",
-      speak_natural: "Bicara natural dengan Dr. Sembuhin AI. Suara ditranskripsi & dijawab secara real-time.",
+      speak_natural:
+        "Bicara natural dengan Dr. Sembuhin AI. Suara ditranskripsi & dijawab secara real-time.",
       stop_send: "⏹ Hentikan & Kirim",
       processing_status: "Memproses...",
       start_speaking: "🎙 Mulai Bicara",
@@ -156,23 +172,24 @@ export const translations: Record<string, any> = {
         "1.1": {
           name: "Sembuhin 1.1",
           badge: "Free",
-          description: "Konsultasi dasar kesehatan umum"
+          description: "Konsultasi dasar kesehatan umum",
         },
         "1.2": {
           name: "Sembuhin 1.2",
           badge: "Pro",
-          description: "Analisis gejala mendalam & rekomendasi"
+          description: "Analisis gejala mendalam & rekomendasi",
         },
         "1.3": {
           name: "Sembuhin 1.3",
           badge: "Ultra",
-          description: "Diagnosis lengkap + rencana perawatan"
-        }
-      }
+          description: "Diagnosis lengkap + rencana perawatan",
+        },
+      },
     },
     dokter: {
       page_title: "Dokter Spesialis — Sembuhin",
-      page_desc: "Temukan dokter spesialis terbaik. Cari berdasarkan spesialisasi, rumah sakit, atau jadwal praktek.",
+      page_desc:
+        "Temukan dokter spesialis terbaik. Cari berdasarkan spesialisasi, rumah sakit, atau jadwal praktek.",
       badge: "Direktori Dokter",
       title: "Semua",
       title_accent: "Dokter",
@@ -181,7 +198,7 @@ export const translations: Record<string, any> = {
       stats: {
         active: "Dokter Aktif",
         rating: "Avg Rating",
-        available: "Tersedia"
+        available: "Tersedia",
       },
       search_placeholder: "Cari nama dokter, spesialisasi, atau rumah sakit…",
       sort_highest_rating: "Rating Tertinggi",
@@ -198,7 +215,8 @@ export const translations: Record<string, any> = {
       error_hint_3: "dan",
       error_hint_4: "di SQL Editor.",
       no_doctors_title: "Belum Ada Dokter Tersedia",
-      no_doctors_desc: "Saat ini belum ada dokter yang terdaftar di platform. Dokter akan muncul di sini setelah pendaftaran mereka disetujui oleh admin.",
+      no_doctors_desc:
+        "Saat ini belum ada dokter yang terdaftar di platform. Dokter akan muncul di sini setelah pendaftaran mereka disetujui oleh admin.",
       not_found_title: "Tidak Ditemukan",
       not_found_desc: "Cari dengan kata kunci lain atau ubah filter.",
       reset_search: "Reset Pencarian",
@@ -213,7 +231,7 @@ export const translations: Record<string, any> = {
       consultation_fee: "Biaya Konsultasi",
       close: "Tutup",
       book_meeting: "Buat Janji Temu",
-      years: "Tahun"
+      years: "Tahun",
     },
     profil: {
       page_title: "Profil Saya — Sembuhin",
@@ -239,7 +257,8 @@ export const translations: Record<string, any> = {
       allergies: "Alergi",
       disease_history: "Riwayat Penyakit",
       emergency_contact: "Kontak Darurat",
-      health_info_desc: "Informasi kesehatan membantu Dr. Sembuhin memberikan saran yang lebih akurat dan personal.",
+      health_info_desc:
+        "Informasi kesehatan membantu Dr. Sembuhin memberikan saran yang lebih akurat dan personal.",
       mental_health_history: "Riwayat Kesehatan Mental",
       refresh: "Refresh",
       new_screening: "Screening Baru",
@@ -274,10 +293,10 @@ export const translations: Record<string, any> = {
       login_required: "Anda harus login terlebih dahulu",
       max_size_error: "Ukuran foto maksimal 2MB",
       upload_success: "Foto profil berhasil diperbarui!",
-      upload_error: "Gagal upload foto. Pastikan bucket \"profiles\" sudah dibuat.",
+      upload_error: 'Gagal upload foto. Pastikan bucket "profiles" sudah dibuat.',
       history_updated: "Riwayat berhasil diperbarui",
       history_update_failed: "Gagal memperbarui riwayat",
-      load_failed: "Gagal memuat"
+      load_failed: "Gagal memuat",
     },
     membership: {
       page_title: "Membership Premium — Sembuhin",
@@ -285,7 +304,8 @@ export const translations: Record<string, any> = {
       hero_badge: "Manfaat Premium",
       hero_title: "Tingkatkan Perjalanan",
       hero_title_accent: "Kesehatanmu",
-      hero_desc: "Akses penuh ke semua fitur AI premium, konsultasi dokter, dan layanan eksklusif Sembuhin — tanpa batas.",
+      hero_desc:
+        "Akses penuh ke semua fitur AI premium, konsultasi dokter, dan layanan eksklusif Sembuhin — tanpa batas.",
       users_count: "50.000+ Pengguna Aktif",
       secure: "Terenkripsi & Aman",
       uptime: "99.9% Uptime",
@@ -310,11 +330,14 @@ export const translations: Record<string, any> = {
       priority_support: "Priority Support 24/7",
       priority_support_desc: "Respons cepat dari tim medis kami",
       faq_cancel_q: "Apakah saya bisa membatalkan kapan saja?",
-      faq_cancel_a: "Ya, Anda dapat membatalkan langganan kapan saja tanpa biaya tambahan. Akses premium tetap aktif hingga akhir periode tagihan.",
+      faq_cancel_a:
+        "Ya, Anda dapat membatalkan langganan kapan saja tanpa biaya tambahan. Akses premium tetap aktif hingga akhir periode tagihan.",
       faq_payment_q: "Metode pembayaran apa yang tersedia?",
-      faq_payment_a: "Kami menerima transfer bank, kartu kredit/debit, GoPay, OVO, Dana, dan ShopeePay.",
+      faq_payment_a:
+        "Kami menerima transfer bank, kartu kredit/debit, GoPay, OVO, Dana, dan ShopeePay.",
       faq_refund_q: "Apakah ada jaminan uang kembali?",
-      faq_refund_a: "Ya! Kami memberikan garansi 7 hari uang kembali jika Anda tidak puas dengan layanan premium kami.",
+      faq_refund_a:
+        "Ya! Kami memberikan garansi 7 hari uang kembali jika Anda tidak puas dengan layanan premium kami.",
       exclusive: "Eksklusif",
       free_desc: "Akses dasar untuk memulai perjalanan sehatmu. Selamanya gratis.",
       premium_desc_monthly: "Buka semua potensi AI medis tanpa batas harian.",
@@ -328,7 +351,8 @@ export const translations: Record<string, any> = {
       common_questions: "Pertanyaan Umum",
       need_to_know: "Semua yang perlu Anda tahu tentang Premium",
       start_premium_journey: "Mulai Perjalanan Premium Anda",
-      join_users: "Bergabunglah dengan 50.000+ pengguna yang sudah merasakan manfaat Sembuhin Premium",
+      join_users:
+        "Bergabunglah dengan 50.000+ pengguna yang sudah merasakan manfaat Sembuhin Premium",
       upgrade_premium: "Upgrade ke Premium",
       start_now_free: "Mulai Sekarang — Gratis",
       no_credit_card: "Tidak ada kartu kredit yang diperlukan",
@@ -339,20 +363,26 @@ export const translations: Record<string, any> = {
       payment_cancelled: "Pembayaran dibatalkan.",
       midtrans_not_ready: "Midtrans Snap belum siap. Silakan refresh halaman.",
       connection_error: "Terjadi kesalahan koneksi",
-      simulator_offer: "Koneksi gagal. Ingin mencoba 'Simulator Pembayaran' (Langsung Sukses) untuk testing?",
+      simulator_offer:
+        "Koneksi gagal. Ingin mencoba 'Simulator Pembayaran' (Langsung Sukses) untuk testing?",
       simulator_success: "Simulator: Pembayaran Berhasil! (Hanya untuk Testing)",
-      transaction_failed: "Gagal membuat transaksi"
+      transaction_failed: "Gagal membuat transaksi",
     },
     header: {
       consultation_desc: "Temukan & buat janji dengan dokter spesialis terpercaya.",
       heart_check_desc: "Pantau detak jantung real-time terhubung langsung dari HP Anda.",
-      symptom_triage_desc: "Input gejala, AI klasifikasikan urgensi: darurat, perlu dokter, atau self-care.",
+      symptom_triage_desc:
+        "Input gejala, AI klasifikasikan urgensi: darurat, perlu dokter, atau self-care.",
       mental_health_desc: "Screening PHQ-9 & GAD-7 + modul CBT berbasis AI terhubung ke psikolog.",
       community_desc: "Forum per kondisi medis, dimoderasi dokter, klaim medis divalidasi AI.",
-      medical_records_desc: "Riwayat konsultasi, lab & resep tersimpan di akunmu, ekspor PDF kapan saja.",
-      dermatology_desc: "Foto area kulit bermasalah, AI pre-screening awal sebelum ke dermatologis.",
-      mood_check_desc: "Cek mood via kamera. AI analisis ekspresi wajah untuk mengetahui kondisi emosional Anda.",
-      prescription_desc: "Kelola resep dari dokter, cek obat, dan pesan di apotek atau marketplace kesehatan.",
+      medical_records_desc:
+        "Riwayat konsultasi, lab & resep tersimpan di akunmu, ekspor PDF kapan saja.",
+      dermatology_desc:
+        "Foto area kulit bermasalah, AI pre-screening awal sebelum ke dermatologis.",
+      mood_check_desc:
+        "Cek mood via kamera. AI analisis ekspresi wajah untuk mengetahui kondisi emosional Anda.",
+      prescription_desc:
+        "Kelola resep dari dokter, cek obat, dan pesan di apotek atau marketplace kesehatan.",
       articles_title: "Artikel Kesehatan",
       articles_desc: "Kumpulan riset dan artikel medis terpercaya untuk Anda.",
       videos_title: "Video Edukasi",
@@ -369,7 +399,8 @@ export const translations: Record<string, any> = {
       page_desc: "Kumpulan riset dan artikel medis terpercaya untuk kesehatan Anda.",
       hero_badge: "Edukasi Kesehatan",
       hero_title: "Artikel Kesehatan",
-      hero_desc: "Kumpulan riset dan artikel medis terpercaya yang ditulis oleh dokter dan ahli kesehatan untuk Anda.",
+      hero_desc:
+        "Kumpulan riset dan artikel medis terpercaya yang ditulis oleh dokter dan ahli kesehatan untuk Anda.",
       search_placeholder: "Cari artikel tentang kesehatan...",
       all_categories: "Semua Kategori",
       read_more: "Baca Selengkapnya",
@@ -382,7 +413,8 @@ export const translations: Record<string, any> = {
       page_desc: "Konten visual interaktif mengenai pencegahan penyakit dan kesehatan.",
       hero_badge: "Video Edukasi",
       hero_title: "Belajar Lewat Video",
-      hero_desc: "Konten visual interaktif dari dokter dan ahli kesehatan. Belajar tentang pencegahan penyakit dan gaya hidup sehat.",
+      hero_desc:
+        "Konten visual interaktif dari dokter dan ahli kesehatan. Belajar tentang pencegahan penyakit dan gaya hidup sehat.",
       search_placeholder: "Cari video edukasi...",
       all_categories: "Semua Kategori",
       watch_now: "Tonton Sekarang",
@@ -392,7 +424,8 @@ export const translations: Record<string, any> = {
       hero_badge: "Direktori Apotekin",
       hero_title: "Apotek Digital",
       hero_subtitle: "Sembuhin",
-      hero_desc: "Solusi kesehatan terlengkap. Obat resmi BPOM, vitamin, dan alat kesehatan diantar dalam 60 menit.",
+      hero_desc:
+        "Solusi kesehatan terlengkap. Obat resmi BPOM, vitamin, dan alat kesehatan diantar dalam 60 menit.",
       active_products: "Produk Aktif",
       rating: "Rating",
       standby: "Siaga",
@@ -411,8 +444,8 @@ export const translations: Record<string, any> = {
       privacy: "Kebijakan Privasi",
       terms: "Syarat & Ketentuan",
       copyright: "Sembuhin International. Seluruh hak cipta dilindungi.",
-      disclaimer: "Disclaimer: Bukan pengganti saran medis profesional dari dokter berlisensi."
-    }
+      disclaimer: "Disclaimer: Bukan pengganti saran medis profesional dari dokter berlisensi.",
+    },
   },
   en: {
     nav: {
@@ -422,7 +455,6 @@ export const translations: Record<string, any> = {
       chatbot_ai: "AI Chatbot",
       pharmacy: "Pharmacy",
       consultation: "Doctor Consultation",
-      heart_check: "Heart Check",
       symptom_triage: "AI Symptom Triage",
       mental_health: "Mental Health Care",
       community: "Patient Community",
@@ -437,7 +469,8 @@ export const translations: Record<string, any> = {
       hero_badge: "Premium Benefits",
       hero_title: "Elevate Your",
       hero_title_accent: "Health Journey",
-      hero_desc: "Full access to all premium AI features, doctor consultations, and exclusive Sembuhin services — unlimited.",
+      hero_desc:
+        "Full access to all premium AI features, doctor consultations, and exclusive Sembuhin services — unlimited.",
       users_count: "50,000+ Active Users",
       secure: "Encrypted & Secure",
       uptime: "99.9% Uptime",
@@ -463,9 +496,21 @@ export const translations: Record<string, any> = {
     },
     home: {
       hero_rotation: [
-        { topTitle: "Loyal Companion", bottomTitle: "For Your Physical & Mental", desc: "A full-scale holistic health ecosystem platform to personally accompany your every physical and mental complaint." },
-        { topTitle: "No Waiting Queue:", bottomTitle: "Live Doctor Consultation", desc: "Ask our smart AI assistant directly or start an emergency session with a specialist doctor live 24/7." },
-        { topTitle: "Medical Navigation:", bottomTitle: "Auto Hospital Finder", desc: "Our smart geolocation system will respond and find the nearest hospitals and clinics from your location in seconds." }
+        {
+          topTitle: "Loyal Companion",
+          bottomTitle: "For Your Physical & Mental",
+          desc: "A full-scale holistic health ecosystem platform to personally accompany your every physical and mental complaint.",
+        },
+        {
+          topTitle: "No Waiting Queue:",
+          bottomTitle: "Live Doctor Consultation",
+          desc: "Ask our smart AI assistant directly or start an emergency session with a specialist doctor live 24/7.",
+        },
+        {
+          topTitle: "Medical Navigation:",
+          bottomTitle: "Auto Hospital Finder",
+          desc: "Our smart geolocation system will respond and find the nearest hospitals and clinics from your location in seconds.",
+        },
       ],
       standard_badge: "Standard of Digital Care v4.0",
       brand_name: "Sembuhin",
@@ -474,14 +519,16 @@ export const translations: Record<string, any> = {
       stats: {
         ai_care: "AI Expert Care",
         pharmacy: "Express Pharmacy",
-        records: "Secure Digital Records"
+        records: "Secure Digital Records",
       },
       pilar_badge: "Smart Health Ecosystem",
       pilar_title: "Four Pillars of",
-      pilar_desc: "All your health needs integrated in one AI-powered holographic portal with futuristic design.",
+      pilar_desc:
+        "All your health needs integrated in one AI-powered holographic portal with futuristic design.",
       cards: {
         consultation: "Doctor Consultation",
-        consultation_desc: "Find & book appointments with trusted specialists directly from the application.",
+        consultation_desc:
+          "Find & book appointments with trusted specialists directly from the application.",
         consultation_btn: "Access Consultation",
         heart: "Heart Check",
         heart_desc: "Monitor real-time heart rate connected directly from your phone.",
@@ -490,17 +537,20 @@ export const translations: Record<string, any> = {
         triage_desc: "Input symptoms, AI classifies your medical urgency.",
         triage_badge: "Symptom Check",
         mental: "Mental Health Care",
-        mental_desc: "PHQ-9 & GAD-7 screening + AI-based CBT modules connected to professional psychologists.",
-        mental_btn: "Access Mental Care"
+        mental_desc:
+          "PHQ-9 & GAD-7 screening + AI-based CBT modules connected to professional psychologists.",
+        mental_btn: "Access Mental Care",
       },
       doctor_badge: "JOIN US",
       doctor_title: "Register as a",
       doctor_title_accent: "Partner Doctor",
-      doctor_desc: "Join a network of trusted professional doctors and help thousands of patients get the best medical care.",
+      doctor_desc:
+        "Join a network of trusted professional doctors and help thousands of patients get the best medical care.",
       partner_badge: "Verified Partners",
       partner_title: "Trusted by Leading",
       partner_title_accent: "Medical Networks",
-      partner_desc: "We work with the best hospitals and laboratories to ensure the accuracy of your diagnosis."
+      partner_desc:
+        "We work with the best hospitals and laboratories to ensure the accuracy of your diagnosis.",
     },
     doctor_section: {
       badge: "Specialist Choice",
@@ -509,7 +559,7 @@ export const translations: Record<string, any> = {
       stats: {
         doctors: "Doctors",
         rating: "Rating",
-        hospitals: "Partner Hospitals"
+        hospitals: "Partner Hospitals",
       },
       hospital: "Hospital",
       schedule: "Schedule",
@@ -517,13 +567,13 @@ export const translations: Record<string, any> = {
       reviews: "reviews",
       view_profile: "View Profile",
       book_appointment: "Book Appointment",
-      view_all: "View All Doctors"
+      view_all: "View All Doctors",
     },
     testimonial: {
       badge: "Trusted by Users",
       title: "Real Stories from",
       title_accent: "Our Users",
-      desc: "Millions of users have experienced real differences with the Sembuhin health ecosystem."
+      desc: "Millions of users have experienced real differences with the Sembuhin health ecosystem.",
     },
     blog_section: {
       badge: "Neural Archive",
@@ -532,7 +582,7 @@ export const translations: Record<string, any> = {
       desc: "Latest articles & research directly from Sembuhin's global medical network.",
       access_archive: "Access Archive",
       read_more: "Read More",
-      access_all: "Access All Archives"
+      access_all: "Access All Archives",
     },
     konsul: {
       page_title: "AI Doctor Consult — Sembuhin",
@@ -542,7 +592,8 @@ export const translations: Record<string, any> = {
       title: "Consult",
       title_accent: "Dr. Sembuhin AI",
       subtitle: "AI-powered virtual health assistant 24/7 — chat or voice, your choice.",
-      warning: "⚠️ This is a chat with AI, not a human doctor. For emergencies, contact the nearest healthcare facility.",
+      warning:
+        "⚠️ This is a chat with AI, not a human doctor. For emergencies, contact the nearest healthcare facility.",
       remaining: "Remaining",
       of: "/",
       chats_today: "chats today",
@@ -570,7 +621,8 @@ export const translations: Record<string, any> = {
       powered_by: "⚡ Powered by",
       elevenlabs: "ElevenLabs Conversational AI",
       streaming: "Real-time streaming",
-      welcome_message: "Hello! I am **Dr. Sembuhin AI**, an AI-based virtual health assistant. I am not a human doctor, but I am ready to help answer your health questions with reliable information! What would you like to ask today?",
+      welcome_message:
+        "Hello! I am **Dr. Sembuhin AI**, an AI-based virtual health assistant. I am not a human doctor, but I am ready to help answer your health questions with reliable information! What would you like to ask today?",
       limit_reached: "Sorry, you have reached the limit",
       error_message: "Sorry, an error occurred. Please try again.",
       suggestions: ["Headache & nausea", "High fever", "Cold & cough"],
@@ -582,7 +634,8 @@ export const translations: Record<string, any> = {
       press_to_speak: "Press button to speak",
       speak_clearly: "Speak clearly and press 'Stop' when done.",
       preparing_answer: "Dr. Sembuhin is preparing answer...",
-      speak_natural: "Speak naturally with Dr. Sembuhin AI. Voice is transcribed & answered in real-time.",
+      speak_natural:
+        "Speak naturally with Dr. Sembuhin AI. Voice is transcribed & answered in real-time.",
       stop_send: "⏹ Stop & Send",
       processing_status: "Processing...",
       start_speaking: "🎙 Start Speaking",
@@ -591,23 +644,24 @@ export const translations: Record<string, any> = {
         "1.1": {
           name: "Sembuhin 1.1",
           badge: "Free",
-          description: "Basic general health consultation"
+          description: "Basic general health consultation",
         },
         "1.2": {
           name: "Sembuhin 1.2",
           badge: "Pro",
-          description: "Deep symptom analysis & recommendations"
+          description: "Deep symptom analysis & recommendations",
         },
         "1.3": {
           name: "Sembuhin 1.3",
           badge: "Ultra",
-          description: "Complete diagnosis + treatment plan"
-        }
-      }
+          description: "Complete diagnosis + treatment plan",
+        },
+      },
     },
     dokter: {
       page_title: "Specialist Doctors — Sembuhin",
-      page_desc: "Find the best specialist doctors. Search by specialization, hospital, or practice schedule.",
+      page_desc:
+        "Find the best specialist doctors. Search by specialization, hospital, or practice schedule.",
       badge: "Doctor Directory",
       title: "All",
       title_accent: "Doctors",
@@ -616,7 +670,7 @@ export const translations: Record<string, any> = {
       stats: {
         active: "Active Doctors",
         rating: "Avg Rating",
-        available: "Available"
+        available: "Available",
       },
       search_placeholder: "Search doctor name, specialization, or hospital…",
       sort_highest_rating: "Highest Rating",
@@ -633,7 +687,8 @@ export const translations: Record<string, any> = {
       error_hint_3: "and",
       error_hint_4: "in SQL Editor.",
       no_doctors_title: "No Doctors Available",
-      no_doctors_desc: "Currently no doctors are registered on the platform. Doctors will appear here after their registration is approved by admin.",
+      no_doctors_desc:
+        "Currently no doctors are registered on the platform. Doctors will appear here after their registration is approved by admin.",
       not_found_title: "Not Found",
       not_found_desc: "Search with other keywords or change filter.",
       reset_search: "Reset Search",
@@ -648,7 +703,7 @@ export const translations: Record<string, any> = {
       consultation_fee: "Consultation Fee",
       close: "Close",
       book_meeting: "Book Meeting",
-      years: "Years"
+      years: "Years",
     },
     profil: {
       page_title: "My Profile — Sembuhin",
@@ -674,7 +729,8 @@ export const translations: Record<string, any> = {
       allergies: "Allergies",
       disease_history: "Disease History",
       emergency_contact: "Emergency Contact",
-      health_info_desc: "Health information helps Dr. Sembuhin provide more accurate and personalized advice.",
+      health_info_desc:
+        "Health information helps Dr. Sembuhin provide more accurate and personalized advice.",
       mental_health_history: "Mental Health History",
       refresh: "Refresh",
       new_screening: "New Screening",
@@ -709,21 +765,29 @@ export const translations: Record<string, any> = {
       login_required: "You must login first",
       max_size_error: "Maximum photo size is 2MB",
       upload_success: "Profile photo updated successfully!",
-      upload_error: "Failed to upload photo. Make sure bucket \"profiles\" is created.",
+      upload_error: 'Failed to upload photo. Make sure bucket "profiles" is created.',
       history_updated: "History updated successfully",
       history_update_failed: "Failed to update history",
-      load_failed: "Failed to load"
+      load_failed: "Failed to load",
     },
     header: {
-      consultation_desc: "Find & book appointments with trusted specialists directly from the application.",
+      consultation_desc:
+        "Find & book appointments with trusted specialists directly from the application.",
       heart_check_desc: "Monitor real-time heart rate connected directly from your phone.",
-      symptom_triage_desc: "Input symptoms, AI classifies urgency: emergency, see a doctor, or self-care.",
-      mental_health_desc: "PHQ-9 & GAD-7 screening + AI-based CBT modules connected to psychologists.",
-      community_desc: "Forums per medical condition, moderated by doctors, AI-validated medical claims.",
-      medical_records_desc: "Consultation history, labs & prescriptions saved in your account, export PDF anytime.",
-      dermatology_desc: "Photo problematic skin areas, AI initial pre-screening before seeing a dermatologist.",
-      mood_check_desc: "Check mood via camera. AI analyzes facial expressions to know your emotional state.",
-      prescription_desc: "Manage prescriptions from doctors, check medicines, and order from pharmacies or health marketplaces.",
+      symptom_triage_desc:
+        "Input symptoms, AI classifies urgency: emergency, see a doctor, or self-care.",
+      mental_health_desc:
+        "PHQ-9 & GAD-7 screening + AI-based CBT modules connected to psychologists.",
+      community_desc:
+        "Forums per medical condition, moderated by doctors, AI-validated medical claims.",
+      medical_records_desc:
+        "Consultation history, labs & prescriptions saved in your account, export PDF anytime.",
+      dermatology_desc:
+        "Photo problematic skin areas, AI initial pre-screening before seeing a dermatologist.",
+      mood_check_desc:
+        "Check mood via camera. AI analyzes facial expressions to know your emotional state.",
+      prescription_desc:
+        "Manage prescriptions from doctors, check medicines, and order from pharmacies or health marketplaces.",
       articles_title: "Health Articles",
       articles_desc: "Collection of trusted medical research and articles for you.",
       videos_title: "Educational Videos",
@@ -739,7 +803,8 @@ export const translations: Record<string, any> = {
       page_desc: "Collection of trusted medical research and articles for your health.",
       hero_badge: "Health Education",
       hero_title: "Health Articles",
-      hero_desc: "Collection of trusted medical research and articles written by doctors and health experts for you.",
+      hero_desc:
+        "Collection of trusted medical research and articles written by doctors and health experts for you.",
       search_placeholder: "Search health articles...",
       all_categories: "All Categories",
       read_more: "Read More",
@@ -752,7 +817,8 @@ export const translations: Record<string, any> = {
       page_desc: "Interactive visual content about disease prevention and health.",
       hero_badge: "Educational Videos",
       hero_title: "Learn Through Videos",
-      hero_desc: "Interactive visual content from doctors and health experts. Learn about disease prevention and healthy lifestyle.",
+      hero_desc:
+        "Interactive visual content from doctors and health experts. Learn about disease prevention and healthy lifestyle.",
       search_placeholder: "Search educational videos...",
       all_categories: "All Categories",
       watch_now: "Watch Now",
@@ -762,7 +828,8 @@ export const translations: Record<string, any> = {
       hero_badge: "Apotekin Directory",
       hero_title: "Digital",
       hero_subtitle: "Sembuhin",
-      hero_desc: "Complete health solution. BPOM-approved medicines, vitamins, and health equipment delivered in 60 minutes.",
+      hero_desc:
+        "Complete health solution. BPOM-approved medicines, vitamins, and health equipment delivered in 60 minutes.",
       active_products: "Active Products",
       rating: "Rating",
       standby: "Standby",
@@ -781,8 +848,9 @@ export const translations: Record<string, any> = {
       privacy: "Privacy Policy",
       terms: "Terms & Conditions",
       copyright: "Sembuhin International. All rights reserved.",
-      disclaimer: "Disclaimer: Not a substitute for professional medical advice from a licensed doctor."
-    }
+      disclaimer:
+        "Disclaimer: Not a substitute for professional medical advice from a licensed doctor.",
+    },
   },
   ms: {
     nav: {
@@ -792,7 +860,6 @@ export const translations: Record<string, any> = {
       chatbot_ai: "Chatbot AI",
       pharmacy: "Farmasi",
       consultation: "Konsultasi Doktor",
-      heart_check: "Semakan Jantung",
       symptom_triage: "AI Symptom Triage",
       mental_health: "Penjagaan Kesihatan Mental",
       community: "Komuniti Pesakit",
@@ -806,7 +873,8 @@ export const translations: Record<string, any> = {
       hero_badge: "Manfaat Premium",
       hero_title: "Tingkatkan Perjalanan",
       hero_title_accent: "Kesihatan Anda",
-      hero_desc: "Akses penuh ke semua fitur AI premium, konsultasi doktor, dan perkhidmatan eksklusif Sembuhin — tanpa had.",
+      hero_desc:
+        "Akses penuh ke semua fitur AI premium, konsultasi doktor, dan perkhidmatan eksklusif Sembuhin — tanpa had.",
       users_count: "50,000+ Pengguna Aktif",
       secure: "Terenskripsi & Selamat",
       uptime: "99.9% Uptime",
@@ -832,13 +900,20 @@ export const translations: Record<string, any> = {
     },
     header: {
       consultation_desc: "Cari & buat temu dengan pakar yang dipercaya terus dari aplikasi.",
-      heart_check_desc: "Pantau kadar denyutan jantung masa nyata disambungkan terus dari telefon anda.",
-      symptom_triage_desc: "Masukkan gejala, AI mengklasifikasikan kecemasan: kecemasan, jumpa doktor, atau penjagaan diri.",
-      mental_health_desc: "Saringan PHQ-9 & GAD-7 + modul CBT berasaskan AI disambungkan ke ahli psikologi.",
-      community_desc: "Forum mengikut keadaan perubatan, dimoderasi oleh doktor, tuntutan perubatan disahkan AI.",
-      medical_records_desc: "Sejarah konsultasi, makmal & resep disimpan dalam akaun anda, eksport PDF bila-bila masa.",
-      dermatology_desc: "Gambar kawasan kulit bermasalah, pra-saringan awal AI sebelum berjumpa dermatologi.",
-      mood_check_desc: "Semak mood melalui kamera. AI menganalisis ekspresi wajah untuk mengetahui keadaan emosi anda.",
+      heart_check_desc:
+        "Pantau kadar denyutan jantung masa nyata disambungkan terus dari telefon anda.",
+      symptom_triage_desc:
+        "Masukkan gejala, AI mengklasifikasikan kecemasan: kecemasan, jumpa doktor, atau penjagaan diri.",
+      mental_health_desc:
+        "Saringan PHQ-9 & GAD-7 + modul CBT berasaskan AI disambungkan ke ahli psikologi.",
+      community_desc:
+        "Forum mengikut keadaan perubatan, dimoderasi oleh doktor, tuntutan perubatan disahkan AI.",
+      medical_records_desc:
+        "Sejarah konsultasi, makmal & resep disimpan dalam akaun anda, eksport PDF bila-bila masa.",
+      dermatology_desc:
+        "Gambar kawasan kulit bermasalah, pra-saringan awal AI sebelum berjumpa dermatologi.",
+      mood_check_desc:
+        "Semak mood melalui kamera. AI menganalisis ekspresi wajah untuk mengetahui keadaan emosi anda.",
       articles_title: "Artikel Kesihatan",
       articles_desc: "Koleksi penyelidikan dan artikel perubatan yang dipercayai untuk anda.",
       videos_title: "Video Pendidikan",
@@ -855,7 +930,8 @@ export const translations: Record<string, any> = {
       page_desc: "Koleksi penyelidikan perubatan dan artikel yang dipercayai untuk kesihatan anda.",
       hero_badge: "Pendidikan Kesihatan",
       hero_title: "Artikel Kesihatan",
-      hero_desc: "Koleksi penyelidikan perubatan dan artikel yang dipercayai yang ditulis oleh doktor dan pakar kesihatan untuk anda.",
+      hero_desc:
+        "Koleksi penyelidikan perubatan dan artikel yang dipercayai yang ditulis oleh doktor dan pakar kesihatan untuk anda.",
       search_placeholder: "Cari artikel kesihatan...",
       all_categories: "Semua Kategori",
       read_more: "Baca Lagi",
@@ -868,7 +944,8 @@ export const translations: Record<string, any> = {
       page_desc: "Kandungan visual interaktif mengenai pencegahan penyakit dan kesihatan.",
       hero_badge: "Video Pendidikan",
       hero_title: "Belajar Melalui Video",
-      hero_desc: "Kandungan visual interaktif dari doktor dan pakar kesihatan. Belajar mengenai pencegahan penyakit dan gaya hidup sihat.",
+      hero_desc:
+        "Kandungan visual interaktif dari doktor dan pakar kesihatan. Belajar mengenai pencegahan penyakit dan gaya hidup sihat.",
       search_placeholder: "Cari video pendidikan...",
       all_categories: "Semua Kategori",
       watch_now: "Tonton Sekarang",
@@ -881,7 +958,7 @@ export const translations: Record<string, any> = {
       stats: {
         doctors: "Doktor",
         rating: "Penilaian",
-        hospitals: "Hospital Rakan"
+        hospitals: "Hospital Rakan",
       },
       hospital: "Hospital",
       schedule: "Jadual",
@@ -889,11 +966,12 @@ export const translations: Record<string, any> = {
       reviews: "ulasan",
       view_profile: "Lihat Profil",
       book_appointment: "Buat Temu Janji",
-      view_all: "Lihat Semua Doktor"
+      view_all: "Lihat Semua Doktor",
     },
     dokter: {
       page_title: "Doktor Pakar — Sembuhin",
-      page_desc: "Cari doktor pakar terbaik. Cari mengikut pengkhususan, hospital, atau jadual praktik.",
+      page_desc:
+        "Cari doktor pakar terbaik. Cari mengikut pengkhususan, hospital, atau jadual praktik.",
       badge: "Direktori Doktor",
       title: "Semua",
       title_accent: "Doktor",
@@ -902,7 +980,7 @@ export const translations: Record<string, any> = {
       stats: {
         active: "Doktor Aktif",
         rating: "Penilaian Purata",
-        available: "Tersedia"
+        available: "Tersedia",
       },
       search_placeholder: "Cari nama doktor, pengkhususan, atau hospital…",
       sort_highest_rating: "Penilaian Tertinggi",
@@ -919,7 +997,8 @@ export const translations: Record<string, any> = {
       error_hint_3: "dan",
       error_hint_4: "dalam Editor SQL.",
       no_doctors_title: "Tiada Doktor Tersedia",
-      no_doctors_desc: "Pada masa ini tiada doktor yang didaftarkan di platform. Doktor akan muncul di sini selepas pendaftaran mereka diluluskan oleh admin.",
+      no_doctors_desc:
+        "Pada masa ini tiada doktor yang didaftarkan di platform. Doktor akan muncul di sini selepas pendaftaran mereka diluluskan oleh admin.",
       not_found_title: "Tidak Ditemui",
       not_found_desc: "Cari dengan kata kunci lain atau ubah penapis.",
       reset_search: "Reset Carian",
@@ -934,7 +1013,7 @@ export const translations: Record<string, any> = {
       consultation_fee: "Yuran Konsultasi",
       close: "Tutup",
       book_meeting: "Buat Temu",
-      years: "Tahun"
+      years: "Tahun",
     },
     profil: {
       page_title: "Profil Saya — Sembuhin",
@@ -960,7 +1039,8 @@ export const translations: Record<string, any> = {
       allergies: "Alergi",
       disease_history: "Sejarah Penyakit",
       emergency_contact: "Kontak Kecemasan",
-      health_info_desc: "Maklumat kesihatan membantu Dr. Sembuhin memberikan nasihat yang lebih tepat dan peribadi.",
+      health_info_desc:
+        "Maklumat kesihatan membantu Dr. Sembuhin memberikan nasihat yang lebih tepat dan peribadi.",
       mental_health_history: "Sejarah Kesihatan Mental",
       refresh: "Refresh",
       new_screening: "Saringan Baru",
@@ -995,16 +1075,16 @@ export const translations: Record<string, any> = {
       login_required: "Anda mesti log masuk dahulu",
       max_size_error: "Saiz foto maksimum 2MB",
       upload_success: "Foto profil berjaya dikemas kini!",
-      upload_error: "Gagal memuat naik foto. Pastikan bucket \"profiles\" telah dibuat.",
+      upload_error: 'Gagal memuat naik foto. Pastikan bucket "profiles" telah dibuat.',
       history_updated: "Sejarah berjaya dikemas kini",
       history_update_failed: "Gagal mengemas kini sejarah",
-      load_failed: "Gagal memuat"
+      load_failed: "Gagal memuat",
     },
     testimonial: {
       badge: "Dipercayai Pengguna",
       title: "Cerita Nyata dari",
       title_accent: "Pengguna Kami",
-      desc: "Jutaan pengguna telah merasakan perbezaan nyata dengan ekosistem kesihatan Sembuhin."
+      desc: "Jutaan pengguna telah merasakan perbezaan nyata dengan ekosistem kesihatan Sembuhin.",
     },
     blog_section: {
       badge: "Neural Archive",
@@ -1013,17 +1093,19 @@ export const translations: Record<string, any> = {
       desc: "Artikel & penyelidikan terkini langsung dari rangkaian perubatan global Sembuhin.",
       access_archive: "Akses Arkib",
       read_more: "Baca Lagi",
-      access_all: "Akses Semua Arkib"
+      access_all: "Akses Semua Arkib",
     },
     konsul: {
       page_title: "Konsul Doktor AI — Sembuhin",
-      page_desc: "Konsultasi doktor AI 24/7 dengan suara & sembang. Visualisasi gelombang suara 3D.",
+      page_desc:
+        "Konsultasi doktor AI 24/7 dengan suara & sembang. Visualisasi gelombang suara 3D.",
       og_title: "Konsul Doktor AI — Sembuhin",
       og_desc: "Sembang & suara konsultasi dengan doktor virtual pintar.",
       title: "Konsul",
       title_accent: "Dr. Sembuhin AI",
       subtitle: "Asisten kesihatan virtual berasaskan AI 24/7 — sembang atau suara, pilihan anda.",
-      warning: "⚠️ Ini adalah sembang dengan AI, bukan doktor manusia. Untuk kecemasan, hubungi fasiliti kesihatan terdekat.",
+      warning:
+        "⚠️ Ini adalah sembang dengan AI, bukan doktor manusia. Untuk kecemasan, hubungi fasiliti kesihatan terdekat.",
       remaining: "Baki",
       of: "/",
       chats_today: "sembang hari ini",
@@ -1051,7 +1133,8 @@ export const translations: Record<string, any> = {
       powered_by: "⚡ Powered by",
       elevenlabs: "ElevenLabs Conversational AI",
       streaming: "Penstriman masa nyata",
-      welcome_message: "Halo! Saya **Dr. Sembuhin AI**, asisten kesihatan virtual berasaskan kecerdasan buatan. Saya bukan doktor manusia, tapi saya sedia membantu menjawab soalan kesihatan anda dengan maklumat dipercayai! Apa yang anda ingin tanyakan hari ini?",
+      welcome_message:
+        "Halo! Saya **Dr. Sembuhin AI**, asisten kesihatan virtual berasaskan kecerdasan buatan. Saya bukan doktor manusia, tapi saya sedia membantu menjawab soalan kesihatan anda dengan maklumat dipercayai! Apa yang anda ingin tanyakan hari ini?",
       limit_reached: "Maaf, anda telah mencapai had",
       error_message: "Maaf, berlaku ralat. Sila cuba lagi.",
       suggestions: ["Sakit kepala & mual", "Demam tinggi", "Selsema & batuk"],
@@ -1063,7 +1146,8 @@ export const translations: Record<string, any> = {
       press_to_speak: "Tekan butang untuk bercakap",
       speak_clearly: "Bercakap dengan jelas dan tekan 'Hentikan' bila selesai.",
       preparing_answer: "Dr. Sembuhin sedang menyediakan jawapan...",
-      speak_natural: "Bercakap secara semula jadi dengan Dr. Sembuhin AI. Suara ditranskripsi & dijawab secara masa nyata.",
+      speak_natural:
+        "Bercakap secara semula jadi dengan Dr. Sembuhin AI. Suara ditranskripsi & dijawab secara masa nyata.",
       stop_send: "⏹ Hentikan & Hantar",
       processing_status: "Memproses...",
       start_speaking: "🎙 Mulakan Bercakap",
@@ -1072,25 +1156,26 @@ export const translations: Record<string, any> = {
         "1.1": {
           name: "Sembuhin 1.1",
           badge: "Free",
-          description: "Konsultasi kesihatan umum asas"
+          description: "Konsultasi kesihatan umum asas",
         },
         "1.2": {
           name: "Sembuhin 1.2",
           badge: "Pro",
-          description: "Analisis gejala mendalam & cadangan"
+          description: "Analisis gejala mendalam & cadangan",
         },
         "1.3": {
           name: "Sembuhin 1.3",
           badge: "Ultra",
-          description: "Diagnosis lengkap + pelan rawatan"
-        }
-      }
+          description: "Diagnosis lengkap + pelan rawatan",
+        },
+      },
     },
     marketplace: {
       hero_badge: "Direktori Apotekin",
       hero_title: "Apotek Digital",
       hero_subtitle: "Sembuhin",
-      hero_desc: "Penyelesaian kesihatan yang lengkap. Ubat rasmi BPOM, vitamin, dan peralatan kesihatan dihantar dalam 60 minit.",
+      hero_desc:
+        "Penyelesaian kesihatan yang lengkap. Ubat rasmi BPOM, vitamin, dan peralatan kesihatan dihantar dalam 60 minit.",
       active_products: "Produk Aktif",
       rating: "Penilaian",
       standby: "Bersedia",
@@ -1104,7 +1189,6 @@ export const translations: Record<string, any> = {
       chatbot_ai: "AI 聊天机器人",
       pharmacy: "药店",
       consultation: "医生咨询",
-      heart_check: "心脏检查",
       symptom_triage: "AI 症状分诊",
       mental_health: "心理健康护理",
       community: "患者社区",
@@ -1165,7 +1249,7 @@ export const translations: Record<string, any> = {
       stats: {
         active: "活跃医生",
         rating: "平均评分",
-        available: "可用"
+        available: "可用",
       },
       search_placeholder: "搜索医生姓名、专业或医院…",
       sort_highest_rating: "最高评分",
@@ -1197,7 +1281,7 @@ export const translations: Record<string, any> = {
       consultation_fee: "咨询费",
       close: "关闭",
       book_meeting: "预约会议",
-      years: "年"
+      years: "年",
     },
     profil: {
       page_title: "我的资料 — Sembuhin",
@@ -1258,10 +1342,10 @@ export const translations: Record<string, any> = {
       login_required: "您必须先登录",
       max_size_error: "照片最大尺寸为2MB",
       upload_success: "资料照片更新成功！",
-      upload_error: "上传照片失败。确保已创建bucket \"profiles\"。",
+      upload_error: '上传照片失败。确保已创建bucket "profiles"。',
       history_updated: "记录更新成功",
       history_update_failed: "更新记录失败",
-      load_failed: "加载失败"
+      load_failed: "加载失败",
     },
     artikel: {
       page_title: "健康文章",
@@ -1294,7 +1378,7 @@ export const translations: Record<string, any> = {
       stats: {
         doctors: "医生",
         rating: "评分",
-        hospitals: "合作医院"
+        hospitals: "合作医院",
       },
       hospital: "医院",
       schedule: "时间表",
@@ -1302,13 +1386,13 @@ export const translations: Record<string, any> = {
       reviews: "评论",
       view_profile: "查看资料",
       book_appointment: "预约",
-      view_all: "查看所有医生"
+      view_all: "查看所有医生",
     },
     testimonial: {
       badge: "用户信赖",
       title: "来自",
       title_accent: "我们用户的真实故事",
-      desc: "数百万用户通过Sembuhin健康生态系统体验到了真正的改变。"
+      desc: "数百万用户通过Sembuhin健康生态系统体验到了真正的改变。",
     },
     blog_section: {
       badge: "Neural Archive",
@@ -1317,7 +1401,7 @@ export const translations: Record<string, any> = {
       desc: "来自Sembuhin全球医疗网络的最新文章和研究。",
       access_archive: "访问档案",
       read_more: "阅读更多",
-      access_all: "访问所有档案"
+      access_all: "访问所有档案",
     },
     konsul: {
       page_title: "AI医生咨询 — Sembuhin",
@@ -1355,7 +1439,8 @@ export const translations: Record<string, any> = {
       powered_by: "⚡ Powered by",
       elevenlabs: "ElevenLabs Conversational AI",
       streaming: "实时流",
-      welcome_message: "你好！我是**Dr. Sembuhin AI**，基于AI的虚拟健康助手。我不是人类医生，但我准备好用可靠的信息回答您的健康问题！您今天想问什么？",
+      welcome_message:
+        "你好！我是**Dr. Sembuhin AI**，基于AI的虚拟健康助手。我不是人类医生，但我准备好用可靠的信息回答您的健康问题！您今天想问什么？",
       limit_reached: "抱歉，您已达到限制",
       error_message: "抱歉，发生错误。请再试一次。",
       suggestions: ["头痛 & 恶心", "高烧", "感冒 & 咳嗽"],
@@ -1376,19 +1461,19 @@ export const translations: Record<string, any> = {
         "1.1": {
           name: "Sembuhin 1.1",
           badge: "Free",
-          description: "基础一般健康咨询"
+          description: "基础一般健康咨询",
         },
         "1.2": {
           name: "Sembuhin 1.2",
           badge: "Pro",
-          description: "深度症状分析 & 建议"
+          description: "深度症状分析 & 建议",
         },
         "1.3": {
           name: "Sembuhin 1.3",
           badge: "Ultra",
-          description: "完整诊断 + 治疗计划"
-        }
-      }
+          description: "完整诊断 + 治疗计划",
+        },
+      },
     },
     marketplace: {
       hero_badge: "Apotekin目录",
@@ -1405,7 +1490,7 @@ export const translations: Record<string, any> = {
       logout: "注销",
       profile: "个人资料",
       loading: "处理中...",
-    }
+    },
   },
   ja: {
     dokter: {
@@ -1419,7 +1504,7 @@ export const translations: Record<string, any> = {
       stats: {
         active: "アクティブ医師",
         rating: "平均評価",
-        available: "利用可能"
+        available: "利用可能",
       },
       search_placeholder: "医師名、専門、病院を検索…",
       sort_highest_rating: "最高評価",
@@ -1436,7 +1521,8 @@ export const translations: Record<string, any> = {
       error_hint_3: "と",
       error_hint_4: "をSQLエディターで実行します。",
       no_doctors_title: "利用可能な医師がいません",
-      no_doctors_desc: "現在、プラットフォームに登録されている医師はいません。医師は登録が管理者によって承認されるとここに表示されます。",
+      no_doctors_desc:
+        "現在、プラットフォームに登録されている医師はいません。医師は登録が管理者によって承認されるとここに表示されます。",
       not_found_title: "見つかりません",
       not_found_desc: "他のキーワードで検索するか、フィルターを変更してください。",
       reset_search: "検索をリセット",
@@ -1451,7 +1537,7 @@ export const translations: Record<string, any> = {
       consultation_fee: "相談料",
       close: "閉じる",
       book_meeting: "会議を予約",
-      years: "年"
+      years: "年",
     },
     profil: {
       page_title: "マイプロフィール — Sembuhin",
@@ -1477,7 +1563,8 @@ export const translations: Record<string, any> = {
       allergies: "アレルギー",
       disease_history: "病歴",
       emergency_contact: "緊急連絡先",
-      health_info_desc: "健康情報はDr. Sembuhinがより正確で個別化されたアドバイスを提供するのに役立ちます。",
+      health_info_desc:
+        "健康情報はDr. Sembuhinがより正確で個別化されたアドバイスを提供するのに役立ちます。",
       mental_health_history: "メンタルヘルス履歴",
       refresh: "更新",
       new_screening: "新しいスクリーニング",
@@ -1512,10 +1599,11 @@ export const translations: Record<string, any> = {
       login_required: "先にログインする必要があります",
       max_size_error: "写真の最大サイズは2MBです",
       upload_success: "プロフィール写真が正常に更新されました！",
-      upload_error: "写真のアップロードに失敗しました。bucket \"profiles\"が作成されていることを確認してください。",
+      upload_error:
+        '写真のアップロードに失敗しました。bucket "profiles"が作成されていることを確認してください。',
       history_updated: "履歴が正常に更新されました",
       history_update_failed: "履歴の更新に失敗しました",
-      load_failed: "読み込みに失敗しました"
+      load_failed: "読み込みに失敗しました",
     },
     nav: {
       home: "ホーム",
@@ -1524,7 +1612,6 @@ export const translations: Record<string, any> = {
       chatbot_ai: "AIチャットボット",
       pharmacy: "薬局",
       consultation: "医師の診察",
-      heart_check: "心臓チェック",
       symptom_triage: "AI症状判定",
       mental_health: "メンタルヘルスケア",
       community: "患者コミュニティ",
@@ -1538,7 +1625,8 @@ export const translations: Record<string, any> = {
       hero_badge: "プレミアム特典",
       hero_title: "あなたの健康の旅を",
       hero_title_accent: "向上させる",
-      hero_desc: "すべてのプレミアムAI機能、医師の診察、およびSembuhin限定サービスへの無制限のアクセス。",
+      hero_desc:
+        "すべてのプレミアムAI機能、医師の診察、およびSembuhin限定サービスへの無制限のアクセス。",
       users_count: "50,000人以上の有効ユーザー",
       secure: "暗号化済み＆安全",
       uptime: "99.9%の稼働率",
@@ -1558,10 +1646,13 @@ export const translations: Record<string, any> = {
       consultation_desc: "アプリから直接信頼できる専門医を検索・予約できます。",
       heart_check_desc: "スマートフォンから直接リアルタイムで心拍数を監視。",
       symptom_triage_desc: "症状を入力すると、AIが緊急度を分類：緊急、医師の診察、または自己ケア。",
-      mental_health_desc: "PHQ-9およびGAD-7スクリーニング+AIベースのCBTモジュールが心理学者に接続。",
+      mental_health_desc:
+        "PHQ-9およびGAD-7スクリーニング+AIベースのCBTモジュールが心理学者に接続。",
       community_desc: "医療状態ごとのフォーラム、医師によるモデレーション、AI検証済みの医療主張。",
-      medical_records_desc: "相談履歴、検査結果、処方箋がアカウントに保存され、いつでもPDFエクスポート可能。",
-      dermatology_desc: "問題のある皮膚領域を写真撮影、皮膚科医に行く前にAIによる初期予備スクリーニング。",
+      medical_records_desc:
+        "相談履歴、検査結果、処方箋がアカウントに保存され、いつでもPDFエクスポート可能。",
+      dermatology_desc:
+        "問題のある皮膚領域を写真撮影、皮膚科医に行く前にAIによる初期予備スクリーニング。",
       mood_check_desc: "カメラでムードチェック。AIが顔の表情を分析して感情状態を把握。",
       articles_title: "健康記事",
       articles_desc: "信頼できる医学研究と記事のコレクション。",
@@ -1592,7 +1683,8 @@ export const translations: Record<string, any> = {
       page_desc: "病気予防と健康に関するインタラクティブな視覚コンテンツ。",
       hero_badge: "教育ビデオ",
       hero_title: "ビデオで学ぶ",
-      hero_desc: "医師と健康専門家からのインタラクティブな視覚コンテンツ。病気予防と健康的なライフスタイルについて学びましょう。",
+      hero_desc:
+        "医師と健康専門家からのインタラクティブな視覚コンテンツ。病気予防と健康的なライフスタイルについて学びましょう。",
       search_placeholder: "教育ビデオを検索...",
       all_categories: "すべてのカテゴリ",
       watch_now: "今すぐ視聴",
@@ -1605,7 +1697,7 @@ export const translations: Record<string, any> = {
       stats: {
         doctors: "医師",
         rating: "評価",
-        hospitals: "パートナー病院"
+        hospitals: "パートナー病院",
       },
       hospital: "病院",
       schedule: "スケジュール",
@@ -1613,13 +1705,13 @@ export const translations: Record<string, any> = {
       reviews: "レビュー",
       view_profile: "プロフィールを見る",
       book_appointment: "予約する",
-      view_all: "全医師を見る"
+      view_all: "全医師を見る",
     },
     testimonial: {
       badge: "ユーザーに信頼されています",
       title: "ユーザーからの",
       title_accent: "リアルなストーリー",
-      desc: "数百万人のユーザーがSembuhin健康エコシステムで本当の変化を体験しています。"
+      desc: "数百万人のユーザーがSembuhin健康エコシステムで本当の変化を体験しています。",
     },
     blog_section: {
       badge: "Neural Archive",
@@ -1628,7 +1720,7 @@ export const translations: Record<string, any> = {
       desc: "Sembuhinのグローバル医療ネットワークからの最新の記事と研究。",
       access_archive: "アーカイブにアクセス",
       read_more: "もっと読む",
-      access_all: "すべてのアーカイブにアクセス"
+      access_all: "すべてのアーカイブにアクセス",
     },
     konsul: {
       page_title: "AI医師相談 — Sembuhin",
@@ -1638,7 +1730,8 @@ export const translations: Record<string, any> = {
       title: "相談",
       title_accent: "Dr. Sembuhin AI",
       subtitle: "AI駆動の仮想健康アシスタント24/7 — チャットまたは音声、あなたの選択。",
-      warning: "⚠️ これはAIとのチャットであり、人間の医師ではありません。緊急の場合は、最寄りの医療施設に連絡してください。",
+      warning:
+        "⚠️ これはAIとのチャットであり、人間の医師ではありません。緊急の場合は、最寄りの医療施設に連絡してください。",
       remaining: "残り",
       of: "/",
       chats_today: "今日のチャット",
@@ -1666,7 +1759,8 @@ export const translations: Record<string, any> = {
       powered_by: "⚡ Powered by",
       elevenlabs: "ElevenLabs Conversational AI",
       streaming: "リアルタイムストリーミング",
-      welcome_message: "こんにちは！私は**Dr. Sembuhin AI**、AIベースの仮想健康アシスタントです。私は人間の医師ではありませんが、信頼できる情報であなたの健康に関する質問に答える準備ができています！今日は何について聞きたいですか？",
+      welcome_message:
+        "こんにちは！私は**Dr. Sembuhin AI**、AIベースの仮想健康アシスタントです。私は人間の医師ではありませんが、信頼できる情報であなたの健康に関する質問に答える準備ができています！今日は何について聞きたいですか？",
       limit_reached: "申し訳ありません、制限に達しました",
       error_message: "申し訳ありません、エラーが発生しました。もう一度お試しください。",
       suggestions: ["頭痛 & 吐き気", "高熱", "風邪 & 咳"],
@@ -1678,7 +1772,8 @@ export const translations: Record<string, any> = {
       press_to_speak: "ボタンを押して話す",
       speak_clearly: "はっきり話し、完了したら「停止」を押してください。",
       preparing_answer: "Dr. Sembuhinが回答を準備しています...",
-      speak_natural: "Dr. Sembuhin AIと自然に話してください。音声はリアルタイムで転記され、回答されます。",
+      speak_natural:
+        "Dr. Sembuhin AIと自然に話してください。音声はリアルタイムで転記され、回答されます。",
       stop_send: "⏹ 停止 & 送信",
       processing_status: "処理中...",
       start_speaking: "🎙 話し始める",
@@ -1687,25 +1782,26 @@ export const translations: Record<string, any> = {
         "1.1": {
           name: "Sembuhin 1.1",
           badge: "Free",
-          description: "基本的な一般健康相談"
+          description: "基本的な一般健康相談",
         },
         "1.2": {
           name: "Sembuhin 1.2",
           badge: "Pro",
-          description: "詳細な症状分析 & 推奨"
+          description: "詳細な症状分析 & 推奨",
         },
         "1.3": {
           name: "Sembuhin 1.3",
           badge: "Ultra",
-          description: "完全な診断 + 治療計画"
-        }
-      }
+          description: "完全な診断 + 治療計画",
+        },
+      },
     },
     marketplace: {
       hero_badge: "Apotekinディレクトリ",
       hero_title: "デジタル",
       hero_subtitle: "Sembuhin",
-      hero_desc: "完全なヘルスケアソリューション。BPOM承認の医薬品、ビタミン、健康機器を60分以内にお届けします。",
+      hero_desc:
+        "完全なヘルスケアソリューション。BPOM承認の医薬品、ビタミン、健康機器を60分以内にお届けします。",
       active_products: "アクティブ製品",
       rating: "評価",
       standby: "待機中",
@@ -1716,7 +1812,7 @@ export const translations: Record<string, any> = {
       logout: "ログアウト",
       profile: "プロフィール",
       loading: "処理中...",
-    }
+    },
   },
   ko: {
     dokter: {
@@ -1730,7 +1826,7 @@ export const translations: Record<string, any> = {
       stats: {
         active: "활성 의사",
         rating: "평균 평점",
-        available: "이용 가능"
+        available: "이용 가능",
       },
       search_placeholder: "의사 이름, 전문, 병원 검색…",
       sort_highest_rating: "최고 평점",
@@ -1747,7 +1843,8 @@ export const translations: Record<string, any> = {
       error_hint_3: "및",
       error_hint_4: "를 SQL 편집기에서 실행합니다.",
       no_doctors_title: "이용 가능한 의사 없음",
-      no_doctors_desc: "현재 플랫폼에 등록된 의사가 없습니다. 의사는 등록이 관리자에 의해 승인된 후 여기에 표시됩니다.",
+      no_doctors_desc:
+        "현재 플랫폼에 등록된 의사가 없습니다. 의사는 등록이 관리자에 의해 승인된 후 여기에 표시됩니다.",
       not_found_title: "찾을 수 없음",
       not_found_desc: "다른 키워드로 검색하거나 필터를 변경하세요.",
       reset_search: "검색 재설정",
@@ -1762,7 +1859,7 @@ export const translations: Record<string, any> = {
       consultation_fee: "상담료",
       close: "닫기",
       book_meeting: "회의 예약",
-      years: "년"
+      years: "년",
     },
     profil: {
       page_title: "내 프로필 — Sembuhin",
@@ -1788,7 +1885,8 @@ export const translations: Record<string, any> = {
       allergies: "알레르기",
       disease_history: "질병 이력",
       emergency_contact: "비상 연락처",
-      health_info_desc: "건강 정보는 Dr. Sembuhin이 더 정확하고 개인화된 조언을 제공하는 데 도움이 됩니다.",
+      health_info_desc:
+        "건강 정보는 Dr. Sembuhin이 더 정확하고 개인화된 조언을 제공하는 데 도움이 됩니다.",
       mental_health_history: "정신 건강 이력",
       refresh: "새로고침",
       new_screening: "새로운 스크리닝",
@@ -1823,10 +1921,10 @@ export const translations: Record<string, any> = {
       login_required: "먼저 로그인해야 합니다",
       max_size_error: "사진 최대 크기는 2MB입니다",
       upload_success: "프로필 사진이 성공적으로 업데이트되었습니다!",
-      upload_error: "사진 업로드 실패. bucket \"profiles\"가 생성되었는지 확인하세요.",
+      upload_error: '사진 업로드 실패. bucket "profiles"가 생성되었는지 확인하세요.',
       history_updated: "이력이 성공적으로 업데이트되었습니다",
       history_update_failed: "이력 업데이트 실패",
-      load_failed: "로드 실패"
+      load_failed: "로드 실패",
     },
     nav: {
       home: "홈",
@@ -1835,7 +1933,6 @@ export const translations: Record<string, any> = {
       chatbot_ai: "AI 챗봇",
       pharmacy: "약국",
       consultation: "의사 상담",
-      heart_check: "심장 체크",
       symptom_triage: "AI 증상 분류",
       mental_health: "정신 건강 관리",
       community: "환자 커뮤니티",
@@ -1871,8 +1968,10 @@ export const translations: Record<string, any> = {
       symptom_triage_desc: "증상을 입력하면 AI가 긴급도를 분류: 응급, 의사 진료, 또는 자가 관리.",
       mental_health_desc: "PHQ-9 및 GAD-7 선별 + AI 기반 CBT 모듈이 심리학자와 연결됩니다.",
       community_desc: "의료 상태별 포럼, 의사 중재, AI 검증된 의료 주장.",
-      medical_records_desc: "상담 기록, 검사 및 처방이 계정에 저장되어 언제든지 PDF로 내보낼 수 있습니다.",
-      dermatology_desc: "문제가 있는 피부 부위를 사진 찍으면, 피부과 의사에게 가기 전에 AI 초기 사전 선별.",
+      medical_records_desc:
+        "상담 기록, 검사 및 처방이 계정에 저장되어 언제든지 PDF로 내보낼 수 있습니다.",
+      dermatology_desc:
+        "문제가 있는 피부 부위를 사진 찍으면, 피부과 의사에게 가기 전에 AI 초기 사전 선별.",
       mood_check_desc: "카메라로 기분 체크. AI가 표정을 분석하여 감정 상태를 파악합니다.",
       articles_title: "건강 기사",
       articles_desc: "신뢰할 수 있는 의학 연구 및 기사 모음.",
@@ -1903,7 +2002,8 @@ export const translations: Record<string, any> = {
       page_desc: "질병 예방 및 건강에 대한 대화형 시각 콘텐츠.",
       hero_badge: "교육 영상",
       hero_title: "영상으로 학습",
-      hero_desc: "의사와 건강 전문가의 대화형 시각 콘텐츠. 질병 예방과 건강한 생활 방식에 대해 알아보세요.",
+      hero_desc:
+        "의사와 건강 전문가의 대화형 시각 콘텐츠. 질병 예방과 건강한 생활 방식에 대해 알아보세요.",
       search_placeholder: "교육 영상 검색...",
       all_categories: "모든 카테고리",
       watch_now: "지금 시청",
@@ -1916,7 +2016,7 @@ export const translations: Record<string, any> = {
       stats: {
         doctors: "의사",
         rating: "평점",
-        hospitals: "파트너 병원"
+        hospitals: "파트너 병원",
       },
       hospital: "병원",
       schedule: "일정",
@@ -1924,13 +2024,13 @@ export const translations: Record<string, any> = {
       reviews: "리뷰",
       view_profile: "프로필 보기",
       book_appointment: "예약하기",
-      view_all: "모든 의사 보기"
+      view_all: "모든 의사 보기",
     },
     testimonial: {
       badge: "사용자 신뢰",
       title: "사용자의",
       title_accent: "실제 이야기",
-      desc: "수백만 명의 사용자가 Sembuhin 건강 생태계를 통해 실제 변화를 경험했습니다."
+      desc: "수백만 명의 사용자가 Sembuhin 건강 생태계를 통해 실제 변화를 경험했습니다.",
     },
     blog_section: {
       badge: "Neural Archive",
@@ -1939,7 +2039,7 @@ export const translations: Record<string, any> = {
       desc: "Sembuhin의 글로벌 의료 네트워크에서 최신 기사와 연구.",
       access_archive: "아카이브 액세스",
       read_more: "더 읽기",
-      access_all: "모든 아카이브 액세스"
+      access_all: "모든 아카이브 액세스",
     },
     konsul: {
       page_title: "AI 의사 상담 — Sembuhin",
@@ -1949,7 +2049,8 @@ export const translations: Record<string, any> = {
       title: "상담",
       title_accent: "Dr. Sembuhin AI",
       subtitle: "AI 기반 가상 건강 어시스턴트 24/7 — 채팅 또는 음성, 선택하세요.",
-      warning: "⚠️ 이것은 AI와의 채팅이며, 인간 의사가 아닙니다. 응급 상황의 경우 가장 가까운 의료 시설에 연락하세요.",
+      warning:
+        "⚠️ 이것은 AI와의 채팅이며, 인간 의사가 아닙니다. 응급 상황의 경우 가장 가까운 의료 시설에 연락하세요.",
       remaining: "남음",
       of: "/",
       chats_today: "오늘의 채팅",
@@ -1977,7 +2078,8 @@ export const translations: Record<string, any> = {
       powered_by: "⚡ Powered by",
       elevenlabs: "ElevenLabs Conversational AI",
       streaming: "실시간 스트리밍",
-      welcome_message: "안녕하세요! 저는 **Dr. Sembuhin AI**, AI 기반 가상 건강 어시스턴트입니다. 저는 인간 의사가 아니지만, 신뢰할 수 있는 정보로 건강 관련 질문에 답변할 준비가 되어 있습니다! 오늘은 무엇을 여쭤보고 싶으신가요?",
+      welcome_message:
+        "안녕하세요! 저는 **Dr. Sembuhin AI**, AI 기반 가상 건강 어시스턴트입니다. 저는 인간 의사가 아니지만, 신뢰할 수 있는 정보로 건강 관련 질문에 답변할 준비가 되어 있습니다! 오늘은 무엇을 여쭤보고 싶으신가요?",
       limit_reached: "죄송합니다, 제한에 도달했습니다",
       error_message: "죄송합니다, 오류가 발생했습니다. 다시 시도해주세요.",
       suggestions: ["두통 & 메스꺼움", "고열", "감기 & 기침"],
@@ -1989,7 +2091,8 @@ export const translations: Record<string, any> = {
       press_to_speak: "버튼을 눌러 말하기",
       speak_clearly: "명확하게 말하고 완료되면 '중지'를 누르세요.",
       preparing_answer: "Dr. Sembuhin이 답변을 준비하는 중...",
-      speak_natural: "Dr. Sembuhin AI와 자연스럽게 대화하세요. 음성이 실시간으로 변환되고 답변됩니다.",
+      speak_natural:
+        "Dr. Sembuhin AI와 자연스럽게 대화하세요. 음성이 실시간으로 변환되고 답변됩니다.",
       stop_send: "⏹ 중지 & 전송",
       processing_status: "처리 중...",
       start_speaking: "🎙 말하기 시작",
@@ -1998,25 +2101,26 @@ export const translations: Record<string, any> = {
         "1.1": {
           name: "Sembuhin 1.1",
           badge: "Free",
-          description: "기본 일반 건강 상담"
+          description: "기본 일반 건강 상담",
         },
         "1.2": {
           name: "Sembuhin 1.2",
           badge: "Pro",
-          description: "심도 증상 분석 & 권장"
+          description: "심도 증상 분석 & 권장",
         },
         "1.3": {
           name: "Sembuhin 1.3",
           badge: "Ultra",
-          description: "완전한 진단 + 치료 계획"
-        }
-      }
+          description: "완전한 진단 + 치료 계획",
+        },
+      },
     },
     marketplace: {
       hero_badge: "Apotekin 디렉토리",
       hero_title: "디지털",
       hero_subtitle: "Sembuhin",
-      hero_desc: "완전한 건강 솔루션. BPOM 승인 약품, 비타민 및 건강 장비를 60분 이내에 배달합니다.",
+      hero_desc:
+        "완전한 건강 솔루션. BPOM 승인 약품, 비타민 및 건강 장비를 60분 이내에 배달합니다.",
       active_products: "활성 제품",
       rating: "평점",
       standby: "대기",
@@ -2027,7 +2131,7 @@ export const translations: Record<string, any> = {
       logout: "로그아웃",
       profile: "프로필",
       loading: "처리 중...",
-    }
+    },
   },
   ar: {
     dokter: {
@@ -2041,7 +2145,7 @@ export const translations: Record<string, any> = {
       stats: {
         active: "الأطباء النشطون",
         rating: "متوسط التقييم",
-        available: "متاح"
+        available: "متاح",
       },
       search_placeholder: "ابحث عن اسم الطبيب أو التخصص أو المستشفى…",
       sort_highest_rating: "أعلى تقييم",
@@ -2058,7 +2162,8 @@ export const translations: Record<string, any> = {
       error_hint_3: "و",
       error_hint_4: "في محرر SQL.",
       no_doctors_title: "لا يوجد أطباء متاحون",
-      no_doctors_desc: "لا يوجد حالياً أطباء مسجلين على المنصة. سيظهر الأطباء هنا بعد الموافقة على تسجيلهم من قبل المسؤول.",
+      no_doctors_desc:
+        "لا يوجد حالياً أطباء مسجلين على المنصة. سيظهر الأطباء هنا بعد الموافقة على تسجيلهم من قبل المسؤول.",
       not_found_title: "لم يتم العثور",
       not_found_desc: "ابحث بكلمات رئيسية أخرى أو قم بتغيير التصفية.",
       reset_search: "إعادة تعيين البحث",
@@ -2073,7 +2178,7 @@ export const translations: Record<string, any> = {
       consultation_fee: "رسوم الاستشارة",
       close: "إغلاق",
       book_meeting: "حجز اجتماع",
-      years: "سنوات"
+      years: "سنوات",
     },
     profil: {
       page_title: "ملفي الشخصي — Sembuhin",
@@ -2134,10 +2239,10 @@ export const translations: Record<string, any> = {
       login_required: "يجب عليك تسجيل الدخول أولاً",
       max_size_error: "الحد الأقصى لحجم الصورة هو 2MB",
       upload_success: "تم تحديث صورة الملف الشخصي بنجاح!",
-      upload_error: "فشل تحميل الصورة. تأكد من إنشاء bucket \"profiles\".",
+      upload_error: 'فشل تحميل الصورة. تأكد من إنشاء bucket "profiles".',
       history_updated: "تم تحديث السجل بنجاح",
       history_update_failed: "فشل تحديث السجل",
-      load_failed: "فشل التحميل"
+      load_failed: "فشل التحميل",
     },
     nav: {
       home: "الرئيسية",
@@ -2146,7 +2251,6 @@ export const translations: Record<string, any> = {
       chatbot_ai: "روبوت الدردشة الذكي",
       pharmacy: "الصيدلية",
       consultation: "استشارة طبيب",
-      heart_check: "فحص القلب",
       symptom_triage: "فرز الأعراض بالذكاء الاصطناعي",
       mental_health: "رعاية الصحة النفسية",
       community: "مجتمع المرضى",
@@ -2160,7 +2264,8 @@ export const translations: Record<string, any> = {
       hero_badge: "مزايا بريميوم",
       hero_title: "ارتقِ برحلتك",
       hero_title_accent: "الصحية",
-      hero_desc: "وصول كامل لجميع ميزات الذكاء الاصطناعي المميزة، واستشارات الأطباء، وخدمات Sembuhin الحصرية — بلا حدود.",
+      hero_desc:
+        "وصول كامل لجميع ميزات الذكاء الاصطناعي المميزة، واستشارات الأطباء، وخدمات Sembuhin الحصرية — بلا حدود.",
       users_count: "+50,000 مستخدم نشط",
       secure: "مشفر وآمن",
       uptime: "99.9% وقت التشغيل",
@@ -2179,12 +2284,18 @@ export const translations: Record<string, any> = {
     header: {
       consultation_desc: "ابحث واحجز مواعيد مع الأخصائيين الموثوقين مباشرة من التطبيق.",
       heart_check_desc: "مراقبة معدل ضربات القلب في الوقت الفعلي متصلة مباشرة من هاتفك.",
-      symptom_triage_desc: "أدخل الأعراض، يصنف الذكاء الاصطناعي الإلحاح: طارئ، راجع طبيباً، أو الرعاية الذاتية.",
-      mental_health_desc: "فحص PHQ-9 و GAD-7 + وحدات CBT المعتمدة على الذكاء الاصطناعي متصلة بأخصائيي علم النفس.",
-      community_desc: "منتديات لكل حالة طبية، ي moderatesها الأطباء، مطالبات طبية تم التحقق منها بالذكاء الاصطناعي.",
-      medical_records_desc: "سجل الاستشارات والمختبرات والوصفات الطبية محفوظ في حسابك، تصدير PDF في أي وقت.",
-      dermatology_desc: "صور المناطق الجلدية problematic، الفحص الأولي بالذكاء الاصطناعي قبل رؤية طبيب الأمراض الجلدية.",
-      mood_check_desc: "تحقق من المزاج عبر الكاميرا. يحلل الذكاء الاصطناعي تعبيرات الوجه لمعرفة حالتك العاطفية.",
+      symptom_triage_desc:
+        "أدخل الأعراض، يصنف الذكاء الاصطناعي الإلحاح: طارئ، راجع طبيباً، أو الرعاية الذاتية.",
+      mental_health_desc:
+        "فحص PHQ-9 و GAD-7 + وحدات CBT المعتمدة على الذكاء الاصطناعي متصلة بأخصائيي علم النفس.",
+      community_desc:
+        "منتديات لكل حالة طبية، ي moderatesها الأطباء، مطالبات طبية تم التحقق منها بالذكاء الاصطناعي.",
+      medical_records_desc:
+        "سجل الاستشارات والمختبرات والوصفات الطبية محفوظ في حسابك، تصدير PDF في أي وقت.",
+      dermatology_desc:
+        "صور المناطق الجلدية problematic، الفحص الأولي بالذكاء الاصطناعي قبل رؤية طبيب الأمراض الجلدية.",
+      mood_check_desc:
+        "تحقق من المزاج عبر الكاميرا. يحلل الذكاء الاصطناعي تعبيرات الوجه لمعرفة حالتك العاطفية.",
       articles_title: "مقالات صحية",
       articles_desc: "مجموعة من الأبحاث والمقالات الطبية الموثوقة لك.",
       videos_title: "فيديوهات تعليمية",
@@ -2214,7 +2325,8 @@ export const translations: Record<string, any> = {
       page_desc: "محتوى بصري تفاعلي حول الوقاية من الأمراض والصحة.",
       hero_badge: "فيديوهات تعليمية",
       hero_title: "تعلم من خلال الفيديو",
-      hero_desc: "محتوى بصري تفاعلي من الأطباء وخبراء الصحة. تعرف على الوقاية من الأمراض ونمط الحياة الصحي.",
+      hero_desc:
+        "محتوى بصري تفاعلي من الأطباء وخبراء الصحة. تعرف على الوقاية من الأمراض ونمط الحياة الصحي.",
       search_placeholder: "البحث في الفيديوهات التعليمية...",
       all_categories: "جميع الفئات",
       watch_now: "شاهد الآن",
@@ -2227,7 +2339,7 @@ export const translations: Record<string, any> = {
       stats: {
         doctors: "الأطباء",
         rating: "التقييم",
-        hospitals: "المستشفيات الشريكة"
+        hospitals: "المستشفيات الشريكة",
       },
       hospital: "المستشفى",
       schedule: "الجدول",
@@ -2235,13 +2347,13 @@ export const translations: Record<string, any> = {
       reviews: "مراجعات",
       view_profile: "عرض الملف الشخصي",
       book_appointment: "حجز موعد",
-      view_all: "عرض جميع الأطباء"
+      view_all: "عرض جميع الأطباء",
     },
     testimonial: {
       badge: "موثوق من قبل المستخدمين",
       title: "قصص حقيقية من",
       title_accent: "مستخدمينا",
-      desc: "ملايين المستخدمين اختبروا فرقاً حقيقياً مع نظام Sembuhin الصحي."
+      desc: "ملايين المستخدمين اختبروا فرقاً حقيقياً مع نظام Sembuhin الصحي.",
     },
     blog_section: {
       badge: "Neural Archive",
@@ -2250,7 +2362,7 @@ export const translations: Record<string, any> = {
       desc: "أحدث المقالات والأبحاث مباشرة من الشبكة الطبية العالمية لـ Sembuhin.",
       access_archive: "الوصول إلى الأرشيف",
       read_more: "اقرأ المزيد",
-      access_all: "الوصول إلى جميع الأرشيف"
+      access_all: "الوصول إلى جميع الأرشيف",
     },
     konsul: {
       page_title: "استشارة الطبيب AI — Sembuhin",
@@ -2288,7 +2400,8 @@ export const translations: Record<string, any> = {
       powered_by: "⚡ Powered by",
       elevenlabs: "ElevenLabs Conversational AI",
       streaming: "بث في الوقت الفعلي",
-      welcome_message: "مرحبًا! أنا **Dr. Sembuhin AI**، مساعد صحي افتراضي يعتمد على الذكاء الاصطناعي. لست طبيبًا بشريًا، لكنني جاهز للمساعدة في الإجابة على أسئلتك الصحية بمعلومات موثوقة! ماذا تريد أن تسأل اليوم؟",
+      welcome_message:
+        "مرحبًا! أنا **Dr. Sembuhin AI**، مساعد صحي افتراضي يعتمد على الذكاء الاصطناعي. لست طبيبًا بشريًا، لكنني جاهز للمساعدة في الإجابة على أسئلتك الصحية بمعلومات موثوقة! ماذا تريد أن تسأل اليوم؟",
       limit_reached: "عذرًا، لقد وصلت إلى الحد",
       error_message: "عذرًا، حدث خطأ. يرجى المحاولة مرة أخرى.",
       suggestions: ["صداع & غثيان", "حمى عالية", "زكام & سعال"],
@@ -2309,25 +2422,26 @@ export const translations: Record<string, any> = {
         "1.1": {
           name: "Sembuhin 1.1",
           badge: "Free",
-          description: "استشارة صحية عامة أساسية"
+          description: "استشارة صحية عامة أساسية",
         },
         "1.2": {
           name: "Sembuhin 1.2",
           badge: "Pro",
-          description: "تحليل الأعراض العميق & التوصيات"
+          description: "تحليل الأعراض العميق & التوصيات",
         },
         "1.3": {
           name: "Sembuhin 1.3",
           badge: "Ultra",
-          description: "تشخيص كامل + خطة علاج"
-        }
-      }
+          description: "تشخيص كامل + خطة علاج",
+        },
+      },
     },
     marketplace: {
       hero_badge: "دليل Apotekin",
       hero_title: "رقمي",
       hero_subtitle: "Sembuhin",
-      hero_desc: "حل صحي شامل. الأدوية المعتمدة من BPOM، الفيتامينات، والمعدات الصحية يتم توصيلها في 60 دقيقة.",
+      hero_desc:
+        "حل صحي شامل. الأدوية المعتمدة من BPOM، الفيتامينات، والمعدات الصحية يتم توصيلها في 60 دقيقة.",
       active_products: "منتجات نشطة",
       rating: "تقييم",
       standby: "في الانتظار",
@@ -2338,6 +2452,6 @@ export const translations: Record<string, any> = {
       logout: "تسجيل الخروج",
       profile: "الملف الشخصي",
       loading: "جاري المعالجة...",
-    }
-  }
+    },
+  },
 };

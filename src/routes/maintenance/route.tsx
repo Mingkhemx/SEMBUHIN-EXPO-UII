@@ -15,7 +15,7 @@ function MaintenancePage() {
         <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] rounded-full bg-blue-50/50 blur-[100px]" />
         <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[50%] rounded-full bg-indigo-50/30 blur-[150px]" />
       </div>
-      
+
       <div className="relative z-10 px-4 py-12 text-center max-w-2xl">
         {/* Animated GIF Illustration */}
         <motion.div
@@ -26,9 +26,9 @@ function MaintenancePage() {
         >
           <div className="relative group">
             <div className="absolute inset-0 bg-sky-400/20 rounded-full blur-3xl group-hover:bg-sky-400/30 transition-all duration-500" />
-            <img 
-              src="/perbaikan.gif" 
-              alt="Sedang Perbaikan" 
+            <img
+              src="/perbaikan.gif"
+              alt="Sedang Perbaikan"
               className="relative w-64 h-64 md:w-80 md:h-80 object-contain mx-auto drop-shadow-2xl"
             />
           </div>
@@ -42,14 +42,12 @@ function MaintenancePage() {
         >
           <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
             Sembuhin Sedang dalam <br />
-            <span className="text-sky-600">
-              Tahap Perbaikan
-            </span>
+            <span className="text-sky-600">Tahap Perbaikan</span>
           </h1>
-          
+
           <p className="text-slate-500 text-lg mb-10 leading-relaxed font-medium">
-            Kami sedang melakukan pembaharuan sistem untuk memberikan pengalaman layanan kesehatan yang lebih baik. 
-            Mohon maaf atas ketidaknyamanannya.
+            Kami sedang melakukan pembaharuan sistem untuk memberikan pengalaman layanan kesehatan
+            yang lebih baik. Mohon maaf atas ketidaknyamanannya.
           </p>
 
           {/* Details */}
@@ -60,7 +58,9 @@ function MaintenancePage() {
               </div>
               <div>
                 <h4 className="text-slate-900 font-bold text-sm">Estimasi Selesai</h4>
-                <p className="text-slate-500 text-xs mt-1">Kami akan segera kembali dalam beberapa jam ke depan.</p>
+                <p className="text-slate-500 text-xs mt-1">
+                  Kami akan segera kembali dalam beberapa jam ke depan.
+                </p>
               </div>
             </div>
             <div className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm flex items-start gap-4">
@@ -69,7 +69,9 @@ function MaintenancePage() {
               </div>
               <div>
                 <h4 className="text-slate-900 font-bold text-sm">Data Tetap Aman</h4>
-                <p className="text-slate-500 text-xs mt-1">Seluruh data rekam medis dan profil Anda terjamin keamanannya.</p>
+                <p className="text-slate-500 text-xs mt-1">
+                  Seluruh data rekam medis dan profil Anda terjamin keamanannya.
+                </p>
               </div>
             </div>
           </div>

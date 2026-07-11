@@ -1,13 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /** Animated 3D-style voice waveform on canvas. Lightweight, no GPU needed. */
-export function VoiceWave({
-  active = true,
-  className,
-}: {
-  active?: boolean;
-  className?: string;
-}) {
+export function VoiceWave({ active = true, className }: { active?: boolean; className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const raf = useRef<number>(0);
 
@@ -39,8 +33,7 @@ export function VoiceWave({
       for (let i = 0; i < bars; i++) {
         const angle = (i / bars) * Math.PI * 2;
         const noise = active
-          ? Math.abs(Math.sin(t * 0.04 + i * 0.3)) +
-            Math.abs(Math.sin(t * 0.07 + i * 0.5)) * 0.5
+          ? Math.abs(Math.sin(t * 0.04 + i * 0.3)) + Math.abs(Math.sin(t * 0.07 + i * 0.5)) * 0.5
           : 0.2;
         const len = 12 + noise * 50;
         const x1 = cx + Math.cos(angle) * radius;

@@ -1,9 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { 
-  Stethoscope, User, Mail, Phone, Briefcase, FileText, Upload, CheckCircle, 
-  ChevronLeft, Users, Zap, ShieldCheck, Loader2, MapPin, Calendar, 
-  FileCheck, BookOpen, UserCheck 
+import {
+  Stethoscope,
+  User,
+  Mail,
+  Phone,
+  Briefcase,
+  FileText,
+  Upload,
+  CheckCircle,
+  ChevronLeft,
+  Users,
+  Zap,
+  ShieldCheck,
+  Loader2,
+  MapPin,
+  Calendar,
+  FileCheck,
+  BookOpen,
+  UserCheck,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -11,7 +26,11 @@ export const Route = createFileRoute("/daftar-dokter")({
   head: () => ({
     meta: [
       { title: "Daftar Dokter Mitra | Sembuhin" },
-      { name: "description", content: "Daftarkan diri Anda menjadi dokter mitra Sembuhin dan bergabung dengan jaringan medis profesional terpercaya." },
+      {
+        name: "description",
+        content:
+          "Daftarkan diri Anda menjadi dokter mitra Sembuhin dan bergabung dengan jaringan medis profesional terpercaya.",
+      },
     ],
   }),
   component: DoctorRegistration,
@@ -40,7 +59,7 @@ const SPECIALTIES = [
   "Spesialis THT",
   "Spesialis Mata",
   "Spesialis Paru",
-  "Lainnya"
+  "Lainnya",
 ];
 
 function DoctorRegistration() {
@@ -74,7 +93,9 @@ function DoctorRegistration() {
   });
 
   // Handle text input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -111,12 +132,20 @@ function DoctorRegistration() {
       // Ambil user_id jika sedang login (untuk linking akun ↔ dokter)
       let currentUserId: string | null = null;
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
         currentUserId = authUser?.id ?? null;
-      } catch { /* ignore — user belum login */ }
+      } catch {
+        /* ignore — user belum login */
+      }
 
       // Upload semua file — kembalikan storage path (bukan public URL)
-      let ktp_path = "", str_path = "", sip_path = "", diploma_path = "", cv_path = "";
+      let ktp_path = "",
+        str_path = "",
+        sip_path = "",
+        diploma_path = "",
+        cv_path = "";
 
       if (formData.ktp_file) ktp_path = await uploadFile(formData.ktp_file, "ktp");
       if (formData.str_file) str_path = await uploadFile(formData.str_file, "str");
@@ -125,9 +154,8 @@ function DoctorRegistration() {
       if (formData.cv_file) cv_path = await uploadFile(formData.cv_file, "cv");
 
       // Insert ke database — simpan path, bukan URL publik
-      const { error: dbError } = await supabase
-        .from("doctor_registrations")
-        .insert([{
+      const { error: dbError } = await supabase.from("doctor_registrations").insert([
+        {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
@@ -138,7 +166,7 @@ function DoctorRegistration() {
           specialty: formData.specialty,
           license_number: formData.license_number,
           sip: formData.sip,
-          hospital: formData.practice_location,      // mapping ke kolom lama
+          hospital: formData.practice_location, // mapping ke kolom lama
           practice_location: formData.practice_location,
           practice_address: formData.practice_address,
           experience_years: parseInt(formData.experience_years) || 0,
@@ -148,8 +176,9 @@ function DoctorRegistration() {
           diploma_path,
           cv_path,
           status: "pending",
-          user_id: currentUserId,  // Link ke auth user jika sedang login
-        }]);
+          user_id: currentUserId, // Link ke auth user jika sedang login
+        },
+      ]);
 
       if (dbError) throw dbError;
       setStep(4); // Success
@@ -164,12 +193,20 @@ function DoctorRegistration() {
   // Validasi per step
   const isStepValid = () => {
     if (step === 1) {
-      return formData.name && formData.email && formData.phone && formData.nik && 
-             formData.birth_date && formData.gender && formData.address;
+      return (
+        formData.name &&
+        formData.email &&
+        formData.phone &&
+        formData.nik &&
+        formData.birth_date &&
+        formData.gender &&
+        formData.address
+      );
     }
     if (step === 2) {
-      return formData.specialty && formData.license_number && formData.sip && 
-             formData.practice_location;
+      return (
+        formData.specialty && formData.license_number && formData.sip && formData.practice_location
+      );
     }
     if (step === 3) {
       return formData.ktp_file && formData.str_file && formData.sip_file && formData.diploma_file;
@@ -213,14 +250,17 @@ function DoctorRegistration() {
                   Bergabunglah dengan Ribuan Dokter Profesional
                 </h2>
               </div>
-              
+
               <div className="space-y-4">
                 {[
                   { icon: Users, text: "Akses ke ribuan pasien", desc: "Booking otomatis" },
                   { icon: Zap, text: "Manajemen praktik digital", desc: "Rekam medis & resep" },
-                  { icon: ShieldCheck, text: "Verifikasi profesional", desc: "Support 24/7" }
+                  { icon: ShieldCheck, text: "Verifikasi profesional", desc: "Support 24/7" },
                 ].map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3 p-4 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/15">
+                  <div
+                    key={idx}
+                    className="flex items-start gap-3 p-4 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/15"
+                  >
                     <item.icon className="h-5 w-5 text-white" />
                     <div className="pt-0.5">
                       <p className="text-white font-semibold text-sm">{item.text}</p>
@@ -231,7 +271,10 @@ function DoctorRegistration() {
             </div>
 
             <div className="relative z-20">
-              <Link to="/beranda" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-xl transition-all duration-300 text-white font-semibold border border-white/20">
+              <Link
+                to="/beranda"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-xl transition-all duration-300 text-white font-semibold border border-white/20"
+              >
                 <ChevronLeft className="h-4 w-4" />
                 Kembali ke Beranda
               </Link>
@@ -246,13 +289,22 @@ function DoctorRegistration() {
                 <div className="flex items-center justify-between mb-10">
                   {[1, 2, 3].map((s) => (
                     <div key={s} className="flex items-center gap-3 flex-1">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                        step > s ? "bg-emerald-500 text-white" :
-                        step === s ? "bg-sky-600 text-white ring-4 ring-sky-100" : "bg-slate-100 text-slate-400"
-                      }`}>
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                          step > s
+                            ? "bg-emerald-500 text-white"
+                            : step === s
+                              ? "bg-sky-600 text-white ring-4 ring-sky-100"
+                              : "bg-slate-100 text-slate-400"
+                        }`}
+                      >
                         {step > s ? <CheckCircle className="h-5 w-5" /> : s}
                       </div>
-                      {s < 3 && <div className={`h-0.5 flex-1 rounded-full transition-all duration-300 ${step > s ? "bg-emerald-500" : "bg-slate-200"}`} />}
+                      {s < 3 && (
+                        <div
+                          className={`h-0.5 flex-1 rounded-full transition-all duration-300 ${step > s ? "bg-emerald-500" : "bg-slate-200"}`}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -263,7 +315,9 @@ function DoctorRegistration() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <h2 className="text-3xl font-bold text-slate-900">Data Diri</h2>
-                    <p className="text-slate-500 text-lg">Isi data pribadi Anda dengan lengkap dan benar.</p>
+                    <p className="text-slate-500 text-lg">
+                      Isi data pribadi Anda dengan lengkap dan benar.
+                    </p>
                   </div>
                   <div className="space-y-5">
                     <div className="space-y-2">
@@ -272,66 +326,143 @@ function DoctorRegistration() {
                       </label>
                       <div className="relative group">
                         <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                        <input name="name" value={formData.name} onChange={handleChange} required placeholder="dr. Nama Lengkap" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                        <input
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
+                          placeholder="dr. Nama Lengkap"
+                          className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Email</label>
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Email
+                        </label>
                         <div className="relative group">
                           <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                          <input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="email@domain.com" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                          <input
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            placeholder="email@domain.com"
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                          />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Nomor Telepon</label>
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Nomor Telepon
+                        </label>
                         <div className="relative group">
                           <Phone className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                          <input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="+628123456789" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                          <input
+                            name="phone"
+                            type="tel"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            required
+                            placeholder="+628123456789"
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                          />
                         </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> NIK</label>
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> NIK
+                        </label>
                         <div className="relative group">
                           <UserCheck className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                          <input name="nik" value={formData.nik} onChange={handleChange} required placeholder="1234567890123456" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                          <input
+                            name="nik"
+                            value={formData.nik}
+                            onChange={handleChange}
+                            required
+                            placeholder="1234567890123456"
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                          />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Tanggal Lahir</label>
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Tanggal Lahir
+                        </label>
                         <div className="relative group">
                           <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                          <input name="birth_date" type="date" value={formData.birth_date} onChange={handleChange} required className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                          <input
+                            name="birth_date"
+                            type="date"
+                            value={formData.birth_date}
+                            onChange={handleChange}
+                            required
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                          />
                         </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Jenis Kelamin</label>
-                        <select name="gender" value={formData.gender} onChange={handleChange} required className="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500">
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Jenis Kelamin
+                        </label>
+                        <select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                        >
                           <option value="">Pilih</option>
                           <option value="Laki-laki">Laki-laki</option>
                           <option value="Perempuan">Perempuan</option>
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Pengalaman (Tahun)</label>
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Pengalaman (Tahun)
+                        </label>
                         <div className="relative group">
                           <Stethoscope className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                          <input name="experience_years" type="number" min="0" value={formData.experience_years} onChange={handleChange} placeholder="0" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                          <input
+                            name="experience_years"
+                            type="number"
+                            min="0"
+                            value={formData.experience_years}
+                            onChange={handleChange}
+                            placeholder="0"
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                          />
                         </div>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Alamat Lengkap</label>
+                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-500" /> Alamat Lengkap
+                      </label>
                       <div className="relative group">
                         <MapPin className="absolute left-5 top-4 h-5 w-5 text-slate-400" />
-                        <textarea name="address" value={formData.address} onChange={handleChange} required rows={3} placeholder="Jalan, RT/RW, Desa/Kelurahan, Kecamatan, Kota/Kabupaten, Provinsi" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                        <textarea
+                          name="address"
+                          value={formData.address}
+                          onChange={handleChange}
+                          required
+                          rows={3}
+                          placeholder="Jalan, RT/RW, Desa/Kelurahan, Kecamatan, Kota/Kabupaten, Provinsi"
+                          className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                        />
                       </div>
                     </div>
-                    <button onClick={() => setStep(2)} disabled={!isStepValid()} className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:from-sky-500 hover:to-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button
+                      onClick={() => setStep(2)}
+                      disabled={!isStepValid()}
+                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:from-sky-500 hover:to-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       Selanjutnya
                     </button>
                   </div>
@@ -343,54 +474,111 @@ function DoctorRegistration() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <h2 className="text-3xl font-bold text-slate-900">Data Profesional</h2>
-                    <p className="text-slate-500 text-lg">Isi informasi praktik dan spesialisasi Anda.</p>
+                    <p className="text-slate-500 text-lg">
+                      Isi informasi praktik dan spesialisasi Anda.
+                    </p>
                   </div>
                   <div className="space-y-5">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Spesialisasi</label>
+                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-500" /> Spesialisasi
+                      </label>
                       <div className="relative group">
                         <Briefcase className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                        <select name="specialty" value={formData.specialty} onChange={handleChange} required className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500">
+                        <select
+                          name="specialty"
+                          value={formData.specialty}
+                          onChange={handleChange}
+                          required
+                          className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                        >
                           <option value="">Pilih Spesialisasi</option>
-                          {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                          {SPECIALTIES.map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Nomor STR</label>
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Nomor STR
+                        </label>
                         <div className="relative group">
                           <FileText className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                          <input name="license_number" value={formData.license_number} onChange={handleChange} required placeholder="Nomor STR" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                          <input
+                            name="license_number"
+                            value={formData.license_number}
+                            onChange={handleChange}
+                            required
+                            placeholder="Nomor STR"
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                          />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Nomor SIP</label>
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Nomor SIP
+                        </label>
                         <div className="relative group">
                           <FileCheck className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                          <input name="sip" value={formData.sip} onChange={handleChange} required placeholder="Nomor SIP" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                          <input
+                            name="sip"
+                            value={formData.sip}
+                            onChange={handleChange}
+                            required
+                            placeholder="Nomor SIP"
+                            className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                          />
                         </div>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Tempat Praktik Utama</label>
+                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-500" /> Tempat Praktik Utama
+                      </label>
                       <div className="relative group">
                         <Stethoscope className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                        <input name="practice_location" value={formData.practice_location} onChange={handleChange} required placeholder="Nama Rumah Sakit / Klinik" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                        <input
+                          name="practice_location"
+                          value={formData.practice_location}
+                          onChange={handleChange}
+                          required
+                          placeholder="Nama Rumah Sakit / Klinik"
+                          className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-500" /> Alamat Praktik</label>
+                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-500" /> Alamat Praktik
+                      </label>
                       <div className="relative group">
                         <MapPin className="absolute left-5 top-4 h-5 w-5 text-slate-400" />
-                        <textarea name="practice_address" value={formData.practice_address} onChange={handleChange} rows={3} placeholder="Alamat lengkap tempat praktik" className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500" />
+                        <textarea
+                          name="practice_address"
+                          value={formData.practice_address}
+                          onChange={handleChange}
+                          rows={3}
+                          placeholder="Alamat lengkap tempat praktik"
+                          className="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500"
+                        />
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      <button onClick={() => setStep(1)} className="flex-1 py-4 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all">
+                      <button
+                        onClick={() => setStep(1)}
+                        className="flex-1 py-4 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
+                      >
                         Kembali
                       </button>
-                      <button onClick={() => setStep(3)} disabled={!isStepValid()} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:from-sky-500 hover:to-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                      <button
+                        onClick={() => setStep(3)}
+                        disabled={!isStepValid()}
+                        className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:from-sky-500 hover:to-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
                         Selanjutnya
                       </button>
                     </div>
@@ -403,34 +591,48 @@ function DoctorRegistration() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <h2 className="text-3xl font-bold text-slate-900">Upload Dokumen</h2>
-                    <p className="text-slate-500 text-lg">Upload dokumen pendukung (PDF/JPG/PNG, max 5MB).</p>
+                    <p className="text-slate-500 text-lg">
+                      Upload dokumen pendukung (PDF/JPG/PNG, max 5MB).
+                    </p>
                   </div>
                   <div className="space-y-4">
                     {REQUIRED_DOCUMENTS.map((doc) => (
                       <div key={doc.id} className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${doc.required ? "bg-sky-500" : "bg-slate-300"}`} />
+                          <span
+                            className={`w-2 h-2 rounded-full ${doc.required ? "bg-sky-500" : "bg-slate-300"}`}
+                          />
                           {doc.label} {doc.required && <span className="text-rose-500">*</span>}
                         </label>
                         <div className="relative group">
-                          <div className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all duration-300 cursor-pointer bg-slate-50 hover:bg-sky-50 ${
-                            (formData as Record<string, any>)[`${doc.id}_file`] ? "border-sky-400 bg-sky-50" : "border-slate-200"
-                          }`}>
+                          <div
+                            className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all duration-300 cursor-pointer bg-slate-50 hover:bg-sky-50 ${
+                              (formData as Record<string, any>)[`${doc.id}_file`]
+                                ? "border-sky-400 bg-sky-50"
+                                : "border-slate-200"
+                            }`}
+                          >
                             <input
                               type="file"
                               accept=".pdf,.jpg,.jpeg,.png"
                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              onChange={(e) => handleFileChange(doc.id, e.target.files?.[0] || null)}
+                              onChange={(e) =>
+                                handleFileChange(doc.id, e.target.files?.[0] || null)
+                              }
                             />
                             {(formData as Record<string, any>)[`${doc.id}_file`] ? (
                               <div className="flex items-center justify-center gap-3">
                                 <CheckCircle className="h-7 w-7 text-emerald-500" />
-                                <span className="text-sm font-semibold text-slate-700">{(formData as Record<string, any>)[`${doc.id}_file`]?.name}</span>
+                                <span className="text-sm font-semibold text-slate-700">
+                                  {(formData as Record<string, any>)[`${doc.id}_file`]?.name}
+                                </span>
                               </div>
                             ) : (
                               <div className="flex flex-col items-center justify-center">
                                 <doc.icon className="h-8 w-8 text-slate-400 mb-2" />
-                                <span className="text-sm text-slate-600 font-semibold">Klik untuk upload</span>
+                                <span className="text-sm text-slate-600 font-semibold">
+                                  Klik untuk upload
+                                </span>
                               </div>
                             )}
                           </div>
@@ -444,16 +646,25 @@ function DoctorRegistration() {
                     </div>
                   )}
                   <div className="flex gap-4 pt-2">
-                    <button onClick={() => setStep(2)} className="flex-1 py-4 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all">
+                    <button
+                      onClick={() => setStep(2)}
+                      className="flex-1 py-4 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
+                    >
                       Kembali
                     </button>
-                    <button onClick={handleSubmit} disabled={loading || !isStepValid()} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:from-sky-500 hover:to-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <button
+                      onClick={handleSubmit}
+                      disabled={loading || !isStepValid()}
+                      className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:from-sky-500 hover:to-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
                       {loading ? (
                         <>
                           <Loader2 className="h-5 w-5 animate-spin" />
                           Mengirim...
                         </>
-                      ) : "Kirim Pendaftaran"}
+                      ) : (
+                        "Kirim Pendaftaran"
+                      )}
                     </button>
                   </div>
                 </div>
@@ -467,7 +678,10 @@ function DoctorRegistration() {
                   </div>
                   <div className="space-y-4">
                     <h2 className="text-3xl font-bold text-slate-900">Pendaftaran Berhasil!</h2>
-                    <p className="text-slate-600 max-w-md mx-auto text-lg leading-relaxed">Terima kasih telah mendaftar. Tim kami akan memverifikasi data Anda dan menghubungi Anda dalam 2x24 jam.</p>
+                    <p className="text-slate-600 max-w-md mx-auto text-lg leading-relaxed">
+                      Terima kasih telah mendaftar. Tim kami akan memverifikasi data Anda dan
+                      menghubungi Anda dalam 2x24 jam.
+                    </p>
                   </div>
                   <Link
                     to="/beranda"

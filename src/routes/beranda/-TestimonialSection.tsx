@@ -7,7 +7,8 @@ const TESTIMONIALS = [
     text: "Saya mengalami takikardia jam 2 pagi. AI Sembuhin langsung mendeteksi anomali dari smartwatch saya dan menghubungkan dokter spesialis.",
     name: "Rina Marlina",
     role: "Arsitek Sistem",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Konsultasi AI",
   },
@@ -15,7 +16,8 @@ const TESTIMONIALS = [
     text: "Melihat organ jantung saya sendiri berdetak secara 3D di layar lewat Health Twin adalah pengalaman yang luar biasa.",
     name: "Budi Hartono",
     role: "Analis Data",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Health Twin",
   },
@@ -23,7 +25,8 @@ const TESTIMONIALS = [
     text: "Resep holografik langsung dikirim ke apotek. Obat tiba dalam 12 menit. Ini bukan sekadar aplikasi medis biasa.",
     name: "Sari Dewi",
     role: "Desainer UX",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Apotek Digital",
   },
@@ -31,7 +34,8 @@ const TESTIMONIALS = [
     text: "Fitur cek jantung real-time benar-benar menyelamatkan saya. Deteksi dini aritmia membuat saya bisa langsung ke dokter.",
     name: "Fajar Nugroho",
     role: "Software Engineer",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Cek Jantung",
   },
@@ -39,7 +43,8 @@ const TESTIMONIALS = [
     text: "Konsultasi dokter spesialis tengah malam tanpa perlu antri. Responsnya cepat dan sangat informatif.",
     name: "Amelia Putri",
     role: "Dokter Umum",
-    avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Konsultasi Dokter",
   },
@@ -47,7 +52,8 @@ const TESTIMONIALS = [
     text: "Platform terbaik yang pernah saya gunakan. Integrasi data kesehatan saya sangat seamless.",
     name: "Dian Pratiwi",
     role: "Product Manager",
-    avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Health Twin",
   },
@@ -55,7 +61,8 @@ const TESTIMONIALS = [
     text: "Pengiriman obat dengan drone adalah inovasi nyata. Sembuhin benar-benar memahami kebutuhan pengguna modern.",
     name: "Rizki Ramadhan",
     role: "Startup Founder",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Apotek Digital",
   },
@@ -63,7 +70,8 @@ const TESTIMONIALS = [
     text: "Resep digital saya tersimpan aman dan bisa diakses kapan saja. Tidak perlu khawatir kehilangan kertas resep lagi.",
     name: "Nita Susanti",
     role: "Ibu Rumah Tangga",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
+    avatar:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
     rating: 5,
     tag: "Resep Digital",
   },
@@ -85,9 +93,7 @@ function TestiCard({ t }: { t: (typeof TESTIMONIALS)[0] }) {
             <Star
               key={s}
               className={`w-3.5 h-3.5 ${
-                s <= t.rating
-                  ? "fill-amber-400 text-amber-400"
-                  : "text-sky-100"
+                s <= t.rating ? "fill-amber-400 text-amber-400" : "text-sky-100"
               }`}
             />
           ))}
@@ -98,9 +104,7 @@ function TestiCard({ t }: { t: (typeof TESTIMONIALS)[0] }) {
       </div>
 
       {/* Quote */}
-      <p className="text-sm text-foreground/80 leading-relaxed flex-1">
-        "{t.text}"
-      </p>
+      <p className="text-sm text-foreground/80 leading-relaxed flex-1">"{t.text}"</p>
 
       {/* Author */}
       <div className="flex items-center gap-3 pt-3 border-t border-sky-100/40">
@@ -188,8 +192,10 @@ export function TestimonialSection() {
       <div
         className="mb-4"
         style={{
-          maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+          maskImage:
+            "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
         }}
       >
         <MarqueeRow items={ROW_1} direction="left" speed={40} />
@@ -197,13 +203,14 @@ export function TestimonialSection() {
 
       <div
         style={{
-          maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+          maskImage:
+            "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
         }}
       >
         <MarqueeRow items={ROW_2} direction="right" speed={35} />
       </div>
-
     </section>
   );
 }

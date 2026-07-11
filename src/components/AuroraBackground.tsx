@@ -20,7 +20,8 @@ export function AuroraBackground() {
           height: 800,
           top: -200,
           left: -150,
-          background: "radial-gradient(circle, oklch(0.82 0.10 215 / 0.65) 0%, oklch(0.88 0.07 220 / 0.30) 40%, transparent 70%)",
+          background:
+            "radial-gradient(circle, oklch(0.82 0.10 215 / 0.65) 0%, oklch(0.88 0.07 220 / 0.30) 40%, transparent 70%)",
           filter: "blur(80px)",
           opacity: 0.7,
         }}
@@ -43,7 +44,8 @@ export function AuroraBackground() {
           height: 700,
           top: "5%",
           right: -120,
-          background: "radial-gradient(circle, oklch(0.78 0.12 210 / 0.55) 0%, oklch(0.85 0.08 225 / 0.25) 45%, transparent 70%)",
+          background:
+            "radial-gradient(circle, oklch(0.78 0.12 210 / 0.55) 0%, oklch(0.85 0.08 225 / 0.25) 45%, transparent 70%)",
           filter: "blur(90px)",
           opacity: 0.65,
         }}
@@ -66,7 +68,8 @@ export function AuroraBackground() {
           height: 900,
           bottom: -250,
           left: "15%",
-          background: "radial-gradient(circle, oklch(0.80 0.09 240 / 0.50) 0%, oklch(0.86 0.06 250 / 0.25) 40%, transparent 70%)",
+          background:
+            "radial-gradient(circle, oklch(0.80 0.09 240 / 0.50) 0%, oklch(0.86 0.06 250 / 0.25) 40%, transparent 70%)",
           filter: "blur(100px)",
           opacity: 0.6,
         }}
