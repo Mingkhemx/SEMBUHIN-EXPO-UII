@@ -71,9 +71,9 @@ function Index() {
 
   return (
     <div className="space-y-32 pb-24">
-      {/* HERO SECTION WITH VIDEO BACKGROUND */}
-      <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-8 flex min-h-screen flex-col items-center justify-center pt-32 pb-20 text-center px-4 overflow-hidden">
-        {/* VIDEO BACKGROUND WITH PROFESSIONAL OVERLAY */}
+      {/* HERO SECTION WITH VIDEO BACKGROUND - MODERN ASYMMETRIC LAYOUT */}
+      <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-8 min-h-screen overflow-hidden">
+        {/* VIDEO BACKGROUND */}
         <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
           <video
             className="absolute top-0 left-0 w-full h-full object-cover"
@@ -86,109 +86,169 @@ function Index() {
             <source src="/hero-bg-medical.mp4" type="video/mp4" />
           </video>
 
-          {/* Multi-layer overlay for professional look */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/25 to-black/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-950/10 via-transparent to-cyan-950/10" />
+          {/* Dynamic overlay with mesh gradient effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-blue-900/30 to-slate-900/50" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="z-10 flex flex-col items-center max-w-5xl w-full text-center"
-        >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold uppercase tracking-wider mb-8 hover:bg-white/15 transition-all"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            {t("home.standard_badge")}
-          </motion.div>
-
-          {/* Animated Content */}
-          <div className="min-h-[320px] sm:min-h-[280px] w-full flex flex-col items-center justify-center">
-            <AnimatePresence mode="wait">
+        {/* MAIN CONTENT - ASYMMETRIC GRID */}
+        <div className="relative z-10 min-h-screen flex items-center pt-24 pb-16">
+          <div className="max-w-7xl mx-auto w-full px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+            {/* LEFT SIDE - TEXT CONTENT */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="flex flex-col justify-center space-y-8 order-2 lg:order-1"
+            >
+              {/* Badge */}
               <motion.div
-                key={contentIndex}
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -30, opacity: 0 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-                className="flex flex-col items-center w-full space-y-6"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="inline-flex items-center gap-2 w-fit px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
               >
-                {/* Main Headline */}
-                <div className="space-y-3">
-                  <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight text-white drop-shadow-2xl">
-                    {rotationContent[contentIndex].topTitle}
-                  </h1>
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-sky-200 drop-shadow-lg">
-                    {rotationContent[contentIndex].bottomTitle}
-                  </h2>
-                </div>
-
-                {/* Description */}
-                <p className="mt-2 max-w-2xl text-base sm:text-lg md:text-xl text-white/85 font-light leading-relaxed px-2">
-                  {rotationContent[contentIndex].desc}
-                </p>
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                {t("home.standard_badge")}
               </motion.div>
-            </AnimatePresence>
-          </div>
 
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none"
-          >
-            <Link
-              to="/twin"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 hover:from-cyan-400 hover:via-blue-400 hover:to-blue-500 text-white px-10 py-4 text-base font-bold shadow-2xl shadow-cyan-500/50 transition-all duration-300 hover:shadow-cyan-500/70 hover:scale-105 active:scale-95 group border border-cyan-300/20 hover:border-cyan-200/40 backdrop-blur-sm"
-            >
-              {t("home.start_btn")}
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              to="/konsul"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 hover:from-white/30 hover:to-white/10 backdrop-blur-xl text-white border border-white/40 hover:border-white/60 px-10 py-4 text-base font-bold transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-black/20 hover:shadow-xl hover:shadow-black/30"
-            >
-              {t("home.ai_btn")}
-            </Link>
-          </motion.div>
+              {/* Animated Content */}
+              <div className="space-y-6 min-h-[280px] flex flex-col justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={contentIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-6"
+                  >
+                    {/* Headline with split styling */}
+                    <div className="space-y-2">
+                      <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
+                        {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
+                          <span key={i}>
+                            {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
+                              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                                {word}
+                              </span>
+                            ) : (
+                              word + " "
+                            )}
+                          </span>
+                        ))}
+                      </h1>
+                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white/90 leading-[1.2]">
+                        {rotationContent[contentIndex].bottomTitle}
+                      </h2>
+                    </div>
 
-          {/* Stats Section */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-20 flex flex-wrap items-center justify-center gap-8 sm:gap-12 border-t border-white/15 pt-10"
-          >
-            {[
-              [t("home.stats.ai_care"), "24/7"],
-              [t("home.stats.pharmacy"), "1 Jam"],
-              [t("home.stats.records"), "100%"],
-            ].map(([l, v], idx) => (
+                    {/* Description */}
+                    <p className="text-base sm:text-lg text-white/70 font-light leading-relaxed max-w-lg">
+                      {rotationContent[contentIndex].desc}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* CTA Buttons - NEW DESIGN */}
               <motion.div
-                key={l}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 + idx * 0.1 }}
-                className="text-center group cursor-default hover:scale-110 transition-transform duration-300"
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex flex-col sm:flex-row gap-4 pt-4"
               >
-                <div className="text-3xl sm:text-4xl font-bold text-white font-display mb-1 group-hover:text-cyan-300 transition-colors">
-                  {v}
-                </div>
-                <div className="text-xs uppercase tracking-wider text-white/60 font-medium group-hover:text-white/80 transition-colors">
-                  {l}
-                </div>
+                {/* Primary Button - Solid with icon */}
+                <Link
+                  to="/twin"
+                  className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  {/* Button background with animation */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 group-hover:from-cyan-500 group-hover:to-blue-500 transition-all duration-300" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300" />
+
+                  {/* Button content */}
+                  <div className="relative flex items-center gap-2.5">
+                    <span>{t("home.start_btn")}</span>
+                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </Link>
+
+                {/* Secondary Button - Outline style */}
+                <Link
+                  to="/konsul"
+                  className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-cyan-300 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  {/* Border animation background */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-cyan-400/40 group-hover:border-cyan-300/80 transition-colors duration-300" />
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/5 to-blue-500/5 group-hover:from-cyan-500/10 group-hover:to-blue-500/10 transition-all duration-300" />
+
+                  {/* Button content */}
+                  <div className="relative">{t("home.ai_btn")}</div>
+                </Link>
               </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
+            </motion.div>
+
+            {/* RIGHT SIDE - STATS CARDS */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="order-1 lg:order-2"
+            >
+              {/* Floating stats cards */}
+              <div className="relative h-full flex items-center justify-center lg:justify-end">
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-6 w-full max-w-sm">
+                  {[
+                    {
+                      stat: "24/7",
+                      label: t("home.stats.ai_care"),
+                      delay: 0.4,
+                      color: "from-cyan-500/20 to-cyan-600/10",
+                    },
+                    {
+                      stat: "1 Jam",
+                      label: t("home.stats.pharmacy"),
+                      delay: 0.5,
+                      color: "from-blue-500/20 to-blue-600/10",
+                    },
+                    {
+                      stat: "100%",
+                      label: t("home.stats.records"),
+                      delay: 0.6,
+                      color: "from-sky-500/20 to-sky-600/10",
+                    },
+                  ].map((item, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: item.delay }}
+                      className="group cursor-default"
+                    >
+                      <div
+                        className={`relative rounded-2xl bg-gradient-to-br ${item.color} backdrop-blur-xl border border-white/10 p-6 transition-all duration-300 hover:border-white/30 hover:scale-105`}
+                      >
+                        <div className="space-y-3">
+                          <div className="text-4xl sm:text-5xl lg:text-4xl font-black text-white group-hover:text-cyan-300 transition-colors">
+                            {item.stat}
+                          </div>
+                          <p className="text-sm sm:text-base text-white/70 font-medium group-hover:text-white/90 transition-colors">
+                            {item.label}
+                          </p>
+                        </div>
+
+                        {/* Decorative corner element */}
+                        <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-cyan-400/20 to-transparent rounded-bl-2xl" />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* FEATURE BENTO GRID */}
