@@ -42,11 +42,11 @@ function Index() {
   return (
     <div className="space-y-32 pb-24">
       {/* HERO SECTION WITH VIDEO BACKGROUND */}
-      <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-8 flex min-h-screen flex-col items-center justify-center pt-40 pb-24 text-center px-4 overflow-hidden">
-        {/* VIDEO BACKGROUND */}
-        <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 75%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 75%, transparent 100%)' }}>
+      <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-8 flex min-h-screen flex-col items-center justify-center pt-32 pb-20 text-center px-4 overflow-hidden">
+        {/* VIDEO BACKGROUND WITH PROFESSIONAL OVERLAY */}
+        <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
           <video
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover opacity-30 select-none pointer-events-none"
+            className="absolute top-0 left-0 w-full h-full object-cover"
             autoPlay
             muted
             loop
@@ -55,48 +55,101 @@ function Index() {
           >
             <source src="/hero-bg-medical.mp4" type="video/mp4" />
           </video>
-          {/* Soft overlay to blend video with page */}
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-100/40 via-transparent to-blue-50/30 z-10" />
+          
+          {/* Multi-layer overlay for professional look */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/25 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-950/10 via-transparent to-cyan-950/10" />
         </div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="z-10 flex flex-col items-center max-w-4xl w-full text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-sky-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-10">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.6, ease: "easeOut" }} 
+          className="z-10 flex flex-col items-center max-w-5xl w-full text-center"
+        >
+          {/* Badge */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold uppercase tracking-wider mb-8 hover:bg-white/15 transition-all"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
             {t("home.standard_badge")}
-          </div>
+          </motion.div>
 
-          <div className="min-h-[380px] sm:min-h-[320px] w-full flex flex-col items-center justify-center">
+          {/* Animated Content */}
+          <div className="min-h-[320px] sm:min-h-[280px] w-full flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
-              <motion.div key={contentIndex} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4, ease: "easeInOut" }} className="flex flex-col items-center w-full">
-                <h1 className="font-display text-5xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl text-foreground drop-shadow-xl text-center">
-                  {rotationContent[contentIndex].topTitle} <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-sky-400 to-blue-400 filter drop-shadow-[0_0_12px_rgba(100,180,220,0.2)] block mt-2 sm:mt-4 pb-2 leading-[1.2]">
+              <motion.div 
+                key={contentIndex} 
+                initial={{ y: 30, opacity: 0 }} 
+                animate={{ y: 0, opacity: 1 }} 
+                exit={{ y: -30, opacity: 0 }} 
+                transition={{ duration: 0.5, ease: "easeInOut" }} 
+                className="flex flex-col items-center w-full space-y-6"
+              >
+                {/* Main Headline */}
+                <div className="space-y-3">
+                  <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight text-white drop-shadow-2xl">
+                    {rotationContent[contentIndex].topTitle}
+                  </h1>
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-sky-200 drop-shadow-lg">
                     {rotationContent[contentIndex].bottomTitle}
-                  </span>
-                </h1>
-                <p className="mt-8 sm:mt-10 max-w-3xl text-lg sm:text-xl text-foreground/60 font-light leading-relaxed text-center px-4">
+                  </h2>
+                </div>
+
+                {/* Description */}
+                <p className="mt-2 max-w-2xl text-base sm:text-lg md:text-xl text-white/85 font-light leading-relaxed px-2">
                   {rotationContent[contentIndex].desc}
                 </p>
               </motion.div>
             </AnimatePresence>
           </div>
 
-          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5 w-full">
-            <Link to="/twin" className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white px-10 py-4.5 text-sm font-bold shadow-lg shadow-sky-500/25 transition-all hover:scale-105 hover:shadow-sky-500/35 active:scale-95">
-              {t("home.start_btn")} <ArrowRight className="h-4 w-4" />
+          {/* CTA Buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none"
+          >
+            <Link 
+              to="/twin" 
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-8 py-3.5 text-sm font-bold shadow-2xl shadow-cyan-500/40 transition-all duration-300 hover:shadow-cyan-500/60 hover:scale-105 active:scale-95 group"
+            >
+              {t("home.start_btn")} 
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link to="/konsul" className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-2xl glass-strong hover:bg-white/80 text-foreground border border-sky-200/50 px-10 py-4.5 text-sm font-bold backdrop-blur-md transition-all hover:scale-105 hover:border-sky-300/60 active:scale-95">
+            <Link 
+              to="/konsul" 
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-md text-white border border-white/30 hover:border-white/50 px-8 py-3.5 text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95"
+            >
               {t("home.ai_btn")}
             </Link>
-          </div>
+          </motion.div>
 
-          <div className="mt-20 flex flex-wrap items-center justify-center gap-12 border-t border-border pt-10">
-            {[[t("home.stats.ai_care"), "24/7"], [t("home.stats.pharmacy"), "1 Jam"], [t("home.stats.records"), "100%"]].map(([l, v]) => (
-              <div key={l} className="text-center">
-                <div className="text-2xl font-bold text-foreground font-display mb-1">{v}</div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-sky-500/60 font-bold">{l}</div>
-              </div>
+          {/* Stats Section */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mt-20 flex flex-wrap items-center justify-center gap-8 sm:gap-12 border-t border-white/15 pt-10"
+          >
+            {[[t("home.stats.ai_care"), "24/7"], [t("home.stats.pharmacy"), "1 Jam"], [t("home.stats.records"), "100%"]].map(([l, v], idx) => (
+              <motion.div 
+                key={l} 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 + idx * 0.1 }}
+                className="text-center group cursor-default hover:scale-110 transition-transform duration-300"
+              >
+                <div className="text-3xl sm:text-4xl font-bold text-white font-display mb-1 group-hover:text-cyan-300 transition-colors">{v}</div>
+                <div className="text-xs uppercase tracking-wider text-white/60 font-medium group-hover:text-white/80 transition-colors">{l}</div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
       </section>
 
@@ -120,19 +173,6 @@ function Index() {
               </div>
               <div className="w-full md:w-1/3">
                 <img src="/images/konsul-dokter.png" alt="Konsultasi Dokter" className="w-full h-32 md:h-40 object-contain" />
-              </div>
-            </div>
-          </SpotlightCard>
-
-          {/* Cek Jantung */}
-          <SpotlightCard to="/cek-jantung" glowColor="#f87171">
-            <div className="flex flex-col h-full">
-              <img src="/images/cek-jantung.png" alt="Cek Jantung" className="w-full h-16 object-contain mb-4" />
-              <h3 className="font-display text-xl font-bold text-foreground mb-2 group-hover:text-rose-600">{t("home.cards.heart")}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-auto">{t("home.cards.heart_desc")}</p>
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-                <span className="text-xs font-semibold uppercase tracking-wider text-rose-500/70 group-hover:text-rose-600 transition-colors">{t("home.cards.heart_badge")}</span>
-                <ArrowRight className="h-4 w-4 text-rose-500 transition-transform duration-300 group-hover:translate-x-1" />
               </div>
             </div>
           </SpotlightCard>
