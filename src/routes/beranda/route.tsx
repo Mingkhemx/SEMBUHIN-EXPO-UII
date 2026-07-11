@@ -86,10 +86,8 @@ function Index() {
             <source src="/hero-bg-medical.mp4" type="video/mp4" />
           </video>
 
-          {/* Dynamic overlay with mesh gradient effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-blue-900/30 to-slate-900/50" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
+          {/* Professional clean overlay */}
+          <div className="absolute inset-0 bg-slate-900/60" />
         </div>
 
         {/* MAIN CONTENT - ASYMMETRIC GRID */}
@@ -124,13 +122,13 @@ function Index() {
                     transition={{ duration: 0.5 }}
                     className="space-y-6"
                   >
-                    {/* Headline with split styling */}
+                    {/* Headline with solid styling */}
                     <div className="space-y-2">
                       <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
                         {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
                           <span key={i}>
                             {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
-                              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                              <span className="text-blue-400">
                                 {word}
                               </span>
                             ) : (
@@ -164,8 +162,8 @@ function Index() {
                   to="/twin"
                   className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95"
                 >
-                  {/* Button background with animation */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 group-hover:from-cyan-500 group-hover:to-blue-500 transition-all duration-300" />
+                  {/* Button background */}
+                  <div className="absolute inset-0 bg-blue-600 group-hover:bg-blue-500 transition-colors duration-300" />
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300" />
 
                   {/* Button content */}
@@ -178,11 +176,11 @@ function Index() {
                 {/* Secondary Button - Outline style */}
                 <Link
                   to="/konsul"
-                  className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-cyan-300 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
+                  className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
                 >
-                  {/* Border animation background */}
-                  <div className="absolute inset-0 rounded-xl border-2 border-cyan-400/40 group-hover:border-cyan-300/80 transition-colors duration-300" />
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/5 to-blue-500/5 group-hover:from-cyan-500/10 group-hover:to-blue-500/10 transition-all duration-300" />
+                  {/* Border background */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-white/30 group-hover:border-white/60 transition-colors duration-300" />
+                  <div className="absolute inset-0 rounded-xl bg-white/5 group-hover:bg-white/10 transition-colors duration-300" />
 
                   {/* Button content */}
                   <div className="relative">{t("home.ai_btn")}</div>
@@ -205,19 +203,16 @@ function Index() {
                       stat: "24/7",
                       label: t("home.stats.ai_care"),
                       delay: 0.4,
-                      color: "from-cyan-500/20 to-cyan-600/10",
                     },
                     {
                       stat: "1 Jam",
                       label: t("home.stats.pharmacy"),
                       delay: 0.5,
-                      color: "from-blue-500/20 to-blue-600/10",
                     },
                     {
                       stat: "100%",
                       label: t("home.stats.records"),
                       delay: 0.6,
-                      color: "from-sky-500/20 to-sky-600/10",
                     },
                   ].map((item, idx) => (
                     <motion.div
@@ -228,7 +223,7 @@ function Index() {
                       className="group cursor-default"
                     >
                       <div
-                        className={`relative rounded-2xl bg-gradient-to-br ${item.color} backdrop-blur-xl border border-white/10 p-6 transition-all duration-300 hover:border-white/30 hover:scale-105`}
+                        className="relative rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:scale-105"
                       >
                         <div className="space-y-3">
                           <div className="text-4xl sm:text-5xl lg:text-4xl font-black text-white group-hover:text-cyan-300 transition-colors">
@@ -259,7 +254,7 @@ function Index() {
           </div>
           <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight">
             {t("home.pilar_title")}{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">
+            <span className="text-sky-600">
               {t("home.brand_name")}
             </span>
           </h2>
@@ -354,7 +349,7 @@ function Index() {
           </div>
           <h2 className="font-display text-3xl font-bold sm:text-5xl text-foreground tracking-tight">
             {t("home.doctor_title")}{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-sky-400">
+            <span className="text-sky-600">
               {t("home.doctor_title_accent")}
             </span>
           </h2>
