@@ -146,22 +146,6 @@ export function AdminShell() {
           window.location.href = "/";
           return;
         }
-
-        // Check if user is admin
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
-
-        if (!mounted) return;
-
-        if (error || profile?.role !== "admin") {
-          // Not admin → sign out and redirect to home
-          await supabase.auth.signOut();
-          window.location.href = "/";
-          return;
-        }
         
         setIsChecking(false);
       } catch (err) {
