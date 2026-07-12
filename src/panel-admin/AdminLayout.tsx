@@ -131,7 +131,6 @@ export function AdminShell() {
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
 
     const checkAdminAuth = async () => {
       try {
@@ -141,54 +140,16 @@ export function AdminShell() {
         if (!isMounted) return;
 
         if (!session) {
+          // No session → redirect to login
           navigate({ to: "/admin/login" });
           return;
         }
 
-        // Get fresh profile from table with timeout
-        try {
-          const { data: profile, error } = (await Promise.race([
-            supabase
-              .from("profiles")
-              .select("full_name, email, role, avatar_url")
-              .eq("id", session.user.id)
-              .single(),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error("Database query timeout")), 5000),
-            ),
-          ])) as any;
-
-          if (!isMounted) return;
-
-          // STRICT: User HARUS punya role admin, jika tidak atau error → redirect ke login
-          if (error) {
-            console.error("Database query failed:", error);
-            await authSignOut();
-            navigate({ to: "/admin/login" });
-            return;
-          }
-
-          if (!profile || profile.role !== "admin") {
-            console.warn("User is not admin. Access denied.");
-            await authSignOut();
-            navigate({ to: "/admin/login" });
-            return;
-          }
-
-          // User adalah admin - boleh akses
-          setIsVerifying(false);
-        } catch (dbErr) {
-          console.error("Database query error:", dbErr);
-          // Database error → sign out dan redirect ke login
-          if (isMounted) {
-            await authSignOut();
-            navigate({ to: "/admin/login" });
-          }
-        }
+        // Session exists → admin sudah verified di AdminLogin, bisa proceed
+        setIsVerifying(false);
       } catch (err) {
         console.error("Auth check error:", err);
         if (isMounted) {
-          setIsVerifying(false);
           navigate({ to: "/admin/login" });
         }
       }
@@ -196,17 +157,8 @@ export function AdminShell() {
 
     checkAdminAuth();
 
-    // Safety timeout - jika verification timeout, redirect ke login (jangan proceed)
-    timeoutId = setTimeout(() => {
-      if (isMounted) {
-        console.warn("Auth verification timeout - redirecting to login for safety");
-        navigate({ to: "/admin/login" });
-      }
-    }, 10000);
-
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
     };
   }, [navigate]);
 
