@@ -17,15 +17,34 @@ export function AdminLogin() {
     setError("");
 
     try {
-      // Simple login - just signIn, no verification
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      // Step 1: Sign in with email and password
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) throw authError;
 
-      // Login success → go to /admin
+      // Step 2: Check if user is admin
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        // If we can't fetch profile, sign them out
+        await supabase.auth.signOut();
+        throw new Error("User profile tidak ditemukan");
+      }
+
+      if (profile.role !== "admin") {
+        // Not admin → sign them out and show error
+        await supabase.auth.signOut();
+        throw new Error("Akun Anda bukan admin. Akses ditolak.");
+      }
+
+      // Step 3: Is admin → go to /admin
       navigate({ to: "/admin" });
     } catch (err: any) {
       setError(err.message || "Login gagal");
