@@ -131,19 +131,27 @@ export function AdminShell() {
 
   useEffect(() => {
     let isMounted = true;
+    let hasChecked = false;
 
     const checkSession = async () => {
+      if (hasChecked || !isMounted) return;
+      hasChecked = true;
+
       try {
         const {
           data: { session },
         } = await supabase.auth.getSession();
+        
         if (!isMounted) return;
 
         if (!session) {
           // No session → go to login
           navigate({ to: "/admin/login" });
-        } else {
-          // Session exists → render admin panel
+          return;
+        }
+
+        // Session exists → allow access (verification sudah dilakukan di login)
+        if (isMounted) {
           setIsVerifying(false);
         }
       } catch (err) {
