@@ -39,6 +39,7 @@ import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminApiUsageRouteImport } from './routes/admin/api-usage'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as DoctorSettingsRouteRouteImport } from './routes/doctor/settings/route'
 import { Route as DoctorPrescriptionsRouteRouteImport } from './routes/doctor/prescriptions/route'
 import { Route as DoctorPatientsRouteRouteImport } from './routes/doctor/patients/route'
@@ -202,6 +203,11 @@ const AdminApiUsageRoute = AdminApiUsageRouteImport.update({
   path: '/api-usage',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const DoctorSettingsRouteRoute = DoctorSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api-usage': typeof AdminApiUsageRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -345,6 +352,7 @@ export interface FileRoutesByTo {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api-usage': typeof AdminApiUsageRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
@@ -390,6 +398,7 @@ export interface FileRoutesById {
   '/doctor/patients': typeof DoctorPatientsRouteRoute
   '/doctor/prescriptions': typeof DoctorPrescriptionsRouteRoute
   '/doctor/settings': typeof DoctorSettingsRouteRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api-usage': typeof AdminApiUsageRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -436,6 +445,7 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/analytics'
     | '/admin/api-usage'
     | '/admin/login'
     | '/admin/'
@@ -477,6 +487,7 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/analytics'
     | '/admin/api-usage'
     | '/admin/login'
     | '/admin'
@@ -521,6 +532,7 @@ export interface FileRouteTypes {
     | '/doctor/patients'
     | '/doctor/prescriptions'
     | '/doctor/settings'
+    | '/admin/analytics'
     | '/admin/api-usage'
     | '/admin/login'
     | '/admin/'
@@ -768,6 +780,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApiUsageRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/doctor/settings': {
       id: '/doctor/settings'
       path: '/settings'
@@ -861,6 +880,7 @@ interface AdminRouteRouteChildren {
   AdminMarketplaceRouteRoute: typeof AdminMarketplaceRouteRoute
   AdminSettingsRouteRoute: typeof AdminSettingsRouteRoute
   AdminUsersRouteRoute: typeof AdminUsersRouteRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApiUsageRoute: typeof AdminApiUsageRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -872,6 +892,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminMarketplaceRouteRoute: AdminMarketplaceRouteRoute,
   AdminSettingsRouteRoute: AdminSettingsRouteRoute,
   AdminUsersRouteRoute: AdminUsersRouteRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApiUsageRoute: AdminApiUsageRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,

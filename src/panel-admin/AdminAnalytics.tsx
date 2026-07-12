@@ -1,26 +1,14 @@
 /**
- * AdminAnalytics — Comprehensive business analytics with multiple chart types.
- * Integrated with Supabase for real-time data.
+ * AdminAnalytics — Business analytics integrated with Supabase Edge Functions.
+ * Direct connection to Supabase serverless API (no Railway backend needed).
  */
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  ShoppingCart,
-  Users,
-  Activity,
-  Download,
-  RefreshCcw,
-} from "lucide-react";
+import { TrendingUp, ShoppingCart, RefreshCcw } from "lucide-react";
 import { AdminLayout } from "@/panel-admin/AdminLayout";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface MetricsData {
   totalRevenue: number;
@@ -31,16 +19,12 @@ interface MetricsData {
   pharmacyOrders: number;
 }
 
-// ─── Chart Components ─────────────────────────────────────────────────────────
-
 function PieChart({
   data,
   colors,
-  title,
 }: {
   data: Array<{ label: string; value: number }>;
   colors: string[];
-  title: string;
 }) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   if (total === 0) return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
@@ -82,7 +66,6 @@ function PieChart({
           ))}
         </svg>
       </div>
-
       <div className="space-y-2">
         {data.map((item, i) => (
           <div
@@ -159,7 +142,6 @@ function DonutChart({
           </div>
         </div>
       </div>
-
       <div className="w-full space-y-2">
         {data.map((item, i) => (
           <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
@@ -242,15 +224,12 @@ function LineChart({ data, color }: { data: number[]; color: string }) {
           stroke="#e2e8f0"
           strokeDasharray="5"
         />
-
         <polyline points={points} fill="none" stroke={color} strokeWidth="3" />
-
         <polygon
           points={`20,${height + 20} ${points} ${20 + (data.length - 1) * pointSpacing},${height + 20}`}
           fill={color}
           opacity="0.1"
         />
-
         {data.map((_, i) => (
           <circle
             key={i}
@@ -265,15 +244,13 @@ function LineChart({ data, color }: { data: number[]; color: string }) {
   );
 }
 
-// ─── Section Card ──────────────────────────────────────────────────────────
-
 function SectionCard({
   title,
   subtitle,
   children,
   delay = 0,
 }: {
-  title: string;
+  title?: string;
   subtitle?: string;
   children: React.ReactNode;
   delay?: number;
@@ -285,16 +262,16 @@ function SectionCard({
       transition={{ duration: 0.3, delay }}
       className="bg-white border border-slate-200 rounded-2xl overflow-hidden"
     >
-      <div className="px-6 py-5 border-b border-slate-200">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
-      </div>
+      {title && (
+        <div className="px-6 py-5 border-b border-slate-200">
+          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+          {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
+        </div>
+      )}
       <div className="p-6">{children}</div>
     </motion.div>
   );
 }
-
-// ─── Main Component ───────────────────────────────────────────────────────
 
 export function AdminAnalytics() {
   const [metrics, setMetrics] = useState<MetricsData>({
@@ -318,94 +295,62 @@ export function AdminAnalytics() {
     try {
       setIsLoading(true);
 
-      // Fetch all payment orders
-      const { data: orders, error } = await supabase
-        .from("payment_orders")
-        .select("*")
-        .eq("payment_status", "paid")
-        .order("created_at", { ascending: false })
-        .limit(1000);
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      if (error) {
-        console.error("Error fetching orders:", error);
-        // Use mock data if fetch fails
-        generateMockData();
-        return;
-      }
-
-      if (!orders || orders.length === 0) {
-        generateMockData();
-        return;
-      }
-
-      // Calculate metrics from real data
-      let premiumRev = 0,
-        pharmacyRev = 0;
-      let premiumCount = 0,
-        pharmacyCount = 0;
-
-      orders.forEach((order: any) => {
-        const amount = parseFloat(order.amount || 0);
-        const orderType = order.order_type || "pharmacy";
-
-        if (orderType === "premium") {
-          premiumRev += amount;
-          premiumCount += 1;
-        } else {
-          pharmacyRev += amount;
-          pharmacyCount += 1;
-        }
+      const response = await fetch(`${supabaseUrl}/functions/v1/analytics-api?days=30`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${anonKey}`,
+          "Content-Type": "application/json",
+        },
       });
 
-      const totalRev = premiumRev + pharmacyRev;
+      if (!response.ok) {
+        console.error("API Error:", response.statusText);
+        generateMockData();
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        console.warn("API Response:", data.message);
+        generateMockData();
+        return;
+      }
 
       setMetrics({
-        totalRevenue: totalRev,
-        premiumRevenue: premiumRev,
-        pharmacyRevenue: pharmacyRev,
-        totalOrders: orders.length,
-        premiumOrders: premiumCount,
-        pharmacyOrders: pharmacyCount,
+        totalRevenue: data.totalRevenue,
+        premiumRevenue: data.premiumRevenue,
+        pharmacyRevenue: data.pharmacyRevenue,
+        totalOrders: data.totalOrders,
+        premiumOrders: data.premiumOrders,
+        pharmacyOrders: data.pharmacyOrders,
       });
 
-      // Generate revenue history from last 30 days
-      generateRevenueHistory(orders);
+      setRevenueHistory(data.revenueHistory || []);
       setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm:ss"));
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Fetch Error:", err);
       generateMockData();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const generateRevenueHistory = (orders: any[]) => {
-    const history: Record<string, number> = {};
-
-    orders.forEach((order: any) => {
-      const date = new Date(order.created_at).toLocaleDateString("id-ID");
-      const amount = parseFloat(order.amount || 0);
-      history[date] = (history[date] || 0) + amount;
-    });
-
-    const last30Days = Object.values(history).slice(-30);
-    setRevenueHistory(last30Days.length > 0 ? last30Days : [0, 0, 0, 0, 0]);
-  };
-
   const generateMockData = () => {
-    // Mock data untuk testing
-    const mockOrders = Array.from({ length: 150 }, (_, i) => ({
+    const mockOrders = Array.from({ length: 150 }, () => ({
       amount: Math.floor(Math.random() * 5000000) + 100000,
       order_type: Math.random() > 0.6 ? "premium" : "pharmacy",
-      created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
     }));
 
     let premiumRev = 0,
-      pharmacyRev = 0;
-    let premiumCount = 0,
+      pharmacyRev = 0,
+      premiumCount = 0,
       pharmacyCount = 0;
 
-    mockOrders.forEach((order: any) => {
+    mockOrders.forEach((order) => {
       if (order.order_type === "premium") {
         premiumRev += order.amount;
         premiumCount += 1;
@@ -439,22 +384,21 @@ export function AdminAnalytics() {
   return (
     <AdminLayout
       title="Analytics & Penjualan"
-      subtitle="Pelacakan bisnis Sembuhin — Premium, Apotek, & Revenue Intelligence"
+      subtitle="Pelacakan bisnis Sembuhin — Koneksi langsung Supabase Edge Function"
       rightElement={
         <div className="flex items-center gap-3">
           <button
             onClick={fetchAnalyticsData}
-            className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+            className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
             disabled={isLoading}
           >
             <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </button>
-          <span className="text-xs text-slate-500">{lastUpdate}</span>
+          <span className="text-xs text-slate-500 font-medium">{lastUpdate}</span>
         </div>
       }
     >
       <div className="space-y-6">
-        {/* ── Key Metrics ───────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <SectionCard>
             <div className="space-y-2">
@@ -517,18 +461,15 @@ export function AdminAnalytics() {
           </SectionCard>
         </div>
 
-        {/* ── Charts Row 1 ──────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Revenue Trend Line Chart */}
           <SectionCard
-            title="Tren Pendapatan (30 Hari Terakhir)"
+            title="Tren Pendapatan (30 Hari)"
             subtitle="Grafik revenue harian"
             delay={0.1}
           >
             <LineChart data={revenueHistory} color="#3b82f6" />
           </SectionCard>
 
-          {/* Revenue Distribution Pie Chart */}
           <SectionCard title="Distribusi Revenue" subtitle="Premium vs Pharmacy" delay={0.15}>
             <PieChart
               data={[
@@ -540,9 +481,7 @@ export function AdminAnalytics() {
           </SectionCard>
         </div>
 
-        {/* ── Charts Row 2 ──────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Orders Donut Chart */}
           <SectionCard title="Breakdown Pesanan" subtitle="Order count per kategori" delay={0.2}>
             <DonutChart
               data={[
@@ -553,12 +492,7 @@ export function AdminAnalytics() {
             />
           </SectionCard>
 
-          {/* Revenue Breakdown Bar Chart */}
-          <SectionCard
-            title="Perbandingan Revenue"
-            subtitle="Bar chart distribusi revenue"
-            delay={0.25}
-          >
+          <SectionCard title="Perbandingan Revenue" subtitle="Bar chart distribusi" delay={0.25}>
             <BarChart
               data={[
                 { label: "Premium Revenue", value: metrics.premiumRevenue },
@@ -572,7 +506,6 @@ export function AdminAnalytics() {
           </SectionCard>
         </div>
 
-        {/* ── Additional Metrics ──────────────────────────────────────────── */}
         <SectionCard title="Ringkasan Metrik Bisnis" delay={0.3}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
@@ -593,7 +526,8 @@ export function AdminAnalytics() {
               </p>
               <p className="text-2xl font-bold text-violet-600 mt-2">{metrics.premiumOrders}</p>
               <p className="text-xs text-slate-600 mt-1">
-                {((metrics.premiumOrders / metrics.totalOrders) * 100).toFixed(1)}% dari total
+                {((metrics.premiumOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}% dari
+                total
               </p>
             </div>
 
@@ -603,13 +537,14 @@ export function AdminAnalytics() {
               </p>
               <p className="text-2xl font-bold text-emerald-600 mt-2">{metrics.pharmacyOrders}</p>
               <p className="text-xs text-slate-600 mt-1">
-                {((metrics.pharmacyOrders / metrics.totalOrders) * 100).toFixed(1)}% dari total
+                {((metrics.pharmacyOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}% dari
+                total
               </p>
             </div>
 
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                Premium Revenue %
+                Premium %
               </p>
               <p className="text-2xl font-bold text-violet-600 mt-2">
                 {premiumPercentage.toFixed(1)}%
