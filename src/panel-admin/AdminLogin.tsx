@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ShieldCheck, Lock, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "@tanstack/react-router";
@@ -11,88 +11,24 @@ export function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect if already logged in as admin
-  useEffect(() => {
-    let isMounted = true;
-    let hasChecked = false;
-
-    const checkExistingAuth = async () => {
-      if (hasChecked) return;
-      hasChecked = true;
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!isMounted) return;
-
-      if (session) {
-        // Ada session, check kalau admin → redirect
-        try {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", session.user.id)
-            .single();
-
-          if (!isMounted) return;
-
-          if (profile?.role === "admin") {
-            // Admin sudah login - redirect ke /admin
-            navigate({ to: "/admin" });
-          } else {
-            // Non-admin dengan session - sign out, stay di login
-            await supabase.auth.signOut();
-          }
-        } catch (err) {
-          console.error("Profile check error:", err);
-          if (isMounted) {
-            await supabase.auth.signOut();
-          }
-        }
-      }
-      // Jika tidak ada session → stay di login (benar)
-    };
-
-    checkExistingAuth();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      // 1. Sign in with Supabase Auth
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      // Simple login - just signIn, no verification
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) throw authError;
 
-      if (data.user) {
-        // 2. Check if user has 'admin' role in profiles table
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profileError || profile?.role !== "admin") {
-          // If not admin, sign out immediately
-          await supabase.auth.signOut();
-          throw new Error("Akses ditolak. Anda bukan Administrator.");
-        }
-
-        // 3. Success
-        navigate({ to: "/admin" });
-      }
+      // Login success → go to /admin
+      navigate({ to: "/admin" });
     } catch (err: any) {
-      setError(err.message || "Gagal masuk ke Admin Panel.");
+      setError(err.message || "Login gagal");
       setIsLoading(false);
     }
   };

@@ -131,12 +131,8 @@ export function AdminShell() {
 
   useEffect(() => {
     let isMounted = true;
-    let hasChecked = false;
 
     const checkSession = async () => {
-      if (hasChecked) return; // Prevent re-running
-      hasChecked = true;
-
       try {
         const {
           data: { session },
@@ -144,16 +140,16 @@ export function AdminShell() {
         if (!isMounted) return;
 
         if (!session) {
-          // Tidak ada session → ke login
+          // No session → go to login
           navigate({ to: "/admin/login" });
         } else {
-          // Ada session → siap render (jangan verify lagi!)
+          // Session exists → render admin panel
           setIsVerifying(false);
         }
       } catch (err) {
-        console.error("Session check error:", err);
+        console.error("Error:", err);
         if (isMounted) {
-          navigate({ to: "/admin/login" });
+          setIsVerifying(false);
         }
       }
     };
