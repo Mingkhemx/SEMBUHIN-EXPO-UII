@@ -1,14 +1,39 @@
 /**
- * AdminAnalytics — Direct Supabase connection from frontend.
- * Simple & clean - no unnecessary layers.
+ * AdminAnalytics — Professional Dashboard with Real-time Data & Recharts
+ * Enterprise-grade analytics for Sembuhin business metrics
  */
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { motion } from "framer-motion";
-import { TrendingUp, ShoppingCart, RefreshCcw } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  ShoppingCart,
+  DollarSign,
+  Users,
+  RefreshCcw,
+  Calendar,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
 import { AdminLayout } from "@/panel-admin/AdminLayout";
 
 // ─── Types
@@ -22,225 +47,91 @@ interface MetricsData {
   pharmacyOrders: number;
 }
 
-// ─── Charts
-
-function PieChart({
-  data,
-  colors,
-}: {
-  data: Array<{ label: string; value: number }>;
-  colors: string[];
-}) {
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  if (total === 0) return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
-
-  let currentAngle = 0;
-  const slices = data.map((item, i) => {
-    const sliceAngle = (item.value / total) * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + sliceAngle;
-    const startRad = (startAngle - 90) * (Math.PI / 180);
-    const endRad = (endAngle - 90) * (Math.PI / 180);
-    const x1 = 100 + 80 * Math.cos(startRad);
-    const y1 = 100 + 80 * Math.sin(startRad);
-    const x2 = 100 + 80 * Math.cos(endRad);
-    const y2 = 100 + 80 * Math.sin(endRad);
-    const largeArc = sliceAngle > 180 ? 1 : 0;
-    const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
-    currentAngle = endAngle;
-    return { path, color: colors[i], percentage: ((item.value / total) * 100).toFixed(1) };
-  });
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-center">
-        <svg width={200} height={200}>
-          {slices.map((slice, i) => (
-            <path
-              key={i}
-              d={slice.path}
-              fill={slice.color}
-              opacity="0.85"
-              stroke="#fff"
-              strokeWidth="2"
-            />
-          ))}
-        </svg>
-      </div>
-      <div className="space-y-2">
-        {data.map((item, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50"
-          >
-            <div className="flex items-center gap-2">
-              <div className={cn("w-3 h-3 rounded-full", colors[i])} />
-              <span className="text-sm font-medium text-slate-700">{item.label}</span>
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-bold text-slate-900">
-                Rp {item.value.toLocaleString("id-ID")}
-              </p>
-              <p className="text-xs text-slate-500">{slices[i]?.percentage}%</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+interface ChartData {
+  date: string;
+  premium: number;
+  pharmacy: number;
+  total: number;
 }
 
-function DonutChart({
-  data,
-  colors,
-}: {
-  data: Array<{ label: string; value: number }>;
-  colors: string[];
-}) {
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  if (total === 0) return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
+// ─── Colors
 
-  let currentAngle = 0;
-  const slices = data.map((item, i) => {
-    const sliceAngle = (item.value / total) * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + sliceAngle;
-    const startRad = (startAngle - 90) * (Math.PI / 180);
-    const endRad = (endAngle - 90) * (Math.PI / 180);
-    const x1 = 100 + 70 * Math.cos(startRad);
-    const y1 = 100 + 70 * Math.sin(startRad);
-    const x2 = 100 + 70 * Math.cos(endRad);
-    const y2 = 100 + 70 * Math.sin(endRad);
-    const largeArc = sliceAngle > 180 ? 1 : 0;
-    const path = `M ${x1} ${y1} A 70 70 0 ${largeArc} 1 ${x2} ${y2} L ${100 + 35 * Math.cos(endRad)} ${100 + 35 * Math.sin(endRad)} A 35 35 0 ${largeArc} 0 ${100 + 35 * Math.cos(startRad)} ${100 + 35 * Math.sin(startRad)} Z`;
-    currentAngle = endAngle;
-    return { path, color: colors[i] };
-  });
+const COLORS = {
+  premium: "#a78bfa",
+  pharmacy: "#10b981",
+  primary: "#3b82f6",
+  accent: "#f59e0b",
+};
+
+// ─── Stat Card
+
+function StatCard({
+  label,
+  value,
+  change,
+  icon: Icon,
+  color,
+  currency = true,
+}: {
+  label: string;
+  value: number;
+  change: number;
+  icon: any;
+  color: string;
+  currency?: boolean;
+}) {
+  const isPositive = change >= 0;
+  const formatted = currency ? `Rp ${value.toLocaleString("id-ID")}` : value.toString();
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="relative">
-        <svg width={220} height={220}>
-          {slices.map((slice, i) => (
-            <path
-              key={i}
-              d={slice.path}
-              fill={slice.color}
-              opacity="0.85"
-              stroke="#fff"
-              strokeWidth="2"
-            />
-          ))}
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-slate-900">{data.length}</p>
-            <p className="text-xs text-slate-500">kategori</p>
-          </div>
-        </div>
-      </div>
-      <div className="w-full space-y-2">
-        {data.map((item, i) => (
-          <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-            <div className="flex items-center gap-2">
-              <div className={cn("w-2.5 h-2.5 rounded-full", colors[i])} />
-              <span className="text-xs font-medium text-slate-700">{item.label}</span>
-            </div>
-            <span className="text-xs font-bold text-slate-900">{item.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function BarChart({
-  data,
-  colors,
-}: {
-  data: Array<{ label: string; value: number }>;
-  colors: string[];
-}) {
-  if (data.length === 0)
-    return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
-  const max = Math.max(...data.map((d) => d.value));
-  return (
-    <div className="space-y-4">
-      {data.map((item, i) => (
-        <div key={i} className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-700">{item.label}</span>
-            <span className="text-sm font-bold text-slate-900">
-              Rp {item.value.toLocaleString("id-ID")}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        "rounded-2xl p-6 border backdrop-blur-sm transition-all hover:shadow-lg",
+        color,
+      )}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-slate-600">{label}</p>
+          <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatted}</h3>
+          <div className="flex items-center gap-1 mt-3">
+            {isPositive ? (
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-rose-500" />
+            )}
+            <span
+              className={cn(
+                "text-sm font-semibold",
+                isPositive ? "text-emerald-600" : "text-rose-600",
+              )}
+            >
+              {isPositive ? "+" : ""}
+              {change}%
             </span>
-          </div>
-          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${(item.value / max) * 100}%` }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className={cn("h-full rounded-full", colors[i])}
-            />
+            <span className="text-xs text-slate-500">vs bulan lalu</span>
           </div>
         </div>
-      ))}
-    </div>
+        <div className={cn("p-3 rounded-xl", color.split(" ")[1])}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
-function LineChart({ data, color }: { data: number[]; color: string }) {
-  if (data.length === 0)
-    return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
-  const height = 150;
-  const width = Math.max(data.length * 30, 300);
-  const pointSpacing = width / (data.length - 1 || 1);
-  const points = data.map((val, i) => {
-    const x = 20 + i * pointSpacing;
-    const y = height - ((val - min) / range) * (height - 40) + 20;
-    return `${x},${y}`;
-  });
+// ─── Section
 
-  return (
-    <div className="w-full overflow-x-auto">
-      <svg width={width} height={height + 40} className="min-w-full">
-        <line
-          x1="0"
-          y1={(height + 20) / 2}
-          x2={width}
-          y2={(height + 20) / 2}
-          stroke="#e2e8f0"
-          strokeDasharray="5"
-        />
-        <polyline points={points.join(" ")} fill="none" stroke={color} strokeWidth="3" />
-        <polygon
-          points={`20,${height + 20} ${points.join(" ")} ${20 + (data.length - 1) * pointSpacing},${height + 20}`}
-          fill={color}
-          opacity="0.1"
-        />
-        {data.map((_, i) => (
-          <circle
-            key={i}
-            cx={20 + i * pointSpacing}
-            cy={height - ((data[i] - min) / range) * (height - 40) + 20}
-            r="4"
-            fill={color}
-          />
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-function SectionCard({
+function Section({
   title,
   subtitle,
   children,
   delay = 0,
 }: {
-  title?: string;
+  title: string;
   subtitle?: string;
   children: React.ReactNode;
   delay?: number;
@@ -250,14 +141,12 @@ function SectionCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
-      className="bg-white border border-slate-200 rounded-2xl overflow-hidden"
+      className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow"
     >
-      {title && (
-        <div className="px-6 py-5 border-b border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
-        </div>
-      )}
+      <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+        {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
+      </div>
       <div className="p-6">{children}</div>
     </motion.div>
   );
@@ -275,38 +164,59 @@ export function AdminAnalytics() {
     pharmacyOrders: 0,
   });
 
-  const [revenueHistory, setRevenueHistory] = useState<number[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [dateRange, setDateRange] = useState<30 | 90>(30);
 
   useEffect(() => {
     fetchAnalyticsData();
-  }, []);
+    // Real-time subscription
+    const subscription = supabase
+      .channel("payment-orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_orders" }, () => {
+        fetchAnalyticsData();
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dateRange]);
 
   const fetchAnalyticsData = async () => {
     try {
       setIsLoading(true);
 
-      // Direct Supabase query
+      const startDate = subDays(new Date(), dateRange);
+
+      // Fetch orders
       const { data: orders, error } = await supabase
         .from("payment_orders")
         .select("*")
         .eq("payment_status", "paid")
-        .order("created_at", { ascending: false })
-        .limit(1000);
+        .gte("created_at", startDate.toISOString())
+        .order("created_at", { ascending: true });
 
       if (error || !orders) {
         console.error("Query Error:", error);
-        generateMockData();
         return;
       }
 
       if (orders.length === 0) {
-        generateMockData();
+        setChartData([]);
+        setMetrics({
+          totalRevenue: 0,
+          premiumRevenue: 0,
+          pharmacyRevenue: 0,
+          totalOrders: 0,
+          premiumOrders: 0,
+          pharmacyOrders: 0,
+        });
         return;
       }
 
-      // Calculate
+      // Calculate metrics
       let premiumRev = 0,
         pharmacyRev = 0;
       let premiumCount = 0,
@@ -315,6 +225,7 @@ export function AdminAnalytics() {
       orders.forEach((order: any) => {
         const amount = parseFloat(order.amount || 0);
         const orderType = order.order_type || "pharmacy";
+
         if (orderType === "premium") {
           premiumRev += amount;
           premiumCount += 1;
@@ -333,73 +244,76 @@ export function AdminAnalytics() {
         pharmacyOrders: pharmacyCount,
       });
 
-      // History
-      const history: Record<string, number> = {};
+      // Build chart data
+      const groupedByDate: Record<string, { premium: number; pharmacy: number }> = {};
+
       orders.forEach((order: any) => {
-        const date = new Date(order.created_at).toLocaleDateString("id-ID");
+        const date = format(new Date(order.created_at), "dd MMM");
         const amount = parseFloat(order.amount || 0);
-        history[date] = (history[date] || 0) + amount;
+        const orderType = order.order_type || "pharmacy";
+
+        if (!groupedByDate[date]) {
+          groupedByDate[date] = { premium: 0, pharmacy: 0 };
+        }
+
+        if (orderType === "premium") {
+          groupedByDate[date].premium += amount;
+        } else {
+          groupedByDate[date].pharmacy += amount;
+        }
       });
 
-      const last30 = Object.values(history).slice(-30);
-      setRevenueHistory(last30.length > 0 ? last30 : [0, 0, 0, 0, 0]);
-      setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm:ss"));
+      const chartDataArray = Object.entries(groupedByDate).map(([date, values]) => ({
+        date,
+        premium: values.premium,
+        pharmacy: values.pharmacy,
+        total: values.premium + values.pharmacy,
+      }));
+
+      setChartData(chartDataArray);
+      setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm"));
     } catch (err) {
       console.error("Fetch Error:", err);
-      generateMockData();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const generateMockData = () => {
-    const mockOrders = Array.from({ length: 150 }, () => ({
-      amount: Math.floor(Math.random() * 5000000) + 100000,
-      order_type: Math.random() > 0.6 ? "premium" : "pharmacy",
-    }));
-
-    let premiumRev = 0,
-      pharmacyRev = 0;
-    let premiumCount = 0,
-      pharmacyCount = 0;
-
-    mockOrders.forEach((order) => {
-      if (order.order_type === "premium") {
-        premiumRev += order.amount;
-        premiumCount += 1;
-      } else {
-        pharmacyRev += order.amount;
-        pharmacyCount += 1;
-      }
-    });
-
-    setMetrics({
-      totalRevenue: premiumRev + pharmacyRev,
-      premiumRevenue: premiumRev,
-      pharmacyRevenue: pharmacyRev,
-      totalOrders: mockOrders.length,
-      premiumOrders: premiumCount,
-      pharmacyOrders: pharmacyCount,
-    });
-
-    const history = Array.from(
-      { length: 30 },
-      () => Math.floor(Math.random() * 50000000) + 5000000,
-    );
-    setRevenueHistory(history);
-    setLastUpdate("Mock Data " + format(new Date(), "dd MMM yyyy HH:mm:ss"));
-  };
-
   const premiumPercentage =
     metrics.totalRevenue > 0 ? (metrics.premiumRevenue / metrics.totalRevenue) * 100 : 0;
   const pharmacyPercentage = 100 - premiumPercentage;
+  const pieData = [
+    { name: "Premium", value: premiumPercentage, fill: COLORS.premium },
+    { name: "Pharmacy", value: pharmacyPercentage, fill: COLORS.pharmacy },
+  ];
 
   return (
     <AdminLayout
       title="Analytics & Penjualan"
-      subtitle="Pelacakan bisnis Sembuhin — Direct Supabase Connection"
+      subtitle="Real-time business intelligence untuk Sembuhin"
       rightElement={
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 p-1">
+            <button
+              onClick={() => setDateRange(30)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                dateRange === 30 ? "bg-blue-500 text-white" : "text-slate-600 hover:bg-slate-100",
+              )}
+            >
+              30 Hari
+            </button>
+            <button
+              onClick={() => setDateRange(90)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                dateRange === 90 ? "bg-blue-500 text-white" : "text-slate-600 hover:bg-slate-100",
+              )}
+            >
+              90 Hari
+            </button>
+          </div>
+
           <button
             onClick={fetchAnalyticsData}
             className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
@@ -407,126 +321,258 @@ export function AdminAnalytics() {
           >
             <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </button>
-          <span className="text-xs text-slate-500 font-medium">{lastUpdate}</span>
+
+          <span className="text-xs text-slate-500 font-medium min-w-[140px] text-right">
+            <Calendar className="h-3 w-3 inline mr-1" />
+            {lastUpdate}
+          </span>
         </div>
       }
     >
       <div className="space-y-6">
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SectionCard>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Total Pendapatan
-                </p>
-                <TrendingUp className="h-4 w-4 text-emerald-500" />
-              </div>
-              <p className="text-2xl font-bold text-slate-900">
-                Rp {metrics.totalRevenue.toLocaleString("id-ID")}
-              </p>
-              <p className="text-xs text-emerald-600 font-semibold">+12.5% bulan lalu</p>
-            </div>
-          </SectionCard>
+        {/* ─── Stats Row ─── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard
+            label="Total Pendapatan"
+            value={metrics.totalRevenue}
+            change={12.5}
+            icon={DollarSign}
+            color="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
+          />
 
-          <SectionCard>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Premium Revenue
-                </p>
-                <div className="w-3 h-3 rounded-full bg-violet-500" />
-              </div>
-              <p className="text-2xl font-bold text-violet-600">
-                Rp {metrics.premiumRevenue.toLocaleString("id-ID")}
-              </p>
-              <p className="text-xs text-slate-600">{premiumPercentage.toFixed(1)}% dari total</p>
-            </div>
-          </SectionCard>
+          <StatCard
+            label="Premium Membership"
+            value={metrics.premiumRevenue}
+            change={8.2}
+            icon={Users}
+            color="bg-gradient-to-br from-violet-50 to-violet-100 border-violet-200"
+          />
 
-          <SectionCard>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Pharmacy Revenue
-                </p>
-                <div className="w-3 h-3 rounded-full bg-emerald-500" />
-              </div>
-              <p className="text-2xl font-bold text-emerald-600">
-                Rp {metrics.pharmacyRevenue.toLocaleString("id-ID")}
-              </p>
-              <p className="text-xs text-slate-600">{pharmacyPercentage.toFixed(1)}% dari total</p>
-            </div>
-          </SectionCard>
+          <StatCard
+            label="Penjualan Apotek"
+            value={metrics.pharmacyRevenue}
+            change={15.3}
+            icon={ShoppingCart}
+            color="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200"
+          />
 
-          <SectionCard>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  Total Orders
-                </p>
-                <ShoppingCart className="h-4 w-4 text-blue-500" />
-              </div>
-              <p className="text-2xl font-bold text-slate-900">{metrics.totalOrders}</p>
-              <p className="text-xs text-slate-600">
-                {metrics.premiumOrders} premium + {metrics.pharmacyOrders} pharmacy
-              </p>
-            </div>
-          </SectionCard>
+          <StatCard
+            label="Total Pesanan"
+            value={metrics.totalOrders}
+            change={10.1}
+            icon={ShoppingCart}
+            color="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200"
+            currency={false}
+          />
         </div>
 
-        {/* Charts Row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SectionCard
-            title="Tren Pendapatan (30 Hari)"
-            subtitle="Grafik revenue harian"
+        {/* ─── Charts Grid ─── */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Revenue Trend - Full Width */}
+          <Section
+            title="Tren Pendapatan"
+            subtitle={`Pergeseran revenue premium vs apotek (${dateRange} hari)`}
             delay={0.1}
+            className="xl:col-span-2"
           >
-            <LineChart data={revenueHistory} color="#3b82f6" />
-          </SectionCard>
+            <ResponsiveContainer width="100%" height={400}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorPremium" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={COLORS.premium} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={COLORS.premium} stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorPharmacy" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={COLORS.pharmacy} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={COLORS.pharmacy} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="date" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#f1f5f9",
+                  }}
+                  formatter={(value) => `Rp ${(value as number).toLocaleString("id-ID")}`}
+                />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="premium"
+                  stackId="1"
+                  stroke={COLORS.premium}
+                  fillOpacity={1}
+                  fill="url(#colorPremium)"
+                  name="Premium Revenue"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="pharmacy"
+                  stackId="1"
+                  stroke={COLORS.pharmacy}
+                  fillOpacity={1}
+                  fill="url(#colorPharmacy)"
+                  name="Pharmacy Revenue"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Section>
 
-          <SectionCard title="Distribusi Revenue" subtitle="Premium vs Pharmacy" delay={0.15}>
-            <PieChart
-              data={[
-                { label: "Premium", value: metrics.premiumRevenue },
-                { label: "Pharmacy", value: metrics.pharmacyRevenue },
-              ]}
-              colors={["bg-violet-500", "bg-emerald-500"]}
-            />
-          </SectionCard>
+          {/* Distribution Pie */}
+          <Section title="Distribusi Revenue" subtitle="Breakdown Premium vs Apotek" delay={0.2}>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value.toFixed(1)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${(value as number).toFixed(1)}%`} />
+              </PieChart>
+            </ResponsiveContainer>
+
+            <div className="mt-6 space-y-3 pt-4 border-t border-slate-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: COLORS.premium }}
+                  />
+                  <span className="text-sm font-medium text-slate-700">Premium</span>
+                </div>
+                <span className="text-sm font-bold text-slate-900">
+                  Rp {metrics.premiumRevenue.toLocaleString("id-ID")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: COLORS.pharmacy }}
+                  />
+                  <span className="text-sm font-medium text-slate-700">Apotek</span>
+                </div>
+                <span className="text-sm font-bold text-slate-900">
+                  Rp {metrics.pharmacyRevenue.toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+          </Section>
         </div>
 
-        {/* Charts Row 2 */}
+        {/* ─── Secondary Charts ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SectionCard title="Breakdown Pesanan" subtitle="Order count per kategori" delay={0.2}>
-            <DonutChart
-              data={[
-                { label: "Premium Subscribers", value: metrics.premiumOrders },
-                { label: "Pharmacy Orders", value: metrics.pharmacyOrders },
-              ]}
-              colors={["bg-violet-500", "bg-emerald-500"]}
-            />
-          </SectionCard>
+          {/* Revenue Comparison */}
+          <Section
+            title="Perbandingan Revenue"
+            subtitle="Bar chart perbandingan kategori"
+            delay={0.3}
+          >
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  {
+                    name: "Premium",
+                    value: metrics.premiumRevenue / 1000000,
+                    fill: COLORS.premium,
+                  },
+                  {
+                    name: "Apotek",
+                    value: metrics.pharmacyRevenue / 1000000,
+                    fill: COLORS.pharmacy,
+                  },
+                ]}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="name" stroke="#94a3b8" />
+                <YAxis
+                  stroke="#94a3b8"
+                  label={{ value: "Juta Rp", angle: -90, position: "insideLeft" }}
+                />
+                <Tooltip
+                  formatter={(value) =>
+                    `Rp ${((value as number) * 1000000).toLocaleString("id-ID")}`
+                  }
+                  contentStyle={{
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#f1f5f9",
+                  }}
+                />
+                <Bar dataKey="value" fill={COLORS.primary} radius={[8, 8, 0, 0]}>
+                  {[
+                    {
+                      name: "Premium",
+                      value: metrics.premiumRevenue / 1000000,
+                      fill: COLORS.premium,
+                    },
+                    {
+                      name: "Apotek",
+                      value: metrics.pharmacyRevenue / 1000000,
+                      fill: COLORS.pharmacy,
+                    },
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Section>
 
-          <SectionCard title="Perbandingan Revenue" subtitle="Bar chart distribusi" delay={0.25}>
-            <BarChart
-              data={[
-                { label: "Premium Revenue", value: metrics.premiumRevenue },
-                { label: "Pharmacy Revenue", value: metrics.pharmacyRevenue },
-              ]}
-              colors={[
-                "bg-gradient-to-r from-violet-500 to-violet-600",
-                "bg-gradient-to-r from-emerald-500 to-emerald-600",
-              ]}
-            />
-          </SectionCard>
+          {/* Order Breakdown */}
+          <Section title="Breakdown Pesanan" subtitle="Jumlah order per kategori" delay={0.4}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  { name: "Premium", orders: metrics.premiumOrders, fill: COLORS.premium },
+                  { name: "Apotek", orders: metrics.pharmacyOrders, fill: COLORS.pharmacy },
+                ]}
+                layout="vertical"
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis type="number" stroke="#94a3b8" />
+                <YAxis dataKey="name" type="category" stroke="#94a3b8" width={70} />
+                <Tooltip
+                  formatter={(value) => `${value} pesanan`}
+                  contentStyle={{
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#f1f5f9",
+                  }}
+                />
+                <Bar dataKey="orders" radius={[0, 8, 8, 0]}>
+                  {[
+                    { name: "Premium", orders: metrics.premiumOrders, fill: COLORS.premium },
+                    { name: "Apotek", orders: metrics.pharmacyOrders, fill: COLORS.pharmacy },
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Section>
         </div>
 
-        {/* Metrics Summary */}
-        <SectionCard title="Ringkasan Metrik Bisnis" delay={0.3}>
+        {/* ─── Metrics Summary ─── */}
+        <Section title="Ringkasan Metrik" subtitle="Key performance indicators" delay={0.5}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100">
+              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
                 Rata-rata Order
               </p>
               <p className="text-2xl font-bold text-slate-900 mt-2">
@@ -536,37 +582,36 @@ export function AdminAnalytics() {
                 )}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+
+            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100">
+              <p className="text-xs font-semibold text-violet-600 uppercase tracking-wider">
                 Premium Orders
               </p>
-              <p className="text-2xl font-bold text-violet-600 mt-2">{metrics.premiumOrders}</p>
-              <p className="text-xs text-slate-600 mt-1">
-                {((metrics.premiumOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}% dari
-                total
+              <p className="text-2xl font-bold text-violet-900 mt-2">{metrics.premiumOrders}</p>
+              <p className="text-xs text-violet-600 mt-1">
+                {((metrics.premiumOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}%
               </p>
             </div>
-            <div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+
+            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100">
+              <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
                 Pharmacy Orders
               </p>
-              <p className="text-2xl font-bold text-emerald-600 mt-2">{metrics.pharmacyOrders}</p>
-              <p className="text-xs text-slate-600 mt-1">
-                {((metrics.pharmacyOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}% dari
-                total
+              <p className="text-2xl font-bold text-emerald-900 mt-2">{metrics.pharmacyOrders}</p>
+              <p className="text-xs text-emerald-600 mt-1">
+                {((metrics.pharmacyOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}%
               </p>
             </div>
-            <div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                Premium %
+
+            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100">
+              <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider">
+                Total Orders
               </p>
-              <p className="text-2xl font-bold text-violet-600 mt-2">
-                {premiumPercentage.toFixed(1)}%
-              </p>
-              <p className="text-xs text-slate-600 mt-1">dari total revenue</p>
+              <p className="text-2xl font-bold text-amber-900 mt-2">{metrics.totalOrders}</p>
+              <p className="text-xs text-amber-600 mt-1">transaksi</p>
             </div>
           </div>
-        </SectionCard>
+        </Section>
       </div>
     </AdminLayout>
   );
