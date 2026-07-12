@@ -160,18 +160,29 @@ export function AdminShell() {
 
           if (!isMounted) return;
 
-          if (error || profile?.role !== "admin") {
-            console.warn("Admin role check failed:", error);
+          // STRICT: User HARUS punya role admin, jika tidak atau error → redirect ke login
+          if (error) {
+            console.error("Database query failed:", error);
             await authSignOut();
             navigate({ to: "/admin/login" });
-          } else {
-            setIsVerifying(false);
+            return;
           }
+
+          if (!profile || profile.role !== "admin") {
+            console.warn("User is not admin. Access denied.");
+            await authSignOut();
+            navigate({ to: "/admin/login" });
+            return;
+          }
+
+          // User adalah admin - boleh akses
+          setIsVerifying(false);
         } catch (dbErr) {
           console.error("Database query error:", dbErr);
-          // Jika database error, tetap izinkan akses jika user sudah authenticated
+          // Database error → sign out dan redirect ke login
           if (isMounted) {
-            setIsVerifying(false);
+            await authSignOut();
+            navigate({ to: "/admin/login" });
           }
         }
       } catch (err) {
@@ -185,11 +196,11 @@ export function AdminShell() {
 
     checkAdminAuth();
 
-    // Safety timeout - fallback ke stop loading setelah 10 detik
+    // Safety timeout - jika verification timeout, redirect ke login (jangan proceed)
     timeoutId = setTimeout(() => {
       if (isMounted) {
-        console.warn("Auth verification timeout - proceeding anyway");
-        setIsVerifying(false);
+        console.warn("Auth verification timeout - redirecting to login for safety");
+        navigate({ to: "/admin/login" });
       }
     }, 10000);
 
@@ -197,7 +208,7 @@ export function AdminShell() {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [navigate]);
 
   const handleLogout = async () => {
     await authSignOut();
