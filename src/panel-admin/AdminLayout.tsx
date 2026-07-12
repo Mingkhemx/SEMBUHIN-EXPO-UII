@@ -3,7 +3,7 @@
  * Clean light-theme professional admin design.
  */
 
-import { Link, useNavigate, Outlet } from "@tanstack/react-router";
+import { Link, Outlet } from "@tanstack/react-router";
 import { useState, useEffect, createContext, useContext } from "react";
 import {
   LayoutDashboard,
@@ -118,7 +118,7 @@ interface AdminLayoutProps {
 export function AdminShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, userProfile, signOut: authSignOut } = useAuth();
-  const [isVerifying, setIsVerifying] = useState(true);
+  const [isChecking, setIsChecking] = useState(true);
 
   // Header state (controlled by child pages)
   const [title, setTitle] = useState("Admin Panel");
@@ -126,63 +126,39 @@ export function AdminShell() {
   const [headerAction, setHeaderAction] = useState<React.ReactNode>();
   const [rightElement, setRightElement] = useState<React.ReactNode>();
 
-  const navigate = useNavigate();
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
 
   useEffect(() => {
-    let isMounted = true;
-    let hasChecked = false;
-
-    const checkSession = async () => {
-      if (hasChecked || !isMounted) return;
-      hasChecked = true;
-
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        
-        if (!isMounted) return;
-
-        if (!session) {
-          // No session → go to login
-          navigate({ to: "/admin/login" });
-          return;
-        }
-
-        // Session exists → allow access (verification sudah dilakukan di login)
-        if (isMounted) {
-          setIsVerifying(false);
-        }
-      } catch (err) {
-        console.error("Error:", err);
-        if (isMounted) {
-          setIsVerifying(false);
-        }
+    // Simple check: if no user, redirect to login
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        window.location.href = "/admin/login";
+        return;
       }
+      
+      setIsChecking(false);
     };
 
-    checkSession();
-
-    return () => {
-      isMounted = false;
-    };
+    checkAuth();
   }, []);
 
   const handleLogout = async () => {
     await authSignOut();
-    navigate({ to: "/admin/login" });
+    window.location.href = "/admin/login";
   };
 
-  if (isVerifying)
+  if (isChecking) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto mb-4"></div>
-          <p className="text-slate-600 font-medium">Memverifikasi akses admin...</p>
+          <p className="text-slate-600 font-medium">Memeriksa sesi...</p>
         </div>
       </div>
     );
+  }
 
   // Prioritas avatar: Metadata Auth > Table Profiles
   const adminAvatar = user?.user_metadata?.avatar_url || userProfile?.avatar_url;
