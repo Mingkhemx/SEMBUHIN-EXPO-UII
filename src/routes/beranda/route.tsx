@@ -72,7 +72,7 @@ function Index() {
   return (
     <div className="space-y-32 pb-24">
       {/* HERO SECTION WITH FULL-SCREEN VIDEO - PROFESSIONAL CLEAN LAYOUT */}
-      <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-8 min-h-screen overflow-hidden">
+      <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-28 pt-32 min-h-screen overflow-hidden">
         {/* VIDEO BACKGROUND */}
         <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
           <video
@@ -91,7 +91,7 @@ function Index() {
         </div>
 
         {/* MAIN CONTENT - ASYMMETRIC GRID */}
-        <div className="relative z-10 min-h-screen flex items-center pt-24 pb-16">
+        <div className="relative z-10 min-h-screen flex items-center pt-20 pb-16">
           <div className="max-w-7xl mx-auto w-full px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             {/* LEFT SIDE - TEXT CONTENT */}
             <motion.div
