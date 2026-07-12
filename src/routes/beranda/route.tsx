@@ -71,178 +71,117 @@ function Index() {
 
   return (
     <div className="space-y-32 pb-24">
-      {/* HERO SECTION WITH VIDEO BACKGROUND - MODERN ASYMMETRIC LAYOUT */}
-      <section className="relative w-screen left-1/2 right-1/2 -mx-[50vw] -mt-8 min-h-screen overflow-hidden">
-        {/* VIDEO BACKGROUND */}
-        <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
-          <video
-            className="absolute top-0 left-0 w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
+      {/* HERO SECTION - MODERN CLEAN SAAS/CORPORATE LAYOUT */}
+      <section className="relative px-4 pt-16 lg:pt-24 pb-16 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          {/* LEFT SIDE - TEXT CONTENT */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="flex flex-col justify-center space-y-8"
           >
-            <source src="/hero-bg-medical.mp4" type="video/mp4" />
-          </video>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">
+              <Shield className="w-4 h-4" />
+              {t("home.standard_badge")}
+            </div>
 
-          {/* Professional clean overlay */}
-          <div className="absolute inset-0 bg-slate-900/60" />
-        </div>
-
-        {/* MAIN CONTENT - ASYMMETRIC GRID */}
-        <div className="relative z-10 min-h-screen flex items-center pt-24 pb-16">
-          <div className="max-w-7xl mx-auto w-full px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-            {/* LEFT SIDE - TEXT CONTENT */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="flex flex-col justify-center space-y-8 order-2 lg:order-1"
-            >
-              {/* Badge */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="inline-flex items-center gap-2 w-fit px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
-              >
-                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                {t("home.standard_badge")}
-              </motion.div>
-
-              {/* Animated Content */}
-              <div className="space-y-6 min-h-[280px] flex flex-col justify-center">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={contentIndex}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-6"
-                  >
-                    {/* Headline with solid styling */}
-                    <div className="space-y-2">
-                      <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
-                        {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
-                          <span key={i}>
-                            {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
-                              <span className="text-blue-400">
-                                {word}
-                              </span>
-                            ) : (
-                              word + " "
-                            )}
-                          </span>
-                        ))}
-                      </h1>
-                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white/90 leading-[1.2]">
-                        {rotationContent[contentIndex].bottomTitle}
-                      </h2>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-base sm:text-lg text-white/70 font-light leading-relaxed max-w-lg">
-                      {rotationContent[contentIndex].desc}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              {/* CTA Buttons - NEW DESIGN */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex flex-col sm:flex-row gap-4 pt-4"
-              >
-                {/* Primary Button - Solid with icon */}
-                <Link
-                  to="/twin"
-                  className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95"
+            {/* Animated Content */}
+            <div className="space-y-6 min-h-[240px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={contentIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-6"
                 >
-                  {/* Button background */}
-                  <div className="absolute inset-0 bg-blue-600 group-hover:bg-blue-500 transition-colors duration-300" />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300" />
-
-                  {/* Button content */}
-                  <div className="relative flex items-center gap-2.5">
-                    <span>{t("home.start_btn")}</span>
-                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <div className="space-y-4">
+                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.1]">
+                      {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
+                        <span key={i}>
+                          {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
+                            <span className="text-blue-600 dark:text-blue-500">{word}</span>
+                          ) : (
+                            word + " "
+                          )}
+                        </span>
+                      ))}
+                    </h1>
+                    <h2 className="text-3xl sm:text-4xl font-bold text-muted-foreground leading-[1.2]">
+                      {rotationContent[contentIndex].bottomTitle}
+                    </h2>
                   </div>
-                </Link>
 
-                {/* Secondary Button - Outline style */}
-                <Link
-                  to="/konsul"
-                  className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
-                >
-                  {/* Border background */}
-                  <div className="absolute inset-0 rounded-xl border-2 border-white/30 group-hover:border-white/60 transition-colors duration-300" />
-                  <div className="absolute inset-0 rounded-xl bg-white/5 group-hover:bg-white/10 transition-colors duration-300" />
+                  <p className="text-lg text-muted-foreground/80 font-normal leading-relaxed max-w-lg">
+                    {rotationContent[contentIndex].desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-                  {/* Button content */}
-                  <div className="relative">{t("home.ai_btn")}</div>
-                </Link>
-              </motion.div>
-            </motion.div>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <Link
+                to="/twin"
+                className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors duration-200"
+              >
+                <span className="flex items-center gap-2.5">
+                  {t("home.start_btn")}
+                  <ArrowRight className="h-5 w-5" />
+                </span>
+              </Link>
+              <Link
+                to="/konsul"
+                className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 rounded-xl transition-colors duration-200"
+              >
+                {t("home.ai_btn")}
+              </Link>
+            </div>
+          </motion.div>
 
-            {/* RIGHT SIDE - STATS CARDS */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="order-1 lg:order-2"
+          {/* RIGHT SIDE - CLEAN MEDIA CONTAINER */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="relative h-full min-h-[400px] lg:min-h-[600px] w-full rounded-[2.5rem] overflow-hidden border border-border shadow-2xl bg-slate-900"
+          >
+            <video
+              className="absolute inset-0 w-full h-full object-cover opacity-90"
+              autoPlay
+              muted
+              loop
+              playsInline
             >
-              {/* Floating stats cards */}
-              <div className="relative h-full flex items-center justify-center lg:justify-end">
-                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-6 w-full max-w-sm">
-                  {[
-                    {
-                      stat: "24/7",
-                      label: t("home.stats.ai_care"),
-                      delay: 0.4,
-                    },
-                    {
-                      stat: "1 Jam",
-                      label: t("home.stats.pharmacy"),
-                      delay: 0.5,
-                    },
-                    {
-                      stat: "100%",
-                      label: t("home.stats.records"),
-                      delay: 0.6,
-                    },
-                  ].map((item, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: item.delay }}
-                      className="group cursor-default"
-                    >
-                      <div
-                        className="relative rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:scale-105"
-                      >
-                        <div className="space-y-3">
-                          <div className="text-4xl sm:text-5xl lg:text-4xl font-black text-white group-hover:text-cyan-300 transition-colors">
-                            {item.stat}
-                          </div>
-                          <p className="text-sm sm:text-base text-white/70 font-medium group-hover:text-white/90 transition-colors">
-                            {item.label}
-                          </p>
-                        </div>
+              <source src="/hero-bg-medical.mp4" type="video/mp4" />
+            </video>
+            
+            {/* Minimal overlay for text readability at bottom */}
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-900/90 to-transparent" />
 
-                        {/* Decorative corner element */}
-                        <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-cyan-400/20 to-transparent rounded-bl-2xl" />
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+            {/* Clean Stats Row at bottom of media */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 p-4 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20">
+                {[
+                  { stat: "24/7", label: t("home.stats.ai_care") },
+                  { stat: "1 Jam", label: t("home.stats.pharmacy") },
+                  { stat: "100%", label: t("home.stats.records") },
+                ].map((item, idx) => (
+                  <div key={idx} className="text-center">
+                    <div className="text-xl sm:text-2xl font-black text-white">
+                      {item.stat}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-white/80 font-medium mt-1 uppercase tracking-wider">
+                      {item.label}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
