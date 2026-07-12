@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Sparkles,
@@ -43,8 +43,6 @@ export const Route = createFileRoute("/beranda")({
 function Index() {
   const { t } = useLanguage();
   const [contentIndex, setContentIndex] = useState(0);
-  const [textColor, setTextColor] = useState("white");
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const rotationContent = (t("home.hero_rotation") as any[]) || [
     {
@@ -64,56 +62,6 @@ function Index() {
     },
   ];
 
-  // Detect brightness from video and adjust text color
-  useEffect(() => {
-    const detectBrightness = () => {
-      if (videoRef.current && videoRef.current.readyState >= 2) {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = videoRef.current.videoWidth;
-          canvas.height = videoRef.current.videoHeight;
-
-          const ctx = canvas.getContext("2d");
-          if (!ctx) return;
-
-          ctx.drawImage(videoRef.current, 0, 0);
-
-          // Get pixel data from center area
-          const imageData = ctx.getImageData(
-            canvas.width / 4,
-            canvas.height / 4,
-            canvas.width / 2,
-            canvas.height / 2,
-          );
-          const data = imageData.data;
-
-          let r = 0,
-            g = 0,
-            b = 0;
-          for (let i = 0; i < data.length; i += 4) {
-            r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
-          }
-
-          const pixelCount = data.length / 4;
-          const brightness = (r + g + b) / (pixelCount * 3);
-
-          // If brightness > 128, use dark text, else use white
-          setTextColor(brightness > 140 ? "#1f2937" : "#ffffff");
-        } catch (e) {
-          console.log("Brightness detection not available");
-          setTextColor("#ffffff");
-        }
-      }
-    };
-
-    const interval = setInterval(detectBrightness, 1000);
-    detectBrightness();
-
-    return () => clearInterval(interval);
-  }, []);
-
   useEffect(() => {
     const timer = setInterval(() => {
       setContentIndex((prev) => (prev + 1) % rotationContent.length);
@@ -128,7 +76,6 @@ function Index() {
         {/* VIDEO BACKGROUND */}
         <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
           <video
-            ref={videoRef}
             className="absolute top-0 left-0 w-full h-full object-cover"
             autoPlay
             muted
@@ -175,12 +122,9 @@ function Index() {
                     transition={{ duration: 0.5 }}
                     className="space-y-6"
                   >
-                    {/* Headline with adaptive text color - drop shadow for readability */}
+                    {/* Headline with white text - drop shadow for readability */}
                     <div className="space-y-4">
-                      <h1
-                        className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight drop-shadow-xl leading-[1.1] transition-colors duration-500"
-                        style={{ color: textColor }}
-                      >
+                      <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight drop-shadow-xl leading-[1.1] text-white">
                         {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
                           <span key={i}>
                             {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
@@ -193,22 +137,13 @@ function Index() {
                           </span>
                         ))}
                       </h1>
-                      <h2
-                        className="text-3xl sm:text-4xl md:text-5xl font-bold drop-shadow-lg leading-[1.2] transition-colors duration-500"
-                        style={{ color: textColor }}
-                      >
+                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold drop-shadow-lg leading-[1.2] text-white">
                         {rotationContent[contentIndex].bottomTitle}
                       </h2>
                     </div>
 
                     {/* Description with enhanced readability */}
-                    <p
-                      className="text-lg font-normal leading-relaxed max-w-lg drop-shadow-md transition-colors duration-500"
-                      style={{
-                        color:
-                          textColor === "#ffffff" ? "rgba(255,255,255,0.9)" : "rgba(31,41,55,0.8)",
-                      }}
-                    >
+                    <p className="text-lg font-normal leading-relaxed max-w-lg drop-shadow-md text-white/95">
                       {rotationContent[contentIndex].desc}
                     </p>
                   </motion.div>
