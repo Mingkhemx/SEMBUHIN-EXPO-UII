@@ -131,8 +131,12 @@ export function AdminShell() {
 
   useEffect(() => {
     let isMounted = true;
+    let hasChecked = false;
 
     const checkSession = async () => {
+      if (hasChecked) return; // Prevent re-running
+      hasChecked = true;
+
       try {
         const {
           data: { session },
@@ -159,7 +163,7 @@ export function AdminShell() {
     return () => {
       isMounted = false;
     };
-  }, [navigate]);
+  }, []);
 
   const handleLogout = async () => {
     await authSignOut();
