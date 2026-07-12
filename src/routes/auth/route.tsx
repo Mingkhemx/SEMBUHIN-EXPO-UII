@@ -50,6 +50,8 @@ function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
   const [mode, setMode] = useState<"login" | "register">(search.mode || "login");
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   // Sync mode with search param if it changes
   useEffect(() => {
@@ -71,10 +73,40 @@ function AuthPage() {
   const [registerPhone, setRegisterPhone] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirm, setRegisterConfirm] = useState("");
+  const [otpCode, setOtpCode] = useState("");
 
   const switchMode = (newMode: "login" | "register") => {
     setMode(newMode);
     setError("");
+    setShowOtpVerification(false);
+    setOtpCode("");
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!otpCode) {
+      setError("Kode OTP harus diisi");
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email: registeredEmail,
+      token: otpCode,
+      type: "email",
+    });
+
+    if (error) {
+      setError(error.message);
+      setIsLoading(false);
+      return;
+    }
+
+    // OTP verified successfully, navigate to beranda
+    setIsLoading(false);
+    navigate({ to: "/beranda" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -140,8 +172,12 @@ function AuthPage() {
         setIsLoading(false);
         return;
       }
+      
+      // Jika signUp berhasil, tampilkan OTP verification screen
       setIsLoading(false);
-      navigate({ to: "/beranda" });
+      setRegisteredEmail(registerEmail);
+      setShowOtpVerification(true);
+      setError("");
     }
   };
 
@@ -274,15 +310,102 @@ function AuthPage() {
 
             {/* Form */}
             <AnimatePresence mode="wait">
-              <motion.form
-                key={mode}
-                initial={{ opacity: 0, x: mode === "login" ? -10 : 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: mode === "login" ? 10 : -10 }}
-                transition={{ duration: 0.2 }}
-                onSubmit={handleSubmit}
-                className="space-y-4"
-              >
+              {showOtpVerification ? (
+                // OTP Verification Screen
+                <motion.div
+                  key="otp"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div className="mb-6 text-center">
+                    <h3 className="text-xl font-bold text-slate-900">Verifikasi Email</h3>
+                    <p className="text-sm text-slate-500 mt-2">
+                      Kami telah mengirimkan kode OTP ke <span className="font-semibold text-slate-700">{registeredEmail}</span>
+                    </p>
+                    <p className="text-xs text-slate-400 mt-3">
+                      Silakan periksa inbox atau folder spam Anda untuk menerima kode OTP
+                    </p>
+                  </div>
+
+                  {/* Error */}
+                  {error && (
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {error}
+                    </div>
+                  )}
+
+                  {/* OTP Input */}
+                  <form onSubmit={handleOtpSubmit} className="space-y-4">
+                    <div>
+                      <label className="text-xs font-medium text-slate-600 mb-1.5 block">
+                        Kode OTP (6 digit)
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                        placeholder="000000"
+                        className="w-full text-center text-2xl font-bold tracking-widest rounded-xl border-2 border-slate-200 bg-slate-50 p-4 text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 focus:bg-white transition-all"
+                      />
+                      <p className="text-[10px] text-slate-400 mt-2">
+                        Masukkan 6 digit kode yang dikirim ke email Anda
+                      </p>
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                      type="submit"
+                      disabled={isLoading || otpCode.length !== 6}
+                      className={cn(
+                        "w-full flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all duration-200",
+                        "bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-lg shadow-sky-600/25 hover:shadow-xl hover:shadow-sky-600/30",
+                        "disabled:opacity-60 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      {isLoading ? (
+                        <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      ) : (
+                        "Verifikasi OTP"
+                      )}
+                    </button>
+
+                    {/* Back button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowOtpVerification(false);
+                        setOtpCode("");
+                        setError("");
+                      }}
+                      className="w-full py-2 text-sm text-slate-600 hover:text-slate-800 font-medium transition-colors"
+                    >
+                      ← Kembali ke form
+                    </button>
+                  </form>
+
+                  {/* Info */}
+                  <div className="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                    <p className="text-xs text-blue-700">
+                      <span className="font-semibold">Tip:</span> Jika tidak menerima email, cek folder spam atau tunggu beberapa detik.
+                    </p>
+                  </div>
+                </motion.div>
+              ) : (
+                // Registration/Login Form
+                <motion.form
+                  key={mode}
+                  initial={{ opacity: 0, x: mode === "login" ? -10 : 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: mode === "login" ? 10 : -10 }}
+                  transition={{ duration: 0.2 }}
+                  onSubmit={handleSubmit}
+                  className="space-y-4"
+                >
                 <div className="mb-2">
                   <h3 className="text-xl font-bold text-slate-900">
                     {mode === "login" ? "Masuk ke Akun Anda" : "Buat Akun Baru"}
@@ -533,6 +656,7 @@ function AuthPage() {
                   </button>
                 </p>
               </motion.form>
+              )}
             </AnimatePresence>
           </div>
         </div>
