@@ -447,4 +447,28 @@
   .page-transition {
     animation: fadeInUp 0.4s ease-out;
   }
+
+  /* Adaptive Text Color - works with dark/light backgrounds */
+  .text-adaptive {
+    color: white;
+    text-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.3),
+      0 -1px 2px rgba(255, 255, 255, 0.1);
+    mix-blend-mode: multiply;
+  }
+
+  /* For better readability over video backgrounds */
+  .text-video-safe {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))
+      drop-shadow(0 -1px 2px rgba(255, 255, 255, 0.1));
+  }
+
+  /* Dark text fallback for light areas */
+  .text-auto-contrast {
+    color: rgb(255, 255, 255);
+    text-shadow:
+      2px 2px 4px rgba(0, 0, 0, 0.5),
+      -1px -1px 2px rgba(255, 255, 255, 0.2);
+  }
 }

@@ -122,26 +122,28 @@ function Index() {
                     transition={{ duration: 0.5 }}
                     className="space-y-6"
                   >
-                    {/* Headline with solid styling */}
+                    {/* Headline with adaptive text color - drop shadow for readability */}
                     <div className="space-y-4">
-                      <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1]">
+                      <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-white drop-shadow-xl leading-[1.1]">
                         {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
                           <span key={i}>
                             {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
-                              <span className="text-blue-400">{word}</span>
+                              <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent drop-shadow-none">
+                                {word}
+                              </span>
                             ) : (
                               word + " "
                             )}
                           </span>
                         ))}
                       </h1>
-                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white/90 leading-[1.2]">
+                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg leading-[1.2]">
                         {rotationContent[contentIndex].bottomTitle}
                       </h2>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-lg text-white/80 font-normal leading-relaxed max-w-lg">
+                    {/* Description with enhanced readability */}
+                    <p className="text-lg text-white/90 font-normal leading-relaxed max-w-lg drop-shadow-md">
                       {rotationContent[contentIndex].desc}
                     </p>
                   </motion.div>
