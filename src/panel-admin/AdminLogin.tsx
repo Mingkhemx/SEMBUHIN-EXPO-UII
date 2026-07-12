@@ -13,28 +13,43 @@ export function AdminLogin() {
 
   // Redirect if already logged in as admin
   useEffect(() => {
+    let isMounted = true;
+
     const checkExistingAuth = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
+      if (!isMounted) return;
 
-        if (profile?.role === "admin") {
-          // User adalah admin - boleh ke /admin
-          navigate({ to: "/admin" });
-        } else {
-          // Session ada tapi bukan admin - sign out dan stay di login
+      if (session) {
+        // Ada session, check kalau admin → redirect
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .single();
+
+          if (profile?.role === "admin") {
+            // Admin sudah login - redirect ke /admin
+            navigate({ to: "/admin" });
+          } else {
+            // Non-admin dengan session - sign out, stay di login
+            await supabase.auth.signOut();
+          }
+        } catch (err) {
+          console.error("Profile check error:", err);
           await supabase.auth.signOut();
         }
       }
-      // Jika tidak ada session → stay di /admin/login (benar)
+      // Jika tidak ada session → stay di login (benar)
     };
+
     checkExistingAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {

@@ -132,7 +132,7 @@ export function AdminShell() {
   useEffect(() => {
     let isMounted = true;
 
-    const checkAdminAuth = async () => {
+    const checkSession = async () => {
       try {
         const {
           data: { session },
@@ -140,22 +140,21 @@ export function AdminShell() {
         if (!isMounted) return;
 
         if (!session) {
-          // No session → redirect to login
+          // Tidak ada session → ke login
           navigate({ to: "/admin/login" });
-          return;
+        } else {
+          // Ada session → siap render (jangan verify lagi!)
+          setIsVerifying(false);
         }
-
-        // Session exists → admin sudah verified di AdminLogin, bisa proceed
-        setIsVerifying(false);
       } catch (err) {
-        console.error("Auth check error:", err);
+        console.error("Session check error:", err);
         if (isMounted) {
           navigate({ to: "/admin/login" });
         }
       }
     };
 
-    checkAdminAuth();
+    checkSession();
 
     return () => {
       isMounted = false;
