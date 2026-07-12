@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   LogOut,
   ShoppingBag,
+  TrendingUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
@@ -49,6 +50,13 @@ export const ADMIN_NAV = [
     icon: LayoutDashboard,
     path: "/admin",
     description: "Ringkasan sistem",
+  },
+  {
+    id: "analytics",
+    label: "Analytics & Penjualan",
+    icon: TrendingUp,
+    path: "/admin/analytics",
+    description: "Pelacakan bisnis & revenue",
   },
   {
     id: "users",
