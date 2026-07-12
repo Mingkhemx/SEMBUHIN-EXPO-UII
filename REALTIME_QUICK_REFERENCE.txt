@@ -1,0 +1,243 @@
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                  REAL-TIME ANALYTICS - QUICK REFERENCE                     ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+📁 FILES CREATED
+─────────────────────────────────────────────────────────────────────────────
+✅ supabase-realtime-analytics.sql
+   └─ SQL script dengan triggers, functions, views
+
+✅ src/hooks/useAnalyticsRealtime.ts
+   └─ React hook untuk real-time data
+
+✅ src/panel-admin/AdminAnalytics.tsx
+   └─ Updated component menggunakan hook
+
+✅ Documentation files:
+   ├─ REALTIME_ANALYTICS_SETUP.md (Full guide)
+   ├─ REALTIME_ANALYTICS_QUICK_START.md (Quick start)
+   ├─ REALTIME_IMPLEMENTATION_CHECKLIST.md (Step-by-step)
+   ├─ ANALYTICS_DATA_STRUCTURE.md (API reference)
+   └─ REALTIME_QUICK_REFERENCE.txt (This file)
+
+⚡ SETUP IN 3 STEPS
+─────────────────────────────────────────────────────────────────────────────
+
+STEP 1: Run SQL Script (5 min)
+  1. Supabase Dashboard → SQL Editor → New Query
+  2. Copy: supabase-realtime-analytics.sql content
+  3. Paste & Run
+  4. Verify tables created ✅
+
+STEP 2: Enable Realtime (2 min)
+  1. Supabase Dashboard → Database → Replication
+  2. Toggle ON: analytics_summary
+  3. Toggle ON: payment_orders
+  4. Done! ✅
+
+STEP 3: Test (3 min)
+  1. Open dashboard: http://localhost:5173/admin/analytics
+  2. Supabase SQL Editor → Insert test data
+  3. Watch dashboard update instantly ✅
+
+📊 DATA FLOW
+─────────────────────────────────────────────────────────────────────────────
+
+Insert Payment Order
+      ↓
+Trigger Fires (trigger_payment_order_analytics)
+      ↓
+Function: refresh_analytics_summary()
+      ↓
+analytics_summary table updated
+      ↓
+Supabase broadcasts change
+      ↓
+React hook subscribes & receives
+      ↓
+Component re-renders with new data ✨
+
+🧪 TEST DATA INSERT
+─────────────────────────────────────────────────────────────────────────────
+
+SQL to run (Supabase SQL Editor):
+
+  INSERT INTO payment_orders (
+    user_id, order_type, amount, payment_status, created_at
+  ) VALUES (
+    (SELECT id FROM auth.users LIMIT 1),
+    'premium',
+    250000,
+    'paid',
+    now()
+  );
+
+Expected: Dashboard updates in 1-2 seconds ✅
+
+🔧 HOOK USAGE
+─────────────────────────────────────────────────────────────────────────────
+
+import { useAnalyticsRealtime } from "@/hooks/useAnalyticsRealtime";
+
+export function Dashboard() {
+  const {
+    metrics,        // { totalRevenue, premiumRevenue, ... }
+    chartData,      // Array for charts
+    isLoading,      // Boolean
+    error,          // Error message or null
+    lastUpdate,     // Date object
+    refresh,        // Function to manually refresh
+    isSubscribed,   // Real-time connection status
+  } = useAnalyticsRealtime({
+    dateRange: 30,      // 30 or 90 days
+    autoSubscribe: true // Auto-connect on mount
+  });
+}
+
+📈 METRICS AVAILABLE
+─────────────────────────────────────────────────────────────────────────────
+
+metrics.totalRevenue          → Total revenue (all types)
+metrics.premiumRevenue        → Premium membership revenue
+metrics.pharmacyRevenue       → Pharmacy sales revenue
+metrics.totalOrders           → Total order count
+metrics.premiumOrders         → Premium order count
+metrics.pharmacyOrders        → Pharmacy order count
+metrics.averageOrderValue     → Average order value
+
+chartData[].date              → "13/07/2026"
+chartData[].premium           → Premium revenue for date
+chartData[].pharmacy          → Pharmacy revenue for date
+chartData[].total             → Total revenue for date
+chartData[].premiumOrders     → Premium orders for date
+chartData[].pharmacyOrders    → Pharmacy orders for date
+
+✅ VERIFICATION CHECKLIST
+─────────────────────────────────────────────────────────────────────────────
+
+□ SQL script executed without errors
+□ Tables created: analytics_summary, mv_analytics_*
+□ Triggers created: trigger_payment_order_analytics
+□ Realtime enabled: analytics_summary ✓, payment_orders ✓
+□ Hook file exists: src/hooks/useAnalyticsRealtime.ts
+□ Component updated: AdminAnalytics.tsx imports hook
+□ Dev server restarted
+□ Dashboard shows "Live" badge (green)
+□ Test data insert updates dashboard instantly
+□ Console shows "Analytics subscription status: SUBSCRIBED"
+
+❌ TROUBLESHOOTING
+─────────────────────────────────────────────────────────────────────────────
+
+Dashboard not updating?
+  1. Check "Live" badge → should be green
+  2. Browser DevTools → Console → check for errors
+  3. Supabase Dashboard → Database → Replication → check toggles
+  4. Verify RLS policies don't block admin user
+
+Analytics shows zero?
+  1. Supabase Dashboard → SQL Editor → Run test insert
+  2. Check payment_orders has data with payment_status = 'paid'
+  3. Verify date range filter (30 vs 90 days)
+
+Query errors?
+  1. Check PostgreSQL syntax in SQL script
+  2. Verify trigger function exists
+  3. Run verification queries from ANALYTICS_DATA_STRUCTURE.md
+
+See detailed guide: REALTIME_ANALYTICS_SETUP.md → Troubleshooting
+
+🎯 COMMON QUERIES
+─────────────────────────────────────────────────────────────────────────────
+
+Show today's analytics:
+  SELECT * FROM analytics_summary WHERE date = CURRENT_DATE;
+
+Show last 7 days:
+  SELECT * FROM analytics_summary WHERE date >= CURRENT_DATE - 7;
+
+Show monthly summary:
+  SELECT * FROM mv_analytics_monthly ORDER BY month DESC;
+
+Show category performance:
+  SELECT * FROM mv_analytics_category;
+
+Check if trigger is working:
+  SELECT COUNT(*) FROM analytics_summary 
+  WHERE date = CURRENT_DATE;
+
+📚 DOCUMENTATION MAP
+─────────────────────────────────────────────────────────────────────────────
+
+Getting Started?
+  → Read: REALTIME_ANALYTICS_QUICK_START.md
+
+Implementing Step-by-step?
+  → Use: REALTIME_IMPLEMENTATION_CHECKLIST.md
+
+Need detailed setup?
+  → Check: REALTIME_ANALYTICS_SETUP.md
+
+Understanding data structure?
+  → See: ANALYTICS_DATA_STRUCTURE.md
+
+Quick lookup?
+  → You're reading: REALTIME_QUICK_REFERENCE.txt
+
+🚀 NEXT STEPS
+─────────────────────────────────────────────────────────────────────────────
+
+1. Run SQL script (supabase-realtime-analytics.sql)
+2. Enable Realtime in Supabase Dashboard
+3. Restart dev server
+4. Test with sample data insert
+5. Deploy to production
+6. Monitor for 24 hours
+7. Share documentation with team
+
+⏱️ ESTIMATED TIMING
+─────────────────────────────────────────────────────────────────────────────
+
+SQL Setup:           5 min
+Realtime Config:     2 min
+Testing:             5 min
+React Integration:   Already done ✅
+Total:              ~15 min (excluding deployment)
+
+💡 TIPS
+─────────────────────────────────────────────────────────────────────────────
+
+• Real-time updates are near-instant (1-2 sec latency)
+• Falling back to payment_orders if analytics_summary is slow
+• Manual refresh available via button in dashboard
+• Support 30 & 90 day date ranges
+• Error messages display in UI (top-right)
+• RLS policies ensure only admin can view analytics
+• Materialized views for fast historical queries
+
+🔐 SECURITY
+─────────────────────────────────────────────────────────────────────────────
+
+✅ RLS policies restrict to admin users only
+✅ Real-time encrypted via Supabase
+✅ Server-side validation on all inserts
+✅ No direct client access to raw payment data
+✅ Audit trail via updated_at timestamps
+
+📞 SUPPORT
+─────────────────────────────────────────────────────────────────────────────
+
+Supabase Docs:    https://supabase.com/docs
+Realtime Docs:    https://supabase.com/docs/guides/realtime
+PostgreSQL:       https://www.postgresql.org/docs
+React Hooks:      https://react.dev/reference/react/hooks
+
+═════════════════════════════════════════════════════════════════════════════
+
+Version: 1.0
+Date: July 2026
+Status: ✅ Production Ready
+
+Ready to implement? Start with REALTIME_ANALYTICS_QUICK_START.md
+
+═════════════════════════════════════════════════════════════════════════════

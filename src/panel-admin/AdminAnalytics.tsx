@@ -3,10 +3,9 @@
  * Enterprise-grade analytics for Sembuhin business metrics
  */
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -16,6 +15,9 @@ import {
   Users,
   RefreshCcw,
   Calendar,
+  Wifi,
+  WifiOff,
+  AlertCircle,
 } from "lucide-react";
 import {
   LineChart,
@@ -35,24 +37,7 @@ import {
   Area,
 } from "recharts";
 import { AdminLayout } from "@/panel-admin/AdminLayout";
-
-// ─── Types
-
-interface MetricsData {
-  totalRevenue: number;
-  premiumRevenue: number;
-  pharmacyRevenue: number;
-  totalOrders: number;
-  premiumOrders: number;
-  pharmacyOrders: number;
-}
-
-interface ChartData {
-  date: string;
-  premium: number;
-  pharmacy: number;
-  total: number;
-}
+import { useAnalyticsRealtime } from "@/hooks/useAnalyticsRealtime";
 
 // ─── Colors
 
@@ -155,129 +140,14 @@ function Section({
 // ─── Main Component
 
 export function AdminAnalytics() {
-  const [metrics, setMetrics] = useState<MetricsData>({
-    totalRevenue: 0,
-    premiumRevenue: 0,
-    pharmacyRevenue: 0,
-    totalOrders: 0,
-    premiumOrders: 0,
-    pharmacyOrders: 0,
-  });
-
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<string>("");
   const [dateRange, setDateRange] = useState<30 | 90>(30);
 
-  useEffect(() => {
-    fetchAnalyticsData();
-    // Real-time subscription
-    const subscription = supabase
-      .channel("payment-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "payment_orders" }, () => {
-        fetchAnalyticsData();
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [dateRange]);
-
-  const fetchAnalyticsData = async () => {
-    try {
-      setIsLoading(true);
-
-      const startDate = subDays(new Date(), dateRange);
-
-      // Fetch orders
-      const { data: orders, error } = await supabase
-        .from("payment_orders")
-        .select("*")
-        .eq("payment_status", "paid")
-        .gte("created_at", startDate.toISOString())
-        .order("created_at", { ascending: true });
-
-      if (error || !orders) {
-        console.error("Query Error:", error);
-        return;
-      }
-
-      if (orders.length === 0) {
-        setChartData([]);
-        setMetrics({
-          totalRevenue: 0,
-          premiumRevenue: 0,
-          pharmacyRevenue: 0,
-          totalOrders: 0,
-          premiumOrders: 0,
-          pharmacyOrders: 0,
-        });
-        return;
-      }
-
-      // Calculate metrics
-      let premiumRev = 0,
-        pharmacyRev = 0;
-      let premiumCount = 0,
-        pharmacyCount = 0;
-
-      orders.forEach((order: any) => {
-        const amount = parseFloat(order.amount || 0);
-        const orderType = order.order_type || "pharmacy";
-
-        if (orderType === "premium") {
-          premiumRev += amount;
-          premiumCount += 1;
-        } else {
-          pharmacyRev += amount;
-          pharmacyCount += 1;
-        }
-      });
-
-      setMetrics({
-        totalRevenue: premiumRev + pharmacyRev,
-        premiumRevenue: premiumRev,
-        pharmacyRevenue: pharmacyRev,
-        totalOrders: orders.length,
-        premiumOrders: premiumCount,
-        pharmacyOrders: pharmacyCount,
-      });
-
-      // Build chart data
-      const groupedByDate: Record<string, { premium: number; pharmacy: number }> = {};
-
-      orders.forEach((order: any) => {
-        const date = format(new Date(order.created_at), "dd MMM");
-        const amount = parseFloat(order.amount || 0);
-        const orderType = order.order_type || "pharmacy";
-
-        if (!groupedByDate[date]) {
-          groupedByDate[date] = { premium: 0, pharmacy: 0 };
-        }
-
-        if (orderType === "premium") {
-          groupedByDate[date].premium += amount;
-        } else {
-          groupedByDate[date].pharmacy += amount;
-        }
-      });
-
-      const chartDataArray = Object.entries(groupedByDate).map(([date, values]) => ({
-        date,
-        premium: values.premium,
-        pharmacy: values.pharmacy,
-        total: values.premium + values.pharmacy,
-      }));
-
-      setChartData(chartDataArray);
-      setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm"));
-    } catch (err) {
-      console.error("Fetch Error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Use real-time hook
+  const { metrics, chartData, isLoading, error, lastUpdate, refresh, isSubscribed } =
+    useAnalyticsRealtime({
+      dateRange,
+      autoSubscribe: true,
+    });
 
   const premiumPercentage =
     metrics.totalRevenue > 0 ? (metrics.premiumRevenue / metrics.totalRevenue) * 100 : 0;
@@ -293,6 +163,30 @@ export function AdminAnalytics() {
       subtitle="Real-time business intelligence untuk Sembuhin"
       rightElement={
         <div className="flex items-center gap-3">
+          {/* Connection Status */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200">
+            {isSubscribed ? (
+              <>
+                <Wifi className="h-4 w-4 text-emerald-500 animate-pulse" />
+                <span className="text-xs font-medium text-emerald-600">Live</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-4 w-4 text-slate-400" />
+                <span className="text-xs font-medium text-slate-500">Offline</span>
+              </>
+            )}
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200">
+              <AlertCircle className="h-4 w-4 text-red-500" />
+              <span className="text-xs font-medium text-red-600 truncate max-w-[200px]">{error}</span>
+            </div>
+          )}
+
+          {/* Date Range Selector */}
           <div className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 p-1">
             <button
               onClick={() => setDateRange(30)}
@@ -314,17 +208,20 @@ export function AdminAnalytics() {
             </button>
           </div>
 
+          {/* Refresh Button */}
           <button
-            onClick={fetchAnalyticsData}
+            onClick={() => refresh()}
             className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
             disabled={isLoading}
+            title="Refresh data"
           >
             <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </button>
 
-          <span className="text-xs text-slate-500 font-medium min-w-[140px] text-right">
+          {/* Last Update */}
+          <span className="text-xs text-slate-500 font-medium min-w-[160px] text-right">
             <Calendar className="h-3 w-3 inline mr-1" />
-            {lastUpdate}
+            {lastUpdate ? format(lastUpdate, "dd MMM yyyy HH:mm") : "—"}
           </span>
         </div>
       }
