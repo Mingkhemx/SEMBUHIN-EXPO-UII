@@ -25,9 +25,14 @@ export function AdminLogin() {
           .single();
 
         if (profile?.role === "admin") {
+          // User adalah admin - boleh ke /admin
           navigate({ to: "/admin" });
+        } else {
+          // Session ada tapi bukan admin - sign out dan stay di login
+          await supabase.auth.signOut();
         }
       }
+      // Jika tidak ada session → stay di /admin/login (benar)
     };
     checkExistingAuth();
   }, [navigate]);
