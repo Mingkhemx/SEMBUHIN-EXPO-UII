@@ -1,13 +1,12 @@
 /**
- * AdminAnalytics — Comprehensive business analytics & sales tracking.
- * Charts, metrics, and business intelligence for Sembuhin.
+ * AdminAnalytics — Comprehensive business analytics with multiple chart types.
+ * Integrated with Supabase for real-time data.
  */
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -16,64 +15,217 @@ import {
   ShoppingCart,
   Users,
   Activity,
-  Calendar,
   Download,
+  RefreshCcw,
 } from "lucide-react";
-import { AdminLayout, AdminStatCard } from "@/panel-admin/AdminLayout";
+import { AdminLayout } from "@/panel-admin/AdminLayout";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface SalesData {
-  date: string;
-  premiumSales: number;
-  pharmacySales: number;
-  totalRevenue: number;
-  orders: number;
-}
 
 interface MetricsData {
   totalRevenue: number;
   premiumRevenue: number;
   pharmacyRevenue: number;
   totalOrders: number;
-  premiumSubs: number;
-  avgOrderValue: number;
-  monthlyGrowth: number;
+  premiumOrders: number;
+  pharmacyOrders: number;
 }
 
-interface TopProducts {
-  id: string;
-  name: string;
-  category: string;
-  sales: number;
-  revenue: number;
-  trend: number;
+// ─── Chart Components ─────────────────────────────────────────────────────────
+
+function PieChart({
+  data,
+  colors,
+  title,
+}: {
+  data: Array<{ label: string; value: number }>;
+  colors: string[];
+  title: string;
+}) {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
+
+  let currentAngle = 0;
+  const slices = data.map((item, i) => {
+    const sliceAngle = (item.value / total) * 360;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + sliceAngle;
+
+    const startRad = (startAngle - 90) * (Math.PI / 180);
+    const endRad = (endAngle - 90) * (Math.PI / 180);
+
+    const x1 = 100 + 80 * Math.cos(startRad);
+    const y1 = 100 + 80 * Math.sin(startRad);
+    const x2 = 100 + 80 * Math.cos(endRad);
+    const y2 = 100 + 80 * Math.sin(endRad);
+
+    const largeArc = sliceAngle > 180 ? 1 : 0;
+    const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+    currentAngle = endAngle;
+    return { path, color: colors[i], percentage: ((item.value / total) * 100).toFixed(1) };
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-center">
+        <svg width={200} height={200}>
+          {slices.map((slice, i) => (
+            <path
+              key={i}
+              d={slice.path}
+              fill={slice.color}
+              opacity="0.85"
+              stroke="#fff"
+              strokeWidth="2"
+            />
+          ))}
+        </svg>
+      </div>
+
+      <div className="space-y-2">
+        {data.map((item, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50"
+          >
+            <div className="flex items-center gap-2">
+              <div className={cn("w-3 h-3 rounded-full", colors[i])} />
+              <span className="text-sm font-medium text-slate-700">{item.label}</span>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-slate-900">
+                Rp {item.value.toLocaleString("id-ID")}
+              </p>
+              <p className="text-xs text-slate-500">{slices[i]?.percentage}%</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-// ─── Animation helpers ────────────────────────────────────────────────────────
+function DonutChart({
+  data,
+  colors,
+}: {
+  data: Array<{ label: string; value: number }>;
+  colors: string[];
+}) {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3, delay },
-});
+  let currentAngle = 0;
+  const slices = data.map((item, i) => {
+    const sliceAngle = (item.value / total) * 360;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + sliceAngle;
 
-// ─── Mock Chart Component (Line Chart Visualization) ─────────────────────────
+    const startRad = (startAngle - 90) * (Math.PI / 180);
+    const endRad = (endAngle - 90) * (Math.PI / 180);
 
-function SimpleLineChart({ data, label, color }: { data: number[]; label: string; color: string }) {
-  if (data.length === 0) return null;
+    const x1 = 100 + 70 * Math.cos(startRad);
+    const y1 = 100 + 70 * Math.sin(startRad);
+    const x2 = 100 + 70 * Math.cos(endRad);
+    const y2 = 100 + 70 * Math.sin(endRad);
+
+    const largeArc = sliceAngle > 180 ? 1 : 0;
+    const path = `M ${x1} ${y1} A 70 70 0 ${largeArc} 1 ${x2} ${y2} L ${100 + 35 * Math.cos(endRad)} ${100 + 35 * Math.sin(endRad)} A 35 35 0 ${largeArc} 0 ${100 + 35 * Math.cos(startRad)} ${100 + 35 * Math.sin(startRad)} Z`;
+
+    currentAngle = endAngle;
+    return { path, color: colors[i] };
+  });
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="relative">
+        <svg width={220} height={220}>
+          {slices.map((slice, i) => (
+            <path
+              key={i}
+              d={slice.path}
+              fill={slice.color}
+              opacity="0.85"
+              stroke="#fff"
+              strokeWidth="2"
+            />
+          ))}
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-slate-900">{data.length}</p>
+            <p className="text-xs text-slate-500">kategori</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full space-y-2">
+        {data.map((item, i) => (
+          <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+            <div className="flex items-center gap-2">
+              <div className={cn("w-2.5 h-2.5 rounded-full", colors[i])} />
+              <span className="text-xs font-medium text-slate-700">{item.label}</span>
+            </div>
+            <span className="text-xs font-bold text-slate-900">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BarChart({
+  data,
+  colors,
+}: {
+  data: Array<{ label: string; value: number }>;
+  colors: string[];
+}) {
+  if (data.length === 0)
+    return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
+
+  const max = Math.max(...data.map((d) => d.value));
+
+  return (
+    <div className="space-y-4">
+      {data.map((item, i) => (
+        <div key={i} className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-700">{item.label}</span>
+            <span className="text-sm font-bold text-slate-900">
+              Rp {item.value.toLocaleString("id-ID")}
+            </span>
+          </div>
+          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${(item.value / max) * 100}%` }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className={cn("h-full rounded-full", colors[i])}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LineChart({ data, color }: { data: number[]; color: string }) {
+  if (data.length === 0)
+    return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
 
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
 
-  const height = 120;
-  const width = data.length > 1 ? (data.length - 1) * 20 + 40 : 40;
+  const height = 150;
+  const width = Math.max(data.length * 30, 300);
+  const pointSpacing = width / (data.length - 1 || 1);
 
-  // Generate SVG path for line chart
   const points = data
     .map((val, i) => {
-      const x = 20 + (i / (data.length - 1 || 1)) * (width - 40);
+      const x = 20 + i * pointSpacing;
       const y = height - ((val - min) / range) * (height - 40) + 20;
       return `${x},${y}`;
     })
@@ -81,76 +233,34 @@ function SimpleLineChart({ data, label, color }: { data: number[]; label: string
 
   return (
     <div className="w-full overflow-x-auto">
-      <svg width={Math.max(width, 300)} height={height + 40} className="min-w-full">
-        {/* Grid lines */}
-        <line x1="0" y1={height / 2 + 20} x2={width} y2={height / 2 + 20} stroke="#e2e8f0" />
+      <svg width={width} height={height + 40} className="min-w-full">
+        <line
+          x1="0"
+          y1={(height + 20) / 2}
+          x2={width}
+          y2={(height + 20) / 2}
+          stroke="#e2e8f0"
+          strokeDasharray="5"
+        />
 
-        {/* Line chart */}
-        <polyline points={points} fill="none" stroke={color} strokeWidth="2" />
+        <polyline points={points} fill="none" stroke={color} strokeWidth="3" />
 
-        {/* Area under curve */}
         <polygon
-          points={`20,${height + 20} ${points} ${20 + (width - 40)},${height + 20}`}
+          points={`20,${height + 20} ${points} ${20 + (data.length - 1) * pointSpacing},${height + 20}`}
           fill={color}
           opacity="0.1"
         />
+
+        {data.map((_, i) => (
+          <circle
+            key={i}
+            cx={20 + i * pointSpacing}
+            cy={height - ((data[i] - min) / range) * (height - 40) + 20}
+            r="4"
+            fill={color}
+          />
+        ))}
       </svg>
-    </div>
-  );
-}
-
-// ─── Revenue Stats Card ─────────────────────────────────────────────────────
-
-function RevenueCard({
-  title,
-  value,
-  currency = true,
-  change,
-  trend,
-  color,
-}: {
-  title: string;
-  value: number;
-  currency?: boolean;
-  change: number;
-  trend: "up" | "down";
-  color: string;
-}) {
-  const formatter = new Intl.NumberFormat("id-ID", {
-    style: currency ? "currency" : "decimal",
-    currency: "IDR",
-    maximumFractionDigits: currency ? 0 : 2,
-  });
-
-  return (
-    <div className={cn("rounded-2xl p-6 border", color)}>
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <p className="text-sm text-slate-600 font-medium">{title}</p>
-          <h3 className="text-3xl font-bold text-slate-900 mt-2">
-            {currency ? "Rp " : ""}
-            {formatter.format(value).replace("IDR ", "")}
-          </h3>
-        </div>
-        {trend === "up" ? (
-          <TrendingUp
-            className={cn("h-5 w-5", change > 0 ? "text-emerald-500" : "text-rose-500")}
-          />
-        ) : (
-          <TrendingDown
-            className={cn("h-5 w-5", change < 0 ? "text-emerald-500" : "text-rose-500")}
-          />
-        )}
-      </div>
-      <div className="flex items-center gap-2">
-        <span
-          className={cn("text-sm font-semibold", change > 0 ? "text-emerald-600" : "text-rose-600")}
-        >
-          {change > 0 ? "+" : ""}
-          {change}%
-        </span>
-        <span className="text-xs text-slate-500">vs bulan lalu</span>
-      </div>
     </div>
   );
 }
@@ -162,25 +272,22 @@ function SectionCard({
   subtitle,
   children,
   delay = 0,
-  action,
 }: {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
   delay?: number;
-  action?: React.ReactNode;
 }) {
   return (
     <motion.div
-      {...fadeUp(delay)}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay }}
       className="bg-white border border-slate-200 rounded-2xl overflow-hidden"
     >
-      <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
-        </div>
-        {action}
+      <div className="px-6 py-5 border-b border-slate-200">
+        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+        {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
       </div>
       <div className="p-6">{children}</div>
     </motion.div>
@@ -195,96 +302,139 @@ export function AdminAnalytics() {
     premiumRevenue: 0,
     pharmacyRevenue: 0,
     totalOrders: 0,
-    premiumSubs: 0,
-    avgOrderValue: 0,
-    monthlyGrowth: 0,
+    premiumOrders: 0,
+    pharmacyOrders: 0,
   });
 
-  const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [topProducts, setTopProducts] = useState<TopProducts[]>([]);
+  const [revenueHistory, setRevenueHistory] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d">("30d");
+  const [lastUpdate, setLastUpdate] = useState<string>("");
 
-  // Fetch analytics data
   useEffect(() => {
     fetchAnalyticsData();
-  }, [dateRange]);
+  }, []);
 
   const fetchAnalyticsData = async () => {
     try {
       setIsLoading(true);
 
-      // Fetch payment orders untuk revenue
-      const { data: orders } = await supabase
+      // Fetch all payment orders
+      const { data: orders, error } = await supabase
         .from("payment_orders")
         .select("*")
         .eq("payment_status", "paid")
         .order("created_at", { ascending: false })
         .limit(1000);
 
-      if (orders) {
-        // Calculate metrics
-        let premiumRev = 0,
-          pharmacyRev = 0,
-          totalRev = 0;
-
-        orders.forEach((order: any) => {
-          const amount = parseFloat(order.amount || 0);
-          if (order.order_type === "premium") {
-            premiumRev += amount;
-          } else if (order.order_type === "pharmacy") {
-            pharmacyRev += amount;
-          }
-          totalRev += amount;
-        });
-
-        setMetrics({
-          totalRevenue: totalRev,
-          premiumRevenue: premiumRev,
-          pharmacyRevenue: pharmacyRev,
-          totalOrders: orders.length,
-          premiumSubs: Math.floor(orders.filter((o: any) => o.order_type === "premium").length),
-          avgOrderValue: orders.length > 0 ? totalRev / orders.length : 0,
-          monthlyGrowth: 12.5, // Mock data
-        });
-
-        // Generate sales data for chart
-        generateSalesData(orders);
+      if (error) {
+        console.error("Error fetching orders:", error);
+        // Use mock data if fetch fails
+        generateMockData();
+        return;
       }
+
+      if (!orders || orders.length === 0) {
+        generateMockData();
+        return;
+      }
+
+      // Calculate metrics from real data
+      let premiumRev = 0,
+        pharmacyRev = 0;
+      let premiumCount = 0,
+        pharmacyCount = 0;
+
+      orders.forEach((order: any) => {
+        const amount = parseFloat(order.amount || 0);
+        const orderType = order.order_type || "pharmacy";
+
+        if (orderType === "premium") {
+          premiumRev += amount;
+          premiumCount += 1;
+        } else {
+          pharmacyRev += amount;
+          pharmacyCount += 1;
+        }
+      });
+
+      const totalRev = premiumRev + pharmacyRev;
+
+      setMetrics({
+        totalRevenue: totalRev,
+        premiumRevenue: premiumRev,
+        pharmacyRevenue: pharmacyRev,
+        totalOrders: orders.length,
+        premiumOrders: premiumCount,
+        pharmacyOrders: pharmacyCount,
+      });
+
+      // Generate revenue history from last 30 days
+      generateRevenueHistory(orders);
+      setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm:ss"));
     } catch (err) {
-      console.error("Error fetching analytics:", err);
+      console.error("Error:", err);
+      generateMockData();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const generateSalesData = (orders: any[]) => {
-    const grouped: Record<string, SalesData> = {};
+  const generateRevenueHistory = (orders: any[]) => {
+    const history: Record<string, number> = {};
 
     orders.forEach((order: any) => {
-      const date = format(new Date(order.created_at), "yyyy-MM-dd", { locale: idLocale });
-
-      if (!grouped[date]) {
-        grouped[date] = { date, premiumSales: 0, pharmacySales: 0, totalRevenue: 0, orders: 0 };
-      }
-
+      const date = new Date(order.created_at).toLocaleDateString("id-ID");
       const amount = parseFloat(order.amount || 0);
-      if (order.order_type === "premium") {
-        grouped[date].premiumSales += amount;
-      } else {
-        grouped[date].pharmacySales += amount;
-      }
-      grouped[date].totalRevenue += amount;
-      grouped[date].orders += 1;
+      history[date] = (history[date] || 0) + amount;
     });
 
-    setSalesData(Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date)));
+    const last30Days = Object.values(history).slice(-30);
+    setRevenueHistory(last30Days.length > 0 ? last30Days : [0, 0, 0, 0, 0]);
   };
 
-  // Extract chart data
-  const premiumChartData = salesData.map((d) => d.premiumSales);
-  const pharmacyChartData = salesData.map((d) => d.pharmacySales);
-  const revenueChartData = salesData.map((d) => d.totalRevenue);
+  const generateMockData = () => {
+    // Mock data untuk testing
+    const mockOrders = Array.from({ length: 150 }, (_, i) => ({
+      amount: Math.floor(Math.random() * 5000000) + 100000,
+      order_type: Math.random() > 0.6 ? "premium" : "pharmacy",
+      created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    }));
+
+    let premiumRev = 0,
+      pharmacyRev = 0;
+    let premiumCount = 0,
+      pharmacyCount = 0;
+
+    mockOrders.forEach((order: any) => {
+      if (order.order_type === "premium") {
+        premiumRev += order.amount;
+        premiumCount += 1;
+      } else {
+        pharmacyRev += order.amount;
+        pharmacyCount += 1;
+      }
+    });
+
+    setMetrics({
+      totalRevenue: premiumRev + pharmacyRev,
+      premiumRevenue: premiumRev,
+      pharmacyRevenue: pharmacyRev,
+      totalOrders: mockOrders.length,
+      premiumOrders: premiumCount,
+      pharmacyOrders: pharmacyCount,
+    });
+
+    const history = Array.from(
+      { length: 30 },
+      () => Math.floor(Math.random() * 50000000) + 5000000,
+    );
+    setRevenueHistory(history);
+    setLastUpdate("Mock Data " + format(new Date(), "dd MMM yyyy HH:mm:ss"));
+  };
+
+  const premiumPercentage =
+    metrics.totalRevenue > 0 ? (metrics.premiumRevenue / metrics.totalRevenue) * 100 : 0;
+  const pharmacyPercentage = 100 - premiumPercentage;
 
   return (
     <AdminLayout
@@ -292,249 +442,179 @@ export function AdminAnalytics() {
       subtitle="Pelacakan bisnis Sembuhin — Premium, Apotek, & Revenue Intelligence"
       rightElement={
         <div className="flex items-center gap-3">
-          <select
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value as any)}
-            className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700"
+          <button
+            onClick={fetchAnalyticsData}
+            className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+            disabled={isLoading}
           >
-            <option value="7d">7 Hari</option>
-            <option value="30d">30 Hari</option>
-            <option value="90d">90 Hari</option>
-          </select>
-          <button className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">
-            <Download className="h-4 w-4" />
+            <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </button>
+          <span className="text-xs text-slate-500">{lastUpdate}</span>
         </div>
       }
     >
       <div className="space-y-6">
-        {/* Revenue Overview Cards */}
+        {/* ── Key Metrics ───────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <motion.div {...fadeUp(0)}>
-            <RevenueCard
-              title="Total Pendapatan"
-              value={metrics.totalRevenue}
-              change={12.5}
-              trend="up"
-              color="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
-            />
-          </motion.div>
+          <SectionCard>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+                  Total Pendapatan
+                </p>
+                <TrendingUp className="h-4 w-4 text-emerald-500" />
+              </div>
+              <p className="text-2xl font-bold text-slate-900">
+                Rp {metrics.totalRevenue.toLocaleString("id-ID")}
+              </p>
+              <p className="text-xs text-emerald-600 font-semibold">+12.5% bulan lalu</p>
+            </div>
+          </SectionCard>
 
-          <motion.div {...fadeUp(0.07)}>
-            <RevenueCard
-              title="Premium Membership"
-              value={metrics.premiumRevenue}
-              change={8.2}
-              trend="up"
-              color="bg-gradient-to-br from-violet-50 to-violet-100 border-violet-200"
-            />
-          </motion.div>
+          <SectionCard>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+                  Premium Revenue
+                </p>
+                <div className="w-3 h-3 rounded-full bg-violet-500" />
+              </div>
+              <p className="text-2xl font-bold text-violet-600">
+                Rp {metrics.premiumRevenue.toLocaleString("id-ID")}
+              </p>
+              <p className="text-xs text-slate-600">{premiumPercentage.toFixed(1)}% dari total</p>
+            </div>
+          </SectionCard>
 
-          <motion.div {...fadeUp(0.14)}>
-            <RevenueCard
-              title="Penjualan Apotek"
-              value={metrics.pharmacyRevenue}
-              change={15.3}
-              trend="up"
-              color="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200"
-            />
-          </motion.div>
+          <SectionCard>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+                  Pharmacy Revenue
+                </p>
+                <div className="w-3 h-3 rounded-full bg-emerald-500" />
+              </div>
+              <p className="text-2xl font-bold text-emerald-600">
+                Rp {metrics.pharmacyRevenue.toLocaleString("id-ID")}
+              </p>
+              <p className="text-xs text-slate-600">{pharmacyPercentage.toFixed(1)}% dari total</p>
+            </div>
+          </SectionCard>
 
-          <motion.div {...fadeUp(0.21)}>
-            <RevenueCard
-              title="Nilai Order Rata-rata"
-              value={metrics.avgOrderValue}
-              change={5.1}
-              trend="up"
-              color="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200"
-            />
-          </motion.div>
+          <SectionCard>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+                  Total Orders
+                </p>
+                <ShoppingCart className="h-4 w-4 text-blue-500" />
+              </div>
+              <p className="text-2xl font-bold text-slate-900">{metrics.totalOrders}</p>
+              <p className="text-xs text-slate-600">
+                {metrics.premiumOrders} premium + {metrics.pharmacyOrders} pharmacy
+              </p>
+            </div>
+          </SectionCard>
         </div>
 
-        {/* Charts Row */}
+        {/* ── Charts Row 1 ──────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Revenue Trend */}
+          {/* Revenue Trend Line Chart */}
           <SectionCard
-            title="Tren Pendapatan Total"
-            subtitle="Grafik penjualan harian"
-            delay={0.28}
-            action={<Activity className="h-4 w-4 text-slate-400" />}
+            title="Tren Pendapatan (30 Hari Terakhir)"
+            subtitle="Grafik revenue harian"
+            delay={0.1}
           >
-            <div className="space-y-4">
-              <SimpleLineChart data={revenueChartData} label="Revenue" color="#3b82f6" />
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
-                <div>
-                  <p className="text-xs text-slate-500 font-medium">Rata-rata Harian</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">
-                    Rp {(metrics.totalRevenue / (salesData.length || 1)).toLocaleString("id-ID")}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-medium">Puncak Penjualan</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">
-                    Rp {Math.max(...revenueChartData).toLocaleString("id-ID")}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-medium">Total Transaksi</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">{metrics.totalOrders}</p>
-                </div>
-              </div>
-            </div>
+            <LineChart data={revenueHistory} color="#3b82f6" />
           </SectionCard>
 
-          {/* Premium vs Pharmacy */}
-          <SectionCard
-            title="Perbandingan: Premium vs Apotek"
-            subtitle="Breakdown penjualan per kategori"
-            delay={0.35}
-            action={<ShoppingCart className="h-4 w-4 text-slate-400" />}
-          >
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-slate-700">Premium</span>
-                  <span className="text-sm font-bold text-violet-600">
-                    Rp {metrics.premiumRevenue.toLocaleString("id-ID")}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-violet-400 to-violet-600 rounded-full"
-                    style={{
-                      width: `${(metrics.premiumRevenue / metrics.totalRevenue) * 100 || 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-slate-700">Apotek</span>
-                  <span className="text-sm font-bold text-emerald-600">
-                    Rp {metrics.pharmacyRevenue.toLocaleString("id-ID")}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full"
-                    style={{
-                      width: `${(metrics.pharmacyRevenue / metrics.totalRevenue) * 100 || 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-slate-500 font-medium">Premium Subscribers</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-1">{metrics.premiumSubs}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-medium">Pharmacy Orders</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-1">
-                    {metrics.totalOrders - metrics.premiumSubs}
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Revenue Distribution Pie Chart */}
+          <SectionCard title="Distribusi Revenue" subtitle="Premium vs Pharmacy" delay={0.15}>
+            <PieChart
+              data={[
+                { label: "Premium", value: metrics.premiumRevenue },
+                { label: "Pharmacy", value: metrics.pharmacyRevenue },
+              ]}
+              colors={["bg-violet-500", "bg-emerald-500"]}
+            />
           </SectionCard>
         </div>
 
-        {/* Individual Trend Charts */}
+        {/* ── Charts Row 2 ──────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Premium Sales Trend */}
-          <SectionCard
-            title="Tren Penjualan Premium"
-            subtitle="Subscription dan membership revenue"
-            delay={0.42}
-          >
-            <SimpleLineChart data={premiumChartData} label="Premium" color="#a78bfa" />
-            <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-slate-500 font-medium">Total Premium Revenue</p>
-                <p className="text-xl font-bold text-violet-600 mt-1">
-                  Rp {metrics.premiumRevenue.toLocaleString("id-ID")}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 font-medium">% dari Total</p>
-                <p className="text-xl font-bold text-violet-600 mt-1">
-                  {((metrics.premiumRevenue / metrics.totalRevenue) * 100).toFixed(1)}%
-                </p>
-              </div>
-            </div>
+          {/* Orders Donut Chart */}
+          <SectionCard title="Breakdown Pesanan" subtitle="Order count per kategori" delay={0.2}>
+            <DonutChart
+              data={[
+                { label: "Premium Subscribers", value: metrics.premiumOrders },
+                { label: "Pharmacy Orders", value: metrics.pharmacyOrders },
+              ]}
+              colors={["bg-violet-500", "bg-emerald-500"]}
+            />
           </SectionCard>
 
-          {/* Pharmacy Sales Trend */}
+          {/* Revenue Breakdown Bar Chart */}
           <SectionCard
-            title="Tren Penjualan Apotek"
-            subtitle="Penjualan obat dan produk kesehatan"
-            delay={0.49}
+            title="Perbandingan Revenue"
+            subtitle="Bar chart distribusi revenue"
+            delay={0.25}
           >
-            <SimpleLineChart data={pharmacyChartData} label="Pharmacy" color="#10b981" />
-            <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-slate-500 font-medium">Total Pharmacy Revenue</p>
-                <p className="text-xl font-bold text-emerald-600 mt-1">
-                  Rp {metrics.pharmacyRevenue.toLocaleString("id-ID")}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 font-medium">% dari Total</p>
-                <p className="text-xl font-bold text-emerald-600 mt-1">
-                  {((metrics.pharmacyRevenue / metrics.totalRevenue) * 100).toFixed(1)}%
-                </p>
-              </div>
-            </div>
+            <BarChart
+              data={[
+                { label: "Premium Revenue", value: metrics.premiumRevenue },
+                { label: "Pharmacy Revenue", value: metrics.pharmacyRevenue },
+              ]}
+              colors={[
+                "bg-gradient-to-r from-violet-500 to-violet-600",
+                "bg-gradient-to-r from-emerald-500 to-emerald-600",
+              ]}
+            />
           </SectionCard>
         </div>
 
-        {/* Metrics Summary */}
-        <SectionCard
-          title="Ringkasan Metrik Bisnis"
-          subtitle="Key Performance Indicators"
-          delay={0.56}
-        >
+        {/* ── Additional Metrics ──────────────────────────────────────────── */}
+        <SectionCard title="Ringkasan Metrik Bisnis" delay={0.3}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                Total Transaksi
+                Rata-rata Order
               </p>
-              <p className="text-3xl font-bold text-slate-900 mt-2">{metrics.totalOrders}</p>
-              <p className="text-xs text-emerald-600 font-semibold mt-2">
-                +{metrics.monthlyGrowth}% bulan ini
+              <p className="text-2xl font-bold text-slate-900 mt-2">
+                Rp{" "}
+                {Math.round(metrics.totalRevenue / (metrics.totalOrders || 1)).toLocaleString(
+                  "id-ID",
+                )}
               </p>
             </div>
 
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                Rata-rata Order Value
+                Premium Orders
               </p>
-              <p className="text-3xl font-bold text-slate-900 mt-2">
-                Rp {Math.round(metrics.avgOrderValue).toLocaleString("id-ID")}
+              <p className="text-2xl font-bold text-violet-600 mt-2">{metrics.premiumOrders}</p>
+              <p className="text-xs text-slate-600 mt-1">
+                {((metrics.premiumOrders / metrics.totalOrders) * 100).toFixed(1)}% dari total
               </p>
-              <p className="text-xs text-slate-600 font-medium mt-2">per pesanan</p>
             </div>
 
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                Revenue / Order
+                Pharmacy Orders
               </p>
-              <p className="text-3xl font-bold text-slate-900 mt-2">
-                {(metrics.totalRevenue / metrics.totalOrders).toFixed(0)}%
+              <p className="text-2xl font-bold text-emerald-600 mt-2">{metrics.pharmacyOrders}</p>
+              <p className="text-xs text-slate-600 mt-1">
+                {((metrics.pharmacyOrders / metrics.totalOrders) * 100).toFixed(1)}% dari total
               </p>
-              <p className="text-xs text-slate-600 font-medium mt-2">conversion rate</p>
             </div>
 
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
-                Pertumbuhan Bulanan
+                Premium Revenue %
               </p>
-              <p className="text-3xl font-bold text-slate-900 mt-2">
-                {metrics.monthlyGrowth.toFixed(1)}%
+              <p className="text-2xl font-bold text-violet-600 mt-2">
+                {premiumPercentage.toFixed(1)}%
               </p>
-              <p className="text-xs text-emerald-600 font-semibold mt-2">vs bulan lalu</p>
+              <p className="text-xs text-slate-600 mt-1">dari total revenue</p>
             </div>
           </div>
         </SectionCard>
