@@ -142,7 +142,24 @@ export function AdminShell() {
         if (!mounted) return;
 
         if (!session) {
-          window.location.href = "/admin/login";
+          // No session → redirect to home
+          window.location.href = "/";
+          return;
+        }
+
+        // Check if user is admin
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!mounted) return;
+
+        if (error || profile?.role !== "admin") {
+          // Not admin → sign out and redirect to home
+          await supabase.auth.signOut();
+          window.location.href = "/";
           return;
         }
         
@@ -164,7 +181,7 @@ export function AdminShell() {
 
   const handleLogout = async () => {
     await authSignOut();
-    window.location.href = "/admin/login";
+    window.location.href = "/";
   };
 
   if (isChecking) {

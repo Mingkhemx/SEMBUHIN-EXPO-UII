@@ -22,6 +22,7 @@ import {
   Crown,
   MessageCircle,
   Pill,
+  Shield,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -38,12 +39,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Header() {
   const matchRoute = useMatchRoute();
-  const { user, signOut, isPremium, isDoctor } = useAuth();
+  const { user, signOut, isPremium, isDoctor, userProfile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Check if user is admin
+  const isAdmin = userProfile?.role === "admin";
 
   const languages = [
     { code: "id", label: "Indonesia", flag: "🇮🇩", short: "ID" },
@@ -458,6 +462,16 @@ export function Header() {
                     >
                       <Stethoscope className="h-4 w-4" />
                       <span>{t("header.doctor_panel")}</span>
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-violet-600 hover:bg-violet-50 w-full"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin Panel</span>
                     </Link>
                   )}
                   <button

@@ -37,7 +37,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResepIndexRouteImport } from './routes/resep/index'
 import { Route as DoctorIndexRouteImport } from './routes/doctor/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminApiUsageRouteImport } from './routes/admin/api-usage'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as DoctorSettingsRouteRouteImport } from './routes/doctor/settings/route'
@@ -193,11 +192,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
 const AdminApiUsageRoute = AdminApiUsageRouteImport.update({
   id: '/api-usage',
   path: '/api-usage',
@@ -312,7 +306,6 @@ export interface FileRoutesByFullPath {
   '/doctor/settings': typeof DoctorSettingsRouteRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api-usage': typeof AdminApiUsageRoute
-  '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/doctor/': typeof DoctorIndexRoute
   '/resep/': typeof ResepIndexRoute
@@ -354,7 +347,6 @@ export interface FileRoutesByTo {
   '/doctor/settings': typeof DoctorSettingsRouteRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api-usage': typeof AdminApiUsageRoute
-  '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
   '/doctor': typeof DoctorIndexRoute
   '/resep': typeof ResepIndexRoute
@@ -400,7 +392,6 @@ export interface FileRoutesById {
   '/doctor/settings': typeof DoctorSettingsRouteRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api-usage': typeof AdminApiUsageRoute
-  '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/doctor/': typeof DoctorIndexRoute
   '/resep/': typeof ResepIndexRoute
@@ -447,7 +438,6 @@ export interface FileRouteTypes {
     | '/doctor/settings'
     | '/admin/analytics'
     | '/admin/api-usage'
-    | '/admin/login'
     | '/admin/'
     | '/doctor/'
     | '/resep/'
@@ -489,7 +479,6 @@ export interface FileRouteTypes {
     | '/doctor/settings'
     | '/admin/analytics'
     | '/admin/api-usage'
-    | '/admin/login'
     | '/admin'
     | '/doctor'
     | '/resep'
@@ -534,7 +523,6 @@ export interface FileRouteTypes {
     | '/doctor/settings'
     | '/admin/analytics'
     | '/admin/api-usage'
-    | '/admin/login'
     | '/admin/'
     | '/doctor/'
     | '/resep/'
@@ -766,13 +754,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
     '/admin/api-usage': {
       id: '/admin/api-usage'
       path: '/api-usage'
@@ -882,7 +863,6 @@ interface AdminRouteRouteChildren {
   AdminUsersRouteRoute: typeof AdminUsersRouteRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApiUsageRoute: typeof AdminApiUsageRoute
-  AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -894,7 +874,6 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminUsersRouteRoute: AdminUsersRouteRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApiUsageRoute: AdminApiUsageRoute,
-  AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
