@@ -83,19 +83,23 @@ export function useAnalyticsRealtime({
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - dateRangeRef.current);
 
-      // Fetch dari analytics_summary untuk performa lebih baik
-      const { data: summaryData, error: summaryError } = await supabase
+      // Try to fetch dari analytics_summary
+      let { data: summaryData, error: summaryError } = await supabase
         .from("analytics_summary")
         .select("*")
         .gte("date", startDate.toISOString().split("T")[0])
         .order("date", { ascending: true });
 
-      if (summaryError) {
+      // If table doesn't exist, fetch directly from payment_orders
+      if (summaryError && summaryError.code === "PGRST116") {
+        console.log("analytics_summary table not found, fetching from payment_orders");
+        summaryData = null;
+      } else if (summaryError) {
         throw new Error(summaryError.message);
       }
 
       if (!summaryData || summaryData.length === 0) {
-        // Fallback ke payment_orders jika analytics_summary kosong
+        // Fallback ke payment_orders jika analytics_summary kosong atau tidak exist
         const { data: ordersData, error: ordersError } = await supabase
           .from("payment_orders")
           .select("*")
@@ -104,6 +108,7 @@ export function useAnalyticsRealtime({
           .order("created_at", { ascending: true });
 
         if (ordersError) {
+          console.error("Orders fetch error:", ordersError);
           throw new Error(ordersError.message);
         }
 
