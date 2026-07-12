@@ -1,0 +1,123 @@
+╔═════════════════════════════════════════════════════════════════════════════╗
+║              INSERT TEST DATA - QUICK STEPS (3 Menit)                      ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+🎯 TUJUAN
+─────────────────────────────────────────────────────────────────────────────
+Tambah data test ke dashboard analytics agar menampilkan data real-time
+
+⏱️ WAKTU: 3 menit
+
+📦 FILES
+─────────────────────────────────────────────────────────────────────────────
+✓ supabase-insert-test-data.sql    ← SQL script (22 test orders)
+✓ INSERT_TEST_DATA_GUIDE.md         ← Lengkap guide
+
+✨ LANGKAH-LANGKAH
+─────────────────────────────────────────────────────────────────────────────
+
+STEP 1: Buka Supabase Editor
+  1. Go to: https://app.supabase.com
+  2. Select: Project "Sembuhin"
+  3. Click: SQL Editor → New Query
+
+STEP 2: Copy Script
+  1. Open: supabase-insert-test-data.sql
+  2. Select: ALL content (Ctrl+A)
+  3. Copy: Ctrl+C
+
+STEP 3: Paste & Run
+  1. Paste di SQL Editor: Ctrl+V
+  2. Click: RUN (tombol biru)
+  3. Wait: ~5 detik
+  4. Result: Count: 22 ✅
+
+STEP 4: Verify Dashboard
+  1. Refresh: Browser F5
+  2. Lihat: Total Pendapatan ≠ Rp 0 ✅
+  3. Lihat: Charts populated ✅
+  4. Lihat: Badge "Live" green ✅
+
+📊 EXPECTED RESULTS
+─────────────────────────────────────────────────────────────────────────────
+
+Total Revenue:        Rp 5,950,000
+├─ Premium:           Rp 2,680,000 (12 orders)
+└─ Pharmacy:          Rp 3,270,000 (10 orders)
+
+Total Orders:         22
+├─ Premium:           12 (54%)
+└─ Pharmacy:          10 (46%)
+
+Average Order Value:  Rp 270,000
+
+7-Day Chart:          Data untuk 7 hari terakhir
+
+✅ CHECKLIST
+─────────────────────────────────────────────────────────────────────────────
+
+□ SQL script executed (tidak ada error)
+□ Result shows "Count: 22"
+□ Dashboard refresh (F5)
+□ Total Pendapatan tidak lagi Rp 0
+□ Premium & Pharmacy revenue visible
+□ Charts menampilkan data
+□ Live badge masih hijau
+
+🧪 TEST REALTIME (Bonus!)
+─────────────────────────────────────────────────────────────────────────────
+
+Untuk test bahwa realtime working:
+
+1. Buka SQL Editor → New Query
+2. Copy-paste ini:
+
+INSERT INTO payment_orders (
+  user_id, order_type, amount, payment_status, created_at, updated_at, paid_at
+) VALUES (
+  (SELECT id FROM auth.users LIMIT 1),
+  'premium',
+  99000,
+  'paid',
+  now(), now(), now()
+);
+
+3. Click RUN
+4. Lihat dashboard → harus auto-update dalam 1-2 detik ✨
+5. Check: Total Pendapatan naik Rp 99,000
+6. Success! Real-time working! 🎉
+
+🆘 TROUBLESHOOTING
+─────────────────────────────────────────────────────────────────────────────
+
+❌ Script Error: "no rows with LIMIT"
+   ✓ Solution: Ensure ada auth.users existing
+
+❌ Dashboard masih Rp 0
+   ✓ Solution: Click Refresh button, tunggu 2-3 detik
+
+❌ Metrics tidak match
+   ✓ Solution: Hanya "paid" status yang di-count
+   ✓ Verify: SELECT * FROM payment_orders WHERE payment_status = 'paid'
+
+📚 FULL GUIDE
+─────────────────────────────────────────────────────────────────────────────
+Untuk detail lengkap: baca INSERT_TEST_DATA_GUIDE.md
+
+🚀 NEXT STEPS
+─────────────────────────────────────────────────────────────────────────────
+
+1. ✅ Insert test data (3 min)
+2. ✅ Verify dashboard shows data (1 min)
+3. ✅ Test realtime update (2 min)
+4. ✅ Try date range filter (1 min)
+5. ✅ Monitor 24 hours
+6. ✅ Deploy to production
+
+═════════════════════════════════════════════════════════════════════════════
+
+TOTAL TIME: ~3-5 minutes untuk full setup + test
+
+Siap? Buka SQL Editor dan mulai! 🎯
+
+═════════════════════════════════════════════════════════════════════════════
