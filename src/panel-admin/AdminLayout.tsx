@@ -129,20 +129,38 @@ export function AdminShell() {
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
 
   useEffect(() => {
-    // Simple check: if no user, redirect to login
+    let mounted = true;
+    let checked = false;
+
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        window.location.href = "/admin/login";
-        return;
+      if (checked) return;
+      checked = true;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+
+        if (!session) {
+          window.location.href = "/admin/login";
+          return;
+        }
+        
+        setIsChecking(false);
+      } catch (err) {
+        console.error("Error checking auth:", err);
+        if (mounted) {
+          setIsChecking(false);
+        }
       }
-      
-      setIsChecking(false);
     };
 
     checkAuth();
-  }, []);
+
+    return () => {
+      mounted = false;
+    };
+  }, []); // Empty dependency array!
 
   const handleLogout = async () => {
     await authSignOut();
