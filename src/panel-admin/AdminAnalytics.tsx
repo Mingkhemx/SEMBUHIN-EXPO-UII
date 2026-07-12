@@ -1,14 +1,17 @@
 /**
- * AdminAnalytics — Business analytics integrated with Supabase Edge Functions.
- * Direct connection to Supabase serverless API (no Railway backend needed).
+ * AdminAnalytics — Direct Supabase connection from frontend.
+ * Simple & clean - no unnecessary layers.
  */
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { TrendingUp, ShoppingCart, RefreshCcw } from "lucide-react";
 import { AdminLayout } from "@/panel-admin/AdminLayout";
+
+// ─── Types
 
 interface MetricsData {
   totalRevenue: number;
@@ -18,6 +21,8 @@ interface MetricsData {
   premiumOrders: number;
   pharmacyOrders: number;
 }
+
+// ─── Charts
 
 function PieChart({
   data,
@@ -34,18 +39,14 @@ function PieChart({
     const sliceAngle = (item.value / total) * 360;
     const startAngle = currentAngle;
     const endAngle = currentAngle + sliceAngle;
-
     const startRad = (startAngle - 90) * (Math.PI / 180);
     const endRad = (endAngle - 90) * (Math.PI / 180);
-
     const x1 = 100 + 80 * Math.cos(startRad);
     const y1 = 100 + 80 * Math.sin(startRad);
     const x2 = 100 + 80 * Math.cos(endRad);
     const y2 = 100 + 80 * Math.sin(endRad);
-
     const largeArc = sliceAngle > 180 ? 1 : 0;
     const path = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
     currentAngle = endAngle;
     return { path, color: colors[i], percentage: ((item.value / total) * 100).toFixed(1) };
   });
@@ -104,18 +105,14 @@ function DonutChart({
     const sliceAngle = (item.value / total) * 360;
     const startAngle = currentAngle;
     const endAngle = currentAngle + sliceAngle;
-
     const startRad = (startAngle - 90) * (Math.PI / 180);
     const endRad = (endAngle - 90) * (Math.PI / 180);
-
     const x1 = 100 + 70 * Math.cos(startRad);
     const y1 = 100 + 70 * Math.sin(startRad);
     const x2 = 100 + 70 * Math.cos(endRad);
     const y2 = 100 + 70 * Math.sin(endRad);
-
     const largeArc = sliceAngle > 180 ? 1 : 0;
     const path = `M ${x1} ${y1} A 70 70 0 ${largeArc} 1 ${x2} ${y2} L ${100 + 35 * Math.cos(endRad)} ${100 + 35 * Math.sin(endRad)} A 35 35 0 ${largeArc} 0 ${100 + 35 * Math.cos(startRad)} ${100 + 35 * Math.sin(startRad)} Z`;
-
     currentAngle = endAngle;
     return { path, color: colors[i] };
   });
@@ -166,9 +163,7 @@ function BarChart({
 }) {
   if (data.length === 0)
     return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
-
   const max = Math.max(...data.map((d) => d.value));
-
   return (
     <div className="space-y-4">
       {data.map((item, i) => (
@@ -196,22 +191,17 @@ function BarChart({
 function LineChart({ data, color }: { data: number[]; color: string }) {
   if (data.length === 0)
     return <div className="text-center py-8 text-slate-400">Tidak ada data</div>;
-
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
-
   const height = 150;
   const width = Math.max(data.length * 30, 300);
   const pointSpacing = width / (data.length - 1 || 1);
-
-  const points = data
-    .map((val, i) => {
-      const x = 20 + i * pointSpacing;
-      const y = height - ((val - min) / range) * (height - 40) + 20;
-      return `${x},${y}`;
-    })
-    .join(" ");
+  const points = data.map((val, i) => {
+    const x = 20 + i * pointSpacing;
+    const y = height - ((val - min) / range) * (height - 40) + 20;
+    return `${x},${y}`;
+  });
 
   return (
     <div className="w-full overflow-x-auto">
@@ -224,9 +214,9 @@ function LineChart({ data, color }: { data: number[]; color: string }) {
           stroke="#e2e8f0"
           strokeDasharray="5"
         />
-        <polyline points={points} fill="none" stroke={color} strokeWidth="3" />
+        <polyline points={points.join(" ")} fill="none" stroke={color} strokeWidth="3" />
         <polygon
-          points={`20,${height + 20} ${points} ${20 + (data.length - 1) * pointSpacing},${height + 20}`}
+          points={`20,${height + 20} ${points.join(" ")} ${20 + (data.length - 1) * pointSpacing},${height + 20}`}
           fill={color}
           opacity="0.1"
         />
@@ -273,6 +263,8 @@ function SectionCard({
   );
 }
 
+// ─── Main Component
+
 export function AdminAnalytics() {
   const [metrics, setMetrics] = useState<MetricsData>({
     totalRevenue: 0,
@@ -295,41 +287,62 @@ export function AdminAnalytics() {
     try {
       setIsLoading(true);
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      // Direct Supabase query
+      const { data: orders, error } = await supabase
+        .from("payment_orders")
+        .select("*")
+        .eq("payment_status", "paid")
+        .order("created_at", { ascending: false })
+        .limit(1000);
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/analytics-api?days=30`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${anonKey}`,
-          "Content-Type": "application/json",
-        },
+      if (error || !orders) {
+        console.error("Query Error:", error);
+        generateMockData();
+        return;
+      }
+
+      if (orders.length === 0) {
+        generateMockData();
+        return;
+      }
+
+      // Calculate
+      let premiumRev = 0,
+        pharmacyRev = 0;
+      let premiumCount = 0,
+        pharmacyCount = 0;
+
+      orders.forEach((order: any) => {
+        const amount = parseFloat(order.amount || 0);
+        const orderType = order.order_type || "pharmacy";
+        if (orderType === "premium") {
+          premiumRev += amount;
+          premiumCount += 1;
+        } else {
+          pharmacyRev += amount;
+          pharmacyCount += 1;
+        }
       });
-
-      if (!response.ok) {
-        console.error("API Error:", response.statusText);
-        generateMockData();
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!data.success) {
-        console.warn("API Response:", data.message);
-        generateMockData();
-        return;
-      }
 
       setMetrics({
-        totalRevenue: data.totalRevenue,
-        premiumRevenue: data.premiumRevenue,
-        pharmacyRevenue: data.pharmacyRevenue,
-        totalOrders: data.totalOrders,
-        premiumOrders: data.premiumOrders,
-        pharmacyOrders: data.pharmacyOrders,
+        totalRevenue: premiumRev + pharmacyRev,
+        premiumRevenue: premiumRev,
+        pharmacyRevenue: pharmacyRev,
+        totalOrders: orders.length,
+        premiumOrders: premiumCount,
+        pharmacyOrders: pharmacyCount,
       });
 
-      setRevenueHistory(data.revenueHistory || []);
+      // History
+      const history: Record<string, number> = {};
+      orders.forEach((order: any) => {
+        const date = new Date(order.created_at).toLocaleDateString("id-ID");
+        const amount = parseFloat(order.amount || 0);
+        history[date] = (history[date] || 0) + amount;
+      });
+
+      const last30 = Object.values(history).slice(-30);
+      setRevenueHistory(last30.length > 0 ? last30 : [0, 0, 0, 0, 0]);
       setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm:ss"));
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -346,8 +359,8 @@ export function AdminAnalytics() {
     }));
 
     let premiumRev = 0,
-      pharmacyRev = 0,
-      premiumCount = 0,
+      pharmacyRev = 0;
+    let premiumCount = 0,
       pharmacyCount = 0;
 
     mockOrders.forEach((order) => {
@@ -384,7 +397,7 @@ export function AdminAnalytics() {
   return (
     <AdminLayout
       title="Analytics & Penjualan"
-      subtitle="Pelacakan bisnis Sembuhin — Koneksi langsung Supabase Edge Function"
+      subtitle="Pelacakan bisnis Sembuhin — Direct Supabase Connection"
       rightElement={
         <div className="flex items-center gap-3">
           <button
@@ -399,6 +412,7 @@ export function AdminAnalytics() {
       }
     >
       <div className="space-y-6">
+        {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <SectionCard>
             <div className="space-y-2">
@@ -461,6 +475,7 @@ export function AdminAnalytics() {
           </SectionCard>
         </div>
 
+        {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SectionCard
             title="Tren Pendapatan (30 Hari)"
@@ -481,6 +496,7 @@ export function AdminAnalytics() {
           </SectionCard>
         </div>
 
+        {/* Charts Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SectionCard title="Breakdown Pesanan" subtitle="Order count per kategori" delay={0.2}>
             <DonutChart
@@ -506,6 +522,7 @@ export function AdminAnalytics() {
           </SectionCard>
         </div>
 
+        {/* Metrics Summary */}
         <SectionCard title="Ringkasan Metrik Bisnis" delay={0.3}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
@@ -519,7 +536,6 @@ export function AdminAnalytics() {
                 )}
               </p>
             </div>
-
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
                 Premium Orders
@@ -530,7 +546,6 @@ export function AdminAnalytics() {
                 total
               </p>
             </div>
-
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
                 Pharmacy Orders
@@ -541,7 +556,6 @@ export function AdminAnalytics() {
                 total
               </p>
             </div>
-
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
                 Premium %
