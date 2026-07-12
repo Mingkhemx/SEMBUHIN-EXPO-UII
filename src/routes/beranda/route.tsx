@@ -128,9 +128,7 @@ function Index() {
                         {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
                           <span key={i}>
                             {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
-                              <span className="text-blue-400">
-                                {word}
-                              </span>
+                              <span className="text-blue-400">{word}</span>
                             ) : (
                               word + " "
                             )}
@@ -212,9 +210,7 @@ function Index() {
                       transition={{ duration: 0.5, delay: item.delay }}
                       className="group cursor-default"
                     >
-                      <div
-                        className="relative rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:scale-105 shadow-xl shadow-black/10"
-                      >
+                      <div className="relative rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:scale-105 shadow-xl shadow-black/10">
                         <div className="space-y-2">
                           <div className="text-4xl font-black text-white group-hover:text-blue-300 transition-colors">
                             {item.stat}
@@ -240,10 +236,7 @@ function Index() {
             {t("home.pilar_badge")}
           </div>
           <h2 className="font-display text-4xl font-bold sm:text-5xl text-foreground tracking-tight">
-            {t("home.pilar_title")}{" "}
-            <span className="text-sky-600">
-              {t("home.brand_name")}
-            </span>
+            {t("home.pilar_title")} <span className="text-sky-600">{t("home.brand_name")}</span>
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
             {t("home.pilar_desc")}
@@ -336,9 +329,7 @@ function Index() {
           </div>
           <h2 className="font-display text-3xl font-bold sm:text-5xl text-foreground tracking-tight">
             {t("home.doctor_title")}{" "}
-            <span className="text-sky-600">
-              {t("home.doctor_title_accent")}
-            </span>
+            <span className="text-sky-600">{t("home.doctor_title_accent")}</span>
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
             {t("home.doctor_desc")}

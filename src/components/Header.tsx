@@ -91,10 +91,10 @@ export function Header() {
   const isApotekinActive = matchRoute({ to: "/marketplace" });
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-4 backdrop-blur-xl w-full">
-      <div className="glass bg-white/70 backdrop-blur-md mx-auto flex max-w-[1400px] items-center justify-between rounded-3xl px-6 py-2 shadow-xl border border-sky-200/50">
+    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 w-full bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-xl border-b border-slate-200/50 shadow-sm">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between rounded-2xl px-6 py-3">
         <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105">
-          <img src="gif_logo/logo.png" alt="Sembuhin" className="h-14 w-auto object-contain" />
+          <img src="gif_logo/logo.png" alt="Sembuhin" className="h-12 w-auto object-contain" />
         </Link>
 
         {/* Desktop Nav */}
