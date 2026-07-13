@@ -103,7 +103,7 @@ export function useAnalyticsRealtime({
         const { data: ordersData, error: ordersError } = await supabase
           .from("payment_orders")
           .select("*")
-          .eq("payment_status", "paid")
+          .eq("status", "completed")
           .gte("created_at", startDate.toISOString())
           .order("created_at", { ascending: true });
 
@@ -147,59 +147,46 @@ export function useAnalyticsRealtime({
    * Process data dari payment_orders
    */
   const processOrdersData = (orders: any[]) => {
-    let premiumRev = 0,
-      pharmacyRev = 0;
-    let premiumCount = 0,
-      pharmacyCount = 0;
-    const groupedByDate: Record<string, { premium: number; pharmacy: number; premiumOrders: number; pharmacyOrders: number }> = {};
+    let totalRev = 0;
+    let totalCount = 0;
+    const groupedByDate: Record<string, { total: number; count: number }> = {};
 
     orders.forEach((order) => {
       const amount = parseFloat(order.amount || 0);
-      const orderType = order.order_type || "pharmacy";
+      totalRev += amount;
+      totalCount += 1;
+
       const dateKey = new Date(order.created_at).toLocaleDateString("id-ID", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
       });
 
-      if (orderType === "premium") {
-        premiumRev += amount;
-        premiumCount += 1;
-      } else {
-        pharmacyRev += amount;
-        pharmacyCount += 1;
-      }
-
       if (!groupedByDate[dateKey]) {
-        groupedByDate[dateKey] = { premium: 0, pharmacy: 0, premiumOrders: 0, pharmacyOrders: 0 };
+        groupedByDate[dateKey] = { total: 0, count: 0 };
       }
 
-      if (orderType === "premium") {
-        groupedByDate[dateKey].premium += amount;
-        groupedByDate[dateKey].premiumOrders += 1;
-      } else {
-        groupedByDate[dateKey].pharmacy += amount;
-        groupedByDate[dateKey].pharmacyOrders += 1;
-      }
+      groupedByDate[dateKey].total += amount;
+      groupedByDate[dateKey].count += 1;
     });
 
     const newChartData = Object.entries(groupedByDate).map(([date, values]) => ({
       date,
-      premium: values.premium,
-      pharmacy: values.pharmacy,
-      total: values.premium + values.pharmacy,
-      premiumOrders: values.premiumOrders,
-      pharmacyOrders: values.pharmacyOrders,
+      premium: values.total,
+      pharmacy: 0,
+      total: values.total,
+      premiumOrders: values.count,
+      pharmacyOrders: 0,
     }));
 
     setMetrics({
-      totalRevenue: premiumRev + pharmacyRev,
-      premiumRevenue: premiumRev,
-      pharmacyRevenue: pharmacyRev,
-      totalOrders: orders.length,
-      premiumOrders: premiumCount,
-      pharmacyOrders: pharmacyCount,
-      averageOrderValue: orders.length > 0 ? (premiumRev + pharmacyRev) / orders.length : 0,
+      totalRevenue: totalRev,
+      premiumRevenue: totalRev,
+      pharmacyRevenue: 0,
+      totalOrders: totalCount,
+      premiumOrders: totalCount,
+      pharmacyOrders: 0,
+      averageOrderValue: totalCount > 0 ? totalRev / totalCount : 0,
     });
 
     setChartData(newChartData);
