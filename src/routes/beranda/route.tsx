@@ -24,16 +24,16 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export const Route = createFileRoute("/beranda")({
   head: () => ({
     meta: [
-      { title: "Sembuhin — Kesehatan Holografik dengan AI 3D" },
+      { title: "Sembuhin — Platform Kesehatan Terpercaya" },
       {
         name: "description",
         content:
-          "Symptom Orb 3D, marketplace obat, konsul dokter AI, Health Twin, dan resep holografik dalam satu platform.",
+          "Platform kesehatan lengkap dengan konsultasi dokter, marketplace obat, dan layanan kesehatan digital.",
       },
-      { property: "og:title", content: "Sembuhin — Kesehatan Holografik dengan AI 3D" },
+      { property: "og:title", content: "Sembuhin — Platform Kesehatan Terpercaya" },
       {
         property: "og:description",
-        content: "Pengalaman kesehatan masa depan dengan visualisasi 3D dan AI.",
+        content: "Layanan kesehatan digital terpercaya untuk Anda dan keluarga.",
       },
     ],
   }),
@@ -46,19 +46,19 @@ function Index() {
 
   const rotationContent = (t("home.hero_rotation") as any[]) || [
     {
-      topTitle: "Pendamping Setia",
-      bottomTitle: "Fisik & Mental Anda",
-      desc: "Platform ekosistem kesehatan holistik berskala penuh untuk mendampingi setiap keluhan fisik maupun mental Anda secara personal.",
+      topTitle: "Layanan Kesehatan",
+      bottomTitle: "Terpercaya",
+      desc: "Platform kesehatan digital lengkap untuk Anda dan keluarga dengan layanan konsultasi dokter dan marketplace obat.",
     },
     {
-      topTitle: "Akses Tanpa Antre:",
-      bottomTitle: "Konsultasi Dokter Live",
-      desc: "Bertanya langsung ke asisten AI cerdas kami atau mulai sesi darurat dengan Dokter spesialis secara live 24/7.",
+      topTitle: "Konsultasi Dokter",
+      bottomTitle: "24 Jam",
+      desc: "Hubungi dokter spesialis kapan saja tanpa antre. Layanan konsultasi online yang mudah dan cepat.",
     },
     {
-      topTitle: "Navigasi Medis:",
-      bottomTitle: "Cari RS Otomatis",
-      desc: "Sistem geolokasi pintar kami akan merespons dan menemukan rumah sakit serta klinik terdekat dari lokasi Anda dalam hitungan detik.",
+      topTitle: "Cari Rumah Sakit",
+      bottomTitle: "Terdekat",
+      desc: "Temukan rumah sakit dan klinik terdekat dari lokasi Anda dengan sistem pencarian yang akurat.",
     },
   ];
 
@@ -86,8 +86,8 @@ function Index() {
             <source src="/hero-bg-medical.mp4" type="video/mp4" />
           </video>
 
-          {/* Professional solid dark overlay (No multi-color gradients) */}
-          <div className="absolute inset-0 bg-slate-900/60" />
+          {/* Professional light overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/50 via-slate-800/40 to-slate-900/50" />
         </div>
 
         {/* MAIN CONTENT - ASYMMETRIC GRID */}
@@ -105,9 +105,9 @@ function Index() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
+                className="inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-white/90 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-widest shadow-lg"
               >
-                <Shield className="w-4 h-4" />
+                <Shield className="w-4 h-4 text-emerald-600" />
                 {t("home.standard_badge")}
               </motion.div>
 
@@ -122,22 +122,12 @@ function Index() {
                     transition={{ duration: 0.5 }}
                     className="space-y-6"
                   >
-                    {/* Headline with white text - drop shadow for readability */}
+                    {/* Headline with professional styling */}
                     <div className="space-y-4">
-                      <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight drop-shadow-xl leading-[1.1] text-white">
-                        {rotationContent[contentIndex].topTitle.split(" ").map((word, i) => (
-                          <span key={i}>
-                            {i === rotationContent[contentIndex].topTitle.split(" ").length - 1 ? (
-                              <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent drop-shadow-none">
-                                {word}
-                              </span>
-                            ) : (
-                              word + " "
-                            )}
-                          </span>
-                        ))}
+                      <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.1] text-white">
+                        {rotationContent[contentIndex].topTitle}
                       </h1>
-                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold drop-shadow-lg leading-[1.2] text-white">
+                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.2] text-emerald-400">
                         {rotationContent[contentIndex].bottomTitle}
                       </h2>
                     </div>
@@ -150,17 +140,17 @@ function Index() {
                 </AnimatePresence>
               </div>
 
-              {/* CTA Buttons - PROFESSIONAL SOLID */}
+              {/* CTA Buttons - Professional solid */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="flex flex-col sm:flex-row gap-4 pt-4"
               >
-                {/* Primary Button - Solid blue */}
+                {/* Primary Button - Solid emerald */}
                 <Link
                   to="/twin"
-                  className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-900/20"
+                  className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 bg-emerald-600 hover:bg-emerald-500 shadow-lg"
                 >
                   <div className="relative flex items-center gap-2.5">
                     <span>{t("home.start_btn")}</span>
@@ -168,17 +158,17 @@ function Index() {
                   </div>
                 </Link>
 
-                {/* Secondary Button - Outline white */}
+                {/* Secondary Button - Solid white */}
                 <Link
                   to="/konsul"
-                  className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white/30 hover:border-white/60 bg-white/5 hover:bg-white/10"
+                  className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-700 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 bg-white hover:bg-slate-50 border border-slate-200 shadow-md"
                 >
                   <div className="relative">{t("home.ai_btn")}</div>
                 </Link>
               </motion.div>
             </motion.div>
 
-            {/* RIGHT SIDE - STATS CARDS (CLEAN GLASS) */}
+            {/* RIGHT SIDE - STATS CARDS (CLEAN PROFESSIONAL) */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -212,12 +202,12 @@ function Index() {
                       transition={{ duration: 0.5, delay: item.delay }}
                       className="group cursor-default"
                     >
-                      <div className="relative rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:scale-105 shadow-xl shadow-black/10">
+                      <div className="relative rounded-xl bg-white/95 backdrop-blur-sm border border-slate-200 p-6 transition-all duration-300 hover:bg-white hover:border-emerald-300 hover:scale-105 shadow-lg">
                         <div className="space-y-2">
-                          <div className="text-4xl font-black text-white group-hover:text-blue-300 transition-colors">
+                          <div className="text-4xl font-black text-emerald-600 group-hover:text-emerald-700 transition-colors">
                             {item.stat}
                           </div>
-                          <p className="text-sm text-white/80 font-medium group-hover:text-white transition-colors uppercase tracking-wider">
+                          <p className="text-sm text-slate-600 font-medium group-hover:text-slate-700 transition-colors uppercase tracking-wider">
                             {item.label}
                           </p>
                         </div>
