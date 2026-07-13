@@ -471,52 +471,102 @@ export function AdminUsers() {
     null,
   );
 
-  // 1. Fetch Stats - Backend API
+  // 1. Fetch Stats - Direct from Supabase
   const fetchStats = async () => {
     try {
-      const res = await fetch(
-        "https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/stats",
-      );
-      const data = await res.json();
-      if (data.success && data.stats) {
-        setStats({
-          total: data.stats.total || 0,
-          active: data.stats.active || 0,
-          banned: data.stats.banned || 0,
-        });
-      }
+      const { count: total } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+      
+      const { count: active } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("is_active", true);
+      
+      const { count: banned } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "banned");
+
+      setStats({
+        total: total || 0,
+        active: active || 0,
+        banned: banned || 0,
+      });
     } catch (err) {
       console.error("Error fetching user stats:", err);
       setStats({ total: 0, active: 0, banned: 0 });
     }
   };
 
-  // 2. Fetch Users - Backend API
+  // 2. Fetch Users - Direct from Supabase
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const url = `https://sembuhin-expo-uii-production.up.railway.app/api/admin/users?search=${encodeURIComponent(search)}&status=${encodeURIComponent(filter)}&page=${page}&per_page=10`;
-      const res = await fetch(url);
-      const data = await res.json();
+      
+      let query = supabase
+        .from("profiles")
+        .select("*", { count: "exact" });
 
-      if (data.success && data.data) {
-        setUsers(
-          data.data.map((u: any) => ({
-            ...u,
-            avatar: u.full_name
-              ? u.full_name
-                  .split(" ")
-                  .map((n: string) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)
-              : "??",
-          })),
-        );
-        setTotalItems(data.total || 0);
-      } else {
-        throw new Error(data.error || "Gagal memuat data user");
+      if (search) {
+        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
       }
+
+      if (filter === "Aktif") {
+        query = query.eq("is_active", true);
+      } else if (filter === "Banned") {
+        query = query.eq("status", "banned");
+      } else if (filter === "Premium") {
+        query = query.eq("is_premium", true);
+      }
+
+      const start = (page - 1) * 10;
+      const end = start + 10 - 1;
+
+      const { data, count, error } = await query
+        .order("created_at", { ascending: false })
+        .range(start, end);
+
+      if (error) throw error;
+
+      // Get doctors for role labeling
+      const { data: doctors } = await supabase
+        .from("doctors")
+        .select("email, avatar_url");
+
+      const doctorMap = new Map(
+        doctors?.map((d) => [d.email, d.avatar_url]) || []
+      );
+
+      const usersWithRoles = (data || []).map((u: any) => {
+        const email = u.email;
+        const currentRole = u.role || "user";
+        
+        // Add doctor role if email exists in doctors table
+        if (doctorMap.has(email)) {
+          if (currentRole === "user") {
+            u.role = "doctor";
+          } else if (!currentRole.includes("doctor")) {
+            u.role = `${currentRole},doctor`;
+          }
+          u.avatar_url = doctorMap.get(email);
+        }
+
+        return {
+          ...u,
+          avatar: u.full_name
+            ? u.full_name
+                .split(" ")
+                .map((n: string) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2)
+            : "??",
+        };
+      });
+
+      setUsers(usersWithRoles);
+      setTotalItems(count || 0);
     } catch (err: any) {
       console.error("Error fetching users:", err);
       toast.error(err.message || "Gagal memuat data user");
@@ -527,7 +577,7 @@ export function AdminUsers() {
     }
   };
 
-  // 3. Update User Status - Backend API
+  // 3. Update User Status - Direct from Supabase
   const handleUpdateStatus = async (
     userId: string,
     status: UserStatus,
@@ -536,26 +586,25 @@ export function AdminUsers() {
     ban_until?: string,
   ) => {
     try {
-      const response = await fetch(
-        `https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/${userId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            status,
-            is_active: isActive,
-            reason: reason || null,
-            ban_until: ban_until || null,
-          }),
-        },
-      );
+      const updateData: any = {
+        status,
+        is_active: isActive,
+      };
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Gagal memperbarui status user");
+      if (reason) {
+        updateData.status_reason = reason;
       }
+
+      if (ban_until) {
+        updateData.ban_until = ban_until;
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .update(updateData)
+        .eq("id", userId);
+
+      if (error) throw error;
 
       toast.success("Status user berhasil diperbarui");
       fetchUsers();
@@ -567,16 +616,59 @@ export function AdminUsers() {
     }
   };
 
-  // 4. Export CSV - Backend API
+  // 4. Export CSV - Direct from Supabase
   const handleExportCSV = async () => {
     try {
       setIsExporting(true);
-      const res = await fetch(
-        "https://sembuhin-expo-uii-production.up.railway.app/api/admin/users/export",
-      );
-      if (!res.ok) throw new Error("Gagal mengunduh data ekspor");
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      const blob = await res.blob();
+      if (error) throw error;
+
+      // Get doctors for role labeling
+      const { data: doctors } = await supabase
+        .from("doctors")
+        .select("email, avatar_url");
+
+      const doctorMap = new Map(
+        doctors?.map((d) => [d.email, d.avatar_url]) || []
+      );
+
+      const usersWithRoles = (data || []).map((u: any) => {
+        const email = u.email;
+        const currentRole = u.role || "user";
+        
+        if (doctorMap.has(email)) {
+          if (currentRole === "user") {
+            u.role = "doctor";
+          } else if (!currentRole.includes("doctor")) {
+            u.role = `${currentRole},doctor`;
+          }
+        }
+
+        return u;
+      });
+
+      // Create CSV
+      const headers = ["ID", "Full Name", "Email", "Role", "Status", "Is Active", "Is Premium", "Created At"];
+      const csvContent = [
+        headers.join(","),
+        ...usersWithRoles.map((u: any) => [
+          u.id,
+          `"${u.full_name || ""}"`,
+          u.email,
+          u.role,
+          u.status,
+          u.is_active,
+          u.is_premium,
+          u.created_at
+        ].join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
