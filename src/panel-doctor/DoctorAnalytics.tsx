@@ -131,16 +131,21 @@ export function DoctorAnalytics() {
       if (consultError) throw consultError;
 
       // 3. Fetch rating (average from consultations with rating)
-      const { data: ratedConsultations, error: ratingError } = await supabase
-        .from("consultations")
-        .select("rating")
-        .eq("doctor_id", doc.id)
-        .not("rating", "is", null);
-
       let avgRating = 0;
-      if (!ratingError && ratedConsultations && ratedConsultations.length > 0) {
-        const sum = ratedConsultations.reduce((acc: number, c: any) => acc + (c.rating || 0), 0);
-        avgRating = Math.round((sum / ratedConsultations.length) * 10) / 10;
+      try {
+        const { data: ratedConsultations, error: ratingError } = await supabase
+          .from("consultations")
+          .select("rating")
+          .eq("doctor_id", doc.id)
+          .not("rating", "is", null)
+          .gt("rating", 0);
+
+        if (!ratingError && ratedConsultations && ratedConsultations.length > 0) {
+          const sum = ratedConsultations.reduce((acc: number, c: any) => acc + (c.rating || 0), 0);
+          avgRating = Math.round((sum / ratedConsultations.length) * 10) / 10;
+        }
+      } catch (e) {
+        console.log("📊 Rating query failed, using default 0");
       }
 
       // 4. Fetch recent consultations for activities
@@ -370,7 +375,7 @@ export function DoctorAnalytics() {
             <p className="text-sm font-semibold text-slate-900">Aktivitas Terbaru</p>
           </div>
           <ul className="divide-y divide-slate-100">
-            {analytics.activities.map((activity) => (
+            {(analytics.activities || []).map((activity) => (
               <li
                 key={activity.id}
                 className="px-5 py-3.5 flex items-start gap-3 hover:bg-slate-50 transition-colors"
