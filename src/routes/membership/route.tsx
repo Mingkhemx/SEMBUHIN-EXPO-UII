@@ -672,19 +672,32 @@ function MembershipPage() {
               </AnimatePresence>
             </div>
 
-            <div className="relative space-y-3.5 flex-1 mb-8">
+            <div className="relative space-y-4 flex-1 mb-8">
               {FEATURES.map((f, i) => {
                 const Icon = f.icon;
                 return (
-                  <div key={i} className="flex items-start gap-3">
-                    <span className="h-[18px] w-[18px] rounded-full bg-sky-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="h-2.5 w-2.5 text-sky-400 stroke-[3]" />
-                    </span>
-                    <div>
-                      <p className="text-[13px] font-medium text-white leading-snug">{f.title}</p>
-                      <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">{f.desc}</p>
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + i * 0.1 }}
+                    className="group flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                  >
+                    <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="h-6 w-6 text-sky-400" />
                     </div>
-                  </div>
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-white leading-snug mb-1 group-hover:text-sky-200 transition-colors">
+                        {f.title}
+                      </p>
+                      <p className="text-[13px] text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">
+                        {f.desc}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <Check className="h-5 w-5 text-emerald-400" />
+                    </div>
+                  </motion.div>
                 );
               })}
             </div>
