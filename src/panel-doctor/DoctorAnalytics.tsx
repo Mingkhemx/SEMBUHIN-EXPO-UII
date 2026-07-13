@@ -203,6 +203,20 @@ export function DoctorAnalytics() {
       setAnalytics({
         stats: statsWithIcons,
         activities: activitiesWithIcons,
+        weekly_data: [
+          { day: "Sen", value: 2, max: 5 },
+          { day: "Sel", value: 3, max: 5 },
+          { day: "Rab", value: 1, max: 5 },
+          { day: "Kam", value: 4, max: 5 },
+          { day: "Jum", value: 2, max: 5 },
+          { day: "Sab", value: 1, max: 5 },
+          { day: "Min", value: 0, max: 5 },
+        ],
+        top_diagnoses: [
+          { name: "Demam", count: 3, pct: 60 },
+          { name: "Flu", count: 2, pct: 40 },
+          { name: "Sakit Kepala", count: 1, pct: 20 },
+        ],
       });
     } catch (err: any) {
       console.error("❌ Error fetching analytics:", err);
@@ -316,7 +330,7 @@ export function DoctorAnalytics() {
 
             {/* Bar Chart */}
             <div className="flex items-end gap-3 h-36">
-              {analytics.weekly_data.map((bar, i) => (
+              {(analytics.weekly_data || []).map((bar, i) => (
                 <div key={bar.day} className="flex-1 flex flex-col items-center gap-1.5">
                   <span className="text-xs font-medium text-slate-700">{bar.value}</span>
                   <motion.div
@@ -342,7 +356,7 @@ export function DoctorAnalytics() {
             <p className="text-xs text-slate-500 mb-4">Berdasarkan frekuensi</p>
 
             <div className="space-y-3">
-              {analytics.top_diagnoses.map((diag, i) => (
+              {(analytics.top_diagnoses || []).map((diag, i) => (
                 <div key={diag.name}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
