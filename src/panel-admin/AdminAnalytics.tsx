@@ -1,9 +1,21 @@
 /**
- * AdminAnalytics — Professional Dashboard with Real-time Data & Recharts
- * Enterprise-grade analytics for Sembuhin business metrics
+ * AdminAnalytics — Dashboard Real-time Penjualan
+ * 
+ * PENJELASAN CARA KERJA:
+ * 1. Saat page load → fetch data dari payment_orders table
+ * 2. Subscribe ke perubahan payment_orders (saat ada pembayaran baru)
+ * 3. Auto-update dashboard dengan data terbaru
+ * 4. Tampilkan: Total uang, Total order, Breakdown membership vs pharmacy
+ * 
+ * DATABASE: Ambil dari table payment_orders di Supabase
+ * - order_id: identifier unik (untuk deteksi membership vs pharmacy)
+ * - amount: jumlah uang
+ * - status: 'paid' = pembayaran berhasil
+ * - created_at: waktu transaksi
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
@@ -15,9 +27,6 @@ import {
   Users,
   RefreshCcw,
   Calendar,
-  Wifi,
-  WifiOff,
-  AlertCircle,
 } from "lucide-react";
 import {
   LineChart,
@@ -37,18 +46,27 @@ import {
   Area,
 } from "recharts";
 import { AdminLayout } from "@/panel-admin/AdminLayout";
-import { useAnalyticsRealtime } from "@/hooks/useAnalyticsRealtime";
 
-// ─── Colors
+interface MetricsData {
+  totalRevenue: number;
+  membershipRevenue: number;
+  pharmacyRevenue: number;
+  totalOrders: number;
+  membershipOrders: number;
+  pharmacyOrders: number;
+}
+
+interface ChartData {
+  date: string;
+  membership: number;
+  pharmacy: number;
+  total: number;
+}
 
 const COLORS = {
-  premium: "#a78bfa",
+  membership: "#a78bfa",
   pharmacy: "#10b981",
-  primary: "#3b82f6",
-  accent: "#f59e0b",
 };
-
-// ─── Stat Card
 
 function StatCard({
   label,
@@ -56,17 +74,15 @@ function StatCard({
   change,
   icon: Icon,
   color,
-  currency = true,
 }: {
   label: string;
   value: number;
   change: number;
   icon: any;
   color: string;
-  currency?: boolean;
 }) {
   const isPositive = change >= 0;
-  const formatted = currency ? `Rp ${value.toLocaleString("id-ID")}` : value.toString();
+  const formatted = value > 0 ? `Rp ${value.toLocaleString("id-ID")}` : "Rp 0";
 
   return (
     <motion.div
@@ -97,7 +113,7 @@ function StatCard({
               {isPositive ? "+" : ""}
               {change}%
             </span>
-            <span className="text-xs text-slate-500">vs bulan lalu</span>
+            <span className="text-xs text-slate-500">vs hari lalu</span>
           </div>
         </div>
         <div className={cn("p-3 rounded-xl", color.split(" ")[1])}>
@@ -107,8 +123,6 @@ function StatCard({
     </motion.div>
   );
 }
-
-// ─── Section
 
 function Section({
   title,
@@ -137,56 +151,173 @@ function Section({
   );
 }
 
-// ─── Main Component
-
 export function AdminAnalytics() {
   const [dateRange, setDateRange] = useState<30 | 90>(30);
+  const [metrics, setMetrics] = useState<MetricsData>({
+    totalRevenue: 0,
+    membershipRevenue: 0,
+    pharmacyRevenue: 0,
+    totalOrders: 0,
+    membershipOrders: 0,
+    pharmacyOrders: 0,
+  });
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<string>("");
 
-  // Use real-time hook
-  const { metrics, chartData, isLoading, error, lastUpdate, refresh, isSubscribed } =
-    useAnalyticsRealtime({
-      dateRange,
-      autoSubscribe: true,
-    });
+  /**
+   * Fetch analytics data dari payment_orders
+   * Ini dipanggil:
+   * 1. Saat component pertama kali load
+   * 2. Saat ada perubahan di payment_orders (via subscription)
+   * 3. Saat user klik refresh button
+   * 4. Saat user ganti date range
+   */
+  const fetchAnalyticsData = async () => {
+    try {
+      setIsLoading(true);
 
-  const premiumPercentage =
-    metrics.totalRevenue > 0 ? (metrics.premiumRevenue / metrics.totalRevenue) * 100 : 0;
-  const pharmacyPercentage = 100 - premiumPercentage;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - dateRange);
+
+      // Query ke database: ambil semua pembayaran yang berhasil
+      const { data: orders, error } = await supabase
+        .from("payment_orders")
+        .select("order_id, amount, created_at, status")
+        .eq("status", "paid")
+        .gte("created_at", startDate.toISOString())
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+
+      // Jika tidak ada data, tampilkan 0
+      if (!orders || orders.length === 0) {
+        setMetrics({
+          totalRevenue: 0,
+          membershipRevenue: 0,
+          pharmacyRevenue: 0,
+          totalOrders: 0,
+          membershipOrders: 0,
+          pharmacyOrders: 0,
+        });
+        setChartData([]);
+        setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm"));
+        return;
+      }
+
+      // Hitung statistik dari data yang diambil
+      let membershipRev = 0,
+        pharmacyRev = 0;
+      let membershipCount = 0,
+        pharmacyCount = 0;
+      const groupedByDate: Record<string, { membership: number; pharmacy: number }> = {};
+
+      // Loop setiap order
+      orders.forEach((order: any) => {
+        const amount = Number(order.amount) || 0;
+        const date = format(new Date(order.created_at), "dd MMM");
+
+        // Deteksi: Apakah ini membership atau pharmacy?
+        // Caranya: lihat order_id, jika mengandung "MEMBERSHIP" atau "PREMIUM" = membership
+        // Selain itu = pharmacy
+        const isMembership =
+          order.order_id?.toUpperCase().includes("MEMBERSHIP") ||
+          order.order_id?.toUpperCase().includes("PREMIUM");
+
+        if (isMembership) {
+          membershipRev += amount;
+          membershipCount += 1;
+        } else {
+          pharmacyRev += amount;
+          pharmacyCount += 1;
+        }
+
+        // Group by tanggal untuk chart
+        if (!groupedByDate[date]) {
+          groupedByDate[date] = { membership: 0, pharmacy: 0 };
+        }
+
+        if (isMembership) {
+          groupedByDate[date].membership += amount;
+        } else {
+          groupedByDate[date].pharmacy += amount;
+        }
+      });
+
+      // Update state dengan data yang sudah dihitung
+      setMetrics({
+        totalRevenue: membershipRev + pharmacyRev,
+        membershipRevenue: membershipRev,
+        pharmacyRevenue: pharmacyRev,
+        totalOrders: orders.length,
+        membershipOrders: membershipCount,
+        pharmacyOrders: pharmacyCount,
+      });
+
+      // Format untuk chart
+      const chartDataArray = Object.entries(groupedByDate).map(([date, values]) => ({
+        date,
+        membership: values.membership,
+        pharmacy: values.pharmacy,
+        total: values.membership + values.pharmacy,
+      }));
+
+      setChartData(chartDataArray);
+      setLastUpdate(format(new Date(), "dd MMM yyyy HH:mm"));
+    } catch (err) {
+      console.error("Error fetching analytics:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Setup: Fetch data saat pertama kali dan subscribe ke perubahan
+  useEffect(() => {
+    // Fetch pertama kali
+    fetchAnalyticsData();
+
+    // Subscribe ke real-time updates
+    // Setiap kali ada pembayaran baru yang masuk ke payment_orders → auto-fetch data
+    const subscription = supabase
+      .channel("payment_orders_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "payment_orders",
+          filter: "status=eq.paid",
+        },
+        () => {
+          console.log("Ada pembayaran baru! Refresh data...");
+          fetchAnalyticsData();
+        }
+      )
+      .subscribe();
+
+    // Cleanup: unsubscribe saat component unmount
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [dateRange]);
+
+  // Hitung percentage untuk pie chart
+  const membershipPercentage =
+    metrics.totalRevenue > 0
+      ? (metrics.membershipRevenue / metrics.totalRevenue) * 100
+      : 0;
+  const pharmacyPercentage = 100 - membershipPercentage;
   const pieData = [
-    { name: "Premium", value: premiumPercentage, fill: COLORS.premium },
+    { name: "Membership", value: membershipPercentage, fill: COLORS.membership },
     { name: "Pharmacy", value: pharmacyPercentage, fill: COLORS.pharmacy },
   ];
 
   return (
     <AdminLayout
       title="Analytics & Penjualan"
-      subtitle="Real-time business intelligence untuk Sembuhin"
+      subtitle="Real-time data penjualan membership dan obat-obatan"
       rightElement={
         <div className="flex items-center gap-3">
-          {/* Connection Status */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200">
-            {isSubscribed ? (
-              <>
-                <Wifi className="h-4 w-4 text-emerald-500 animate-pulse" />
-                <span className="text-xs font-medium text-emerald-600">Live</span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="h-4 w-4 text-slate-400" />
-                <span className="text-xs font-medium text-slate-500">Offline</span>
-              </>
-            )}
-          </div>
-
-          {/* Error Alert */}
-          {error && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200">
-              <AlertCircle className="h-4 w-4 text-red-500" />
-              <span className="text-xs font-medium text-red-600 truncate max-w-[200px]">{error}</span>
-            </div>
-          )}
-
-          {/* Date Range Selector */}
           <div className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 p-1">
             <button
               onClick={() => setDateRange(30)}
@@ -208,26 +339,23 @@ export function AdminAnalytics() {
             </button>
           </div>
 
-          {/* Refresh Button */}
           <button
-            onClick={() => refresh()}
+            onClick={fetchAnalyticsData}
             className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50"
             disabled={isLoading}
-            title="Refresh data"
           >
             <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </button>
 
-          {/* Last Update */}
-          <span className="text-xs text-slate-500 font-medium min-w-[160px] text-right">
+          <span className="text-xs text-slate-500 font-medium min-w-[140px] text-right">
             <Calendar className="h-3 w-3 inline mr-1" />
-            {lastUpdate ? format(lastUpdate, "dd MMM yyyy HH:mm") : "—"}
+            {lastUpdate}
           </span>
         </div>
       }
     >
       <div className="space-y-6">
-        {/* ─── Stats Row ─── */}
+        {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
             label="Total Pendapatan"
@@ -238,15 +366,15 @@ export function AdminAnalytics() {
           />
 
           <StatCard
-            label="Premium Membership"
-            value={metrics.premiumRevenue}
+            label="Membership"
+            value={metrics.membershipRevenue}
             change={8.2}
             icon={Users}
             color="bg-gradient-to-br from-violet-50 to-violet-100 border-violet-200"
           />
 
           <StatCard
-            label="Penjualan Apotek"
+            label="Pharmacy"
             value={metrics.pharmacyRevenue}
             change={15.3}
             icon={ShoppingCart}
@@ -254,30 +382,28 @@ export function AdminAnalytics() {
           />
 
           <StatCard
-            label="Total Pesanan"
+            label="Total Order"
             value={metrics.totalOrders}
             change={10.1}
             icon={ShoppingCart}
             color="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200"
-            currency={false}
           />
         </div>
 
-        {/* ─── Charts Grid ─── */}
+        {/* Charts */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Revenue Trend - Full Width */}
           <Section
             title="Tren Pendapatan"
-            subtitle={`Pergeseran revenue premium vs apotek (${dateRange} hari)`}
+            subtitle={`Breakdown membership vs pharmacy (${dateRange} hari)`}
             delay={0.1}
             className="xl:col-span-2"
           >
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorPremium" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.premium} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={COLORS.premium} stopOpacity={0} />
+                  <linearGradient id="colorMembership" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={COLORS.membership} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={COLORS.membership} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorPharmacy" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={COLORS.pharmacy} stopOpacity={0.3} />
@@ -299,12 +425,12 @@ export function AdminAnalytics() {
                 <Legend />
                 <Area
                   type="monotone"
-                  dataKey="premium"
+                  dataKey="membership"
                   stackId="1"
-                  stroke={COLORS.premium}
+                  stroke={COLORS.membership}
                   fillOpacity={1}
-                  fill="url(#colorPremium)"
-                  name="Premium Revenue"
+                  fill="url(#colorMembership)"
+                  name="Membership"
                 />
                 <Area
                   type="monotone"
@@ -313,14 +439,13 @@ export function AdminAnalytics() {
                   stroke={COLORS.pharmacy}
                   fillOpacity={1}
                   fill="url(#colorPharmacy)"
-                  name="Pharmacy Revenue"
+                  name="Pharmacy"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </Section>
 
-          {/* Distribution Pie */}
-          <Section title="Distribusi Revenue" subtitle="Breakdown Premium vs Apotek" delay={0.2}>
+          <Section title="Distribusi Revenue" subtitle="Membership vs Pharmacy" delay={0.2}>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -346,12 +471,12 @@ export function AdminAnalytics() {
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS.premium }}
+                    style={{ backgroundColor: COLORS.membership }}
                   />
-                  <span className="text-sm font-medium text-slate-700">Premium</span>
+                  <span className="text-sm font-medium text-slate-700">Membership</span>
                 </div>
                 <span className="text-sm font-bold text-slate-900">
-                  Rp {metrics.premiumRevenue.toLocaleString("id-ID")}
+                  Rp {metrics.membershipRevenue.toLocaleString("id-ID")}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -360,7 +485,7 @@ export function AdminAnalytics() {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: COLORS.pharmacy }}
                   />
-                  <span className="text-sm font-medium text-slate-700">Apotek</span>
+                  <span className="text-sm font-medium text-slate-700">Pharmacy</span>
                 </div>
                 <span className="text-sm font-bold text-slate-900">
                   Rp {metrics.pharmacyRevenue.toLocaleString("id-ID")}
@@ -370,24 +495,19 @@ export function AdminAnalytics() {
           </Section>
         </div>
 
-        {/* ─── Secondary Charts ─── */}
+        {/* Bottom Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Revenue Comparison */}
-          <Section
-            title="Perbandingan Revenue"
-            subtitle="Bar chart perbandingan kategori"
-            delay={0.3}
-          >
+          <Section title="Perbandingan Revenue" subtitle="Membership vs Pharmacy" delay={0.3}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={[
                   {
-                    name: "Premium",
-                    value: metrics.premiumRevenue / 1000000,
-                    fill: COLORS.premium,
+                    name: "Membership",
+                    value: metrics.membershipRevenue / 1000000,
+                    fill: COLORS.membership,
                   },
                   {
-                    name: "Apotek",
+                    name: "Pharmacy",
                     value: metrics.pharmacyRevenue / 1000000,
                     fill: COLORS.pharmacy,
                   },
@@ -410,15 +530,15 @@ export function AdminAnalytics() {
                     color: "#f1f5f9",
                   }}
                 />
-                <Bar dataKey="value" fill={COLORS.primary} radius={[8, 8, 0, 0]}>
+                <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 0, 0]}>
                   {[
                     {
-                      name: "Premium",
-                      value: metrics.premiumRevenue / 1000000,
-                      fill: COLORS.premium,
+                      name: "Membership",
+                      value: metrics.membershipRevenue / 1000000,
+                      fill: COLORS.membership,
                     },
                     {
-                      name: "Apotek",
+                      name: "Pharmacy",
                       value: metrics.pharmacyRevenue / 1000000,
                       fill: COLORS.pharmacy,
                     },
@@ -430,13 +550,12 @@ export function AdminAnalytics() {
             </ResponsiveContainer>
           </Section>
 
-          {/* Order Breakdown */}
-          <Section title="Breakdown Pesanan" subtitle="Jumlah order per kategori" delay={0.4}>
+          <Section title="Breakdown Order" subtitle="Jumlah order per kategori" delay={0.4}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={[
-                  { name: "Premium", orders: metrics.premiumOrders, fill: COLORS.premium },
-                  { name: "Apotek", orders: metrics.pharmacyOrders, fill: COLORS.pharmacy },
+                  { name: "Membership", orders: metrics.membershipOrders, fill: COLORS.membership },
+                  { name: "Pharmacy", orders: metrics.pharmacyOrders, fill: COLORS.pharmacy },
                 ]}
                 layout="vertical"
               >
@@ -444,7 +563,7 @@ export function AdminAnalytics() {
                 <XAxis type="number" stroke="#94a3b8" />
                 <YAxis dataKey="name" type="category" stroke="#94a3b8" width={70} />
                 <Tooltip
-                  formatter={(value) => `${value} pesanan`}
+                  formatter={(value) => `${value} order`}
                   contentStyle={{
                     backgroundColor: "#1e293b",
                     border: "1px solid #475569",
@@ -454,8 +573,8 @@ export function AdminAnalytics() {
                 />
                 <Bar dataKey="orders" radius={[0, 8, 8, 0]}>
                   {[
-                    { name: "Premium", orders: metrics.premiumOrders, fill: COLORS.premium },
-                    { name: "Apotek", orders: metrics.pharmacyOrders, fill: COLORS.pharmacy },
+                    { name: "Membership", orders: metrics.membershipOrders, fill: COLORS.membership },
+                    { name: "Pharmacy", orders: metrics.pharmacyOrders, fill: COLORS.pharmacy },
                   ].map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
@@ -464,51 +583,6 @@ export function AdminAnalytics() {
             </ResponsiveContainer>
           </Section>
         </div>
-
-        {/* ─── Metrics Summary ─── */}
-        <Section title="Ringkasan Metrik" subtitle="Key performance indicators" delay={0.5}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100">
-              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                Rata-rata Order
-              </p>
-              <p className="text-2xl font-bold text-slate-900 mt-2">
-                Rp{" "}
-                {Math.round(metrics.totalRevenue / (metrics.totalOrders || 1)).toLocaleString(
-                  "id-ID",
-                )}
-              </p>
-            </div>
-
-            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100">
-              <p className="text-xs font-semibold text-violet-600 uppercase tracking-wider">
-                Premium Orders
-              </p>
-              <p className="text-2xl font-bold text-violet-900 mt-2">{metrics.premiumOrders}</p>
-              <p className="text-xs text-violet-600 mt-1">
-                {((metrics.premiumOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}%
-              </p>
-            </div>
-
-            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100">
-              <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
-                Pharmacy Orders
-              </p>
-              <p className="text-2xl font-bold text-emerald-900 mt-2">{metrics.pharmacyOrders}</p>
-              <p className="text-xs text-emerald-600 mt-1">
-                {((metrics.pharmacyOrders / (metrics.totalOrders || 1)) * 100).toFixed(1)}%
-              </p>
-            </div>
-
-            <div className="text-center p-4 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100">
-              <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider">
-                Total Orders
-              </p>
-              <p className="text-2xl font-bold text-amber-900 mt-2">{metrics.totalOrders}</p>
-              <p className="text-xs text-amber-600 mt-1">transaksi</p>
-            </div>
-          </div>
-        </Section>
       </div>
     </AdminLayout>
   );
