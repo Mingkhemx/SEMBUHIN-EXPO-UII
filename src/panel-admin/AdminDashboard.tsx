@@ -160,6 +160,7 @@ export function AdminDashboard() {
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
+      console.log("📊 Fetching dashboard data from Supabase...");
 
       // Fetch stats count
       const [usersCount, doctorsCount, pendingDocs, activeConsultations] = await Promise.all([
@@ -175,6 +176,17 @@ export function AdminDashboard() {
           .eq("payment_status", "paid"),
       ]);
 
+      console.log("📊 Stats fetched:", {
+        users: usersCount.count,
+        doctors: doctorsCount.count,
+        pending: pendingDocs.count,
+        chats: activeConsultations.count,
+        usersError: usersCount.error,
+        doctorsError: doctorsCount.error,
+        pendingError: pendingDocs.error,
+        chatsError: activeConsultations.error,
+      });
+
       setStats({
         totalUsers: usersCount.count || 0,
         totalDoctors: doctorsCount.count || 0,
@@ -185,11 +197,13 @@ export function AdminDashboard() {
       });
 
       // Fetch Recent Doctor Requests
-      const { data: docs } = await supabase
+      const { data: docs, error: docsError } = await supabase
         .from("doctor_registrations")
         .select("id, name, specialty, created_at, status")
         .order("created_at", { ascending: false })
         .limit(5);
+
+      console.log("📊 Doctor requests:", docs?.length || 0, docsError);
 
       if (docs) {
         setDoctorRequests(
@@ -204,11 +218,13 @@ export function AdminDashboard() {
       }
 
       // Fetch Recent Users
-      const { data: users } = await supabase
+      const { data: users, error: usersError } = await supabase
         .from("profiles")
         .select("id, full_name, email, created_at, is_active")
         .order("created_at", { ascending: false })
         .limit(5);
+
+      console.log("📊 Recent users:", users?.length || 0, usersError);
 
       if (users) setRecentUsers(users);
 
@@ -224,7 +240,7 @@ export function AdminDashboard() {
       ];
       setActivities(initialActivities);
     } catch (err) {
-      console.error("Error fetching dashboard:", err);
+      console.error("❌ Error fetching dashboard:", err);
       // Set default empty stats
       setStats({
         totalUsers: 0,
