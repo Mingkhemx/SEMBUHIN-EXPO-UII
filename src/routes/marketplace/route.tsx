@@ -167,13 +167,19 @@ function Marketplace() {
   };
 
   const handleCheckout = async () => {
+    console.log("🛒 Checkout button clicked");
+    
     if (!user) {
       toast.error("Silakan login terlebih dahulu untuk melakukan pemesanan");
       return;
     }
 
+    console.log("✅ User authenticated:", user.id);
     setIsSubmitting(true);
+    
     try {
+      console.log("📦 Creating order with items:", cartItems.length, "Total:", cartTotal);
+      
       // 1. Create order
       const { data: order, error: orderError } = await supabase
         .from("orders")
@@ -194,9 +200,12 @@ function Marketplace() {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("❌ Order creation failed:", orderError);
+        throw orderError;
+      }
 
-      console.log("📦 Order created:", order.id);
+      console.log("📦 Order created successfully:", order.id);
 
       // 2. Save to payment_orders for analytics tracking
       const orderId = `SMBH-PHARM-${order.id.substring(0, 8)}`;
