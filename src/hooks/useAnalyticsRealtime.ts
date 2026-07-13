@@ -103,7 +103,7 @@ export function useAnalyticsRealtime({
         const { data: ordersData, error: ordersError } = await supabase
           .from("payment_orders")
           .select("*")
-          .eq("status", "completed")
+          .eq("status", "paid")
           .gte("created_at", startDate.toISOString())
           .order("created_at", { ascending: true });
 
