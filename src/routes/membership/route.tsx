@@ -689,38 +689,6 @@ function MembershipPage() {
               })}
             </div>
 
-            {/* Payment Card Container - Simplified */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="relative mb-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50" />
-              
-              <div className="relative z-10 space-y-3">
-                {/* Price Summary */}
-                <div className="flex items-center justify-between py-2 border-b border-white/10">
-                  <span className="text-white/70 text-sm">Harga</span>
-                  <div className="text-right">
-                    <span className="font-semibold text-white">Rp {fmt(price)}</span>
-                    <span className="text-white/60 text-xs block">/{billing === "monthly" ? "bulan" : "tahun"}</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-white/70 text-sm">Biaya</span>
-                  <span className="font-semibold text-emerald-300">GRATIS</span>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-white/20">
-                  <span className="text-white font-bold">Total</span>
-                  <div className="text-right">
-                    <span className="text-xl font-black text-white">Rp {fmt(price)}</span>
-                    <span className="text-white/60 text-xs block">/{billing === "monthly" ? "bulan" : "tahun"}</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
             <div className="relative">
               {isPremium ? (
                 <motion.div
