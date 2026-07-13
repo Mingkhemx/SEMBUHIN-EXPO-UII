@@ -72,7 +72,7 @@ export function useAnalyticsRealtime({
   }, [dateRange]);
 
   /**
-   * Fetch analytics data dari database
+   * Fetch analytics data dari payment_orders table
    */
   const fetchAnalyticsData = useCallback(async () => {
     try {
@@ -83,57 +83,35 @@ export function useAnalyticsRealtime({
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - dateRangeRef.current);
 
-      // Try to fetch dari analytics_summary
-      let { data: summaryData, error: summaryError } = await supabase
-        .from("analytics_summary")
-        .select("*")
-        .gte("date", startDate.toISOString().split("T")[0])
-        .order("date", { ascending: true });
+      // Fetch langsung dari payment_orders
+      const { data: ordersData, error: ordersError } = await supabase
+        .from("payment_orders")
+        .select("id, amount, status, created_at")
+        .eq("status", "paid")
+        .gte("created_at", startDate.toISOString())
+        .order("created_at", { ascending: true });
 
-      // If table doesn't exist, fetch directly from payment_orders
-      if (summaryError && summaryError.code === "PGRST116") {
-        console.log("analytics_summary table not found, fetching from payment_orders");
-        summaryData = null;
-      } else if (summaryError) {
-        throw new Error(summaryError.message);
+      if (ordersError) {
+        throw new Error(ordersError.message);
       }
 
-      if (!summaryData || summaryData.length === 0) {
-        // Fallback ke payment_orders jika analytics_summary kosong atau tidak exist
-        const { data: ordersData, error: ordersError } = await supabase
-          .from("payment_orders")
-          .select("*")
-          .eq("status", "paid")
-          .gte("created_at", startDate.toISOString())
-          .order("created_at", { ascending: true });
-
-        if (ordersError) {
-          console.error("Orders fetch error:", ordersError);
-          throw new Error(ordersError.message);
-        }
-
-        if (!ordersData || ordersData.length === 0) {
-          setMetrics({
-            totalRevenue: 0,
-            premiumRevenue: 0,
-            pharmacyRevenue: 0,
-            totalOrders: 0,
-            premiumOrders: 0,
-            pharmacyOrders: 0,
-            averageOrderValue: 0,
-          });
-          setChartData([]);
-          setLastUpdate(new Date());
-          return;
-        }
-
-        // Process orders data
-        processOrdersData(ordersData);
-      } else {
-        // Process summary data
-        processSummaryData(summaryData);
+      if (!ordersData || ordersData.length === 0) {
+        setMetrics({
+          totalRevenue: 0,
+          premiumRevenue: 0,
+          pharmacyRevenue: 0,
+          totalOrders: 0,
+          premiumOrders: 0,
+          pharmacyOrders: 0,
+          averageOrderValue: 0,
+        });
+        setChartData([]);
+        setLastUpdate(new Date());
+        return;
       }
 
+      // Process orders data
+      processOrdersData(ordersData);
       setLastUpdate(new Date());
     } catch (err) {
       console.error("Analytics fetch error:", err);
@@ -144,17 +122,15 @@ export function useAnalyticsRealtime({
   }, []);
 
   /**
-   * Process data dari payment_orders
+   * Process data dari payment_orders - simple aggregation
    */
   const processOrdersData = (orders: any[]) => {
     let totalRev = 0;
-    let totalCount = 0;
-    const groupedByDate: Record<string, { total: number; count: number }> = {};
+    const groupedByDate: Record<string, number> = {};
 
     orders.forEach((order) => {
       const amount = parseFloat(order.amount || 0);
       totalRev += amount;
-      totalCount += 1;
 
       const dateKey = new Date(order.created_at).toLocaleDateString("id-ID", {
         year: "numeric",
@@ -162,124 +138,53 @@ export function useAnalyticsRealtime({
         day: "2-digit",
       });
 
-      if (!groupedByDate[dateKey]) {
-        groupedByDate[dateKey] = { total: 0, count: 0 };
-      }
-
-      groupedByDate[dateKey].total += amount;
-      groupedByDate[dateKey].count += 1;
+      groupedByDate[dateKey] = (groupedByDate[dateKey] || 0) + amount;
     });
 
-    const newChartData = Object.entries(groupedByDate).map(([date, values]) => ({
-      date,
-      premium: values.total,
-      pharmacy: 0,
-      total: values.total,
-      premiumOrders: values.count,
-      pharmacyOrders: 0,
-    }));
+    const newChartData = Object.entries(groupedByDate)
+      .map(([date, total]) => ({
+        date,
+        premium: total,
+        pharmacy: 0,
+        total,
+        premiumOrders: 0,
+        pharmacyOrders: 0,
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     setMetrics({
       totalRevenue: totalRev,
       premiumRevenue: totalRev,
       pharmacyRevenue: 0,
-      totalOrders: totalCount,
-      premiumOrders: totalCount,
+      totalOrders: orders.length,
+      premiumOrders: orders.length,
       pharmacyOrders: 0,
-      averageOrderValue: totalCount > 0 ? totalRev / totalCount : 0,
+      averageOrderValue: orders.length > 0 ? totalRev / orders.length : 0,
     });
 
     setChartData(newChartData);
   };
 
   /**
-   * Process data dari analytics_summary
-   */
-  const processSummaryData = (summaryData: any[]) => {
-    let totalRev = 0,
-      premiumRev = 0,
-      pharmacyRev = 0;
-    let totalOrders = 0,
-      premiumOrders = 0,
-      pharmacyOrders = 0;
-    let totalAvg = 0;
-
-    const chartDataArray: AnalyticsChartData[] = [];
-
-    summaryData.forEach((row) => {
-      totalRev += parseFloat(row.total_revenue || 0);
-      premiumRev += parseFloat(row.premium_revenue || 0);
-      pharmacyRev += parseFloat(row.pharmacy_revenue || 0);
-      totalOrders += row.total_orders || 0;
-      premiumOrders += row.premium_orders || 0;
-      pharmacyOrders += row.pharmacy_orders || 0;
-      totalAvg += parseFloat(row.average_order_value || 0);
-
-      chartDataArray.push({
-        date: new Date(row.date).toLocaleDateString("id-ID", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
-        premium: parseFloat(row.premium_revenue || 0),
-        pharmacy: parseFloat(row.pharmacy_revenue || 0),
-        total: parseFloat(row.total_revenue || 0),
-        premiumOrders: row.premium_orders || 0,
-        pharmacyOrders: row.pharmacy_orders || 0,
-      });
-    });
-
-    setMetrics({
-      totalRevenue: totalRev,
-      premiumRevenue: premiumRev,
-      pharmacyRevenue: pharmacyRev,
-      totalOrders: totalOrders,
-      premiumOrders: premiumOrders,
-      pharmacyOrders: pharmacyOrders,
-      averageOrderValue: summaryData.length > 0 ? totalAvg / summaryData.length : 0,
-    });
-
-    setChartData(chartDataArray);
-  };
-
-  /**
-   * Subscribe ke real-time updates
+   * Subscribe ke real-time updates dari payment_orders
    */
   const subscribe = useCallback(() => {
     if (channelRef.current) {
-      return; // Already subscribed
+      return;
     }
 
     const channel = supabase
-      .channel("analytics-realtime", {
-        config: {
-          broadcast: { self: true },
-        },
-      })
-      // Subscribe ke payment_orders
+      .channel("analytics-realtime-v2")
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "payment_orders",
-          filter: "payment_status=eq.paid",
+          filter: "status=eq.paid",
         },
-        (payload) => {
-          console.log("Payment order change:", payload);
-          fetchAnalyticsData();
-        }
-      )
-      // Subscribe ke analytics_summary
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "analytics_summary",
-        },
-        (payload) => {
-          console.log("Analytics summary change:", payload);
+        () => {
+          console.log("Payment order change detected");
           fetchAnalyticsData();
         }
       )
