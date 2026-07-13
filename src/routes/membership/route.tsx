@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
@@ -13,10 +13,15 @@ import {
   Shield,
   Microscope,
   Pill,
+  Home,
+  ChevronDown,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+
 
 export const Route = createFileRoute("/membership")({
   head: () => ({
@@ -24,6 +29,9 @@ export const Route = createFileRoute("/membership")({
       { title: "Premium — Sembuhin" },
       { name: "description", content: "Akses penuh ke semua fitur AI kesehatan Sembuhin." },
     ],
+  }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    status: (search.status as string) || undefined,
   }),
   component: MembershipPage,
 });
@@ -129,10 +137,13 @@ function FaqItem({
 
 function MembershipPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const { user, isPremium, upgradeToPremium } = useAuth();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  // Show success page if ?status=success or after payment
+  const [isSuccess, setIsSuccess] = useState(search.status === "success" || isPremium);
 
   const monthlyPrice = 49000;
   const yearlyMonthly = Math.round(monthlyPrice * 0.75);
@@ -143,6 +154,14 @@ function MembershipPage() {
 
   // Stats display (statis untuk marketing page)
   const stats = { total: "50K+", konsultasi: "30K+", lab: "5K+", resep: "15K+" };
+
+  useEffect(() => {
+    // Handle Midtrans redirect callback: ?status=success
+    if (search.status === "success") {
+      upgradeToPremium();
+      setIsSuccess(true);
+    }
+  }, [search.status]);
 
   useEffect(() => {
     const key = import.meta.env.VITE_MIDTRANS_CLIENT_KEY || "";
@@ -169,54 +188,160 @@ function MembershipPage() {
     }
     setIsProcessing(true);
     try {
-      const res = await fetch(
-        "https://sembuhin-expo-uii-production.up.railway.app/api/payment/membership",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            email: user.email,
-            name: user.user_metadata?.full_name || "Pengguna Sembuhin",
-            amount: billing === "monthly" ? monthlyPrice : yearlyTotal,
-          }),
+      // Call Supabase Edge Function instead of Railway backend
+      const { data, error } = await supabase.functions.invoke("midtrans-token", {
+        body: {
+          user_id: user.id,
+          email: user.email,
+          name: user.user_metadata?.full_name || "Pengguna Sembuhin",
+          amount: billing === "monthly" ? monthlyPrice : yearlyTotal,
         },
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal membuat transaksi");
-      if (data.is_mock) {
-        toast.success("Pembayaran berhasil!");
-        upgradeToPremium();
-        setIsProcessing(false);
-        return;
-      }
-      if ((window as any).snap) {
+      });
+
+      if (error) throw new Error(error.message || "Gagal membuat transaksi");
+
+      if ((window as any).snap && data?.token) {
         (window as any).snap.pay(data.token, {
           onSuccess: () => {
-            toast.success("Selamat datang di Sembuhin Premium!");
             upgradeToPremium();
+            setIsSuccess(true);
             setIsProcessing(false);
+            toast.success("Selamat datang di Sembuhin Premium! 🎉");
           },
           onPending: () => {
             toast.info("Menunggu konfirmasi pembayaran...");
             setIsProcessing(false);
           },
           onError: () => {
-            toast.error("Pembayaran gagal.");
+            toast.error("Pembayaran gagal. Silakan coba lagi.");
             setIsProcessing(false);
           },
           onClose: () => {
             setIsProcessing(false);
           },
         });
+      } else if (data?.redirect_url) {
+        // Fallback: open redirect URL if snap is not available
+        window.location.href = data.redirect_url;
       } else {
-        throw new Error("Midtrans belum siap. Refresh halaman.");
+        throw new Error("Midtrans belum siap. Silakan refresh halaman.");
       }
     } catch (err: any) {
-      toast.error(err.message || "Koneksi gagal");
+      toast.error(err.message || "Koneksi gagal. Coba lagi.");
       setIsProcessing(false);
     }
   };
+
+  // ─── SUCCESS PAGE ────────────────────────────────────────────────────────────
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="max-w-md w-full text-center"
+        >
+          {/* Success icon with animation */}
+          <div className="relative mb-8 flex justify-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
+              className="w-28 h-28 rounded-full bg-emerald-100 flex items-center justify-center"
+            >
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.4, type: "spring" }}
+              >
+                <Check className="w-14 h-14 text-emerald-600 stroke-[2.5]" />
+              </motion.div>
+            </motion.div>
+            {/* Floating stars */}
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 + i * 0.15 }}
+                className={cn(
+                  "absolute",
+                  i === 0 && "-top-1 right-16",
+                  i === 1 && "top-6 right-6",
+                  i === 2 && "-top-3 left-16",
+                )}
+              >
+                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Text content */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="space-y-3 mb-8"
+          >
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+              Pembelian Berhasil! 🎉
+            </h1>
+            <p className="text-slate-500 text-base leading-relaxed">
+              Selamat! Kamu sekarang sudah menjadi anggota{" "}
+              <span className="font-bold text-sky-600">Sembuhin Premium</span>. Nikmati semua
+              fitur AI kesehatan tanpa batas.
+            </p>
+          </motion.div>
+
+          {/* Feature chips */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="grid grid-cols-2 gap-3 mb-8"
+          >
+            {[
+              { icon: Brain, label: "Mental Health Care" },
+              { icon: ScanLine, label: "Dermatologi AI Scan" },
+              { icon: Zap, label: "Chatbot AI Unlimited" },
+              { icon: Heart, label: "Cek Jantung Real-time" },
+            ].map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2.5 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 text-left"
+              >
+                <Icon className="w-4 h-4 text-sky-600 flex-shrink-0" />
+                <span className="text-xs font-semibold text-slate-700 leading-snug">{label}</span>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Back to home button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+          >
+            <Link
+              to="/beranda"
+              className="inline-flex items-center justify-center gap-2.5 w-full px-8 py-4 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-600/20"
+            >
+              <Home className="w-5 h-5" />
+              Kembali ke Beranda
+            </Link>
+            <Link
+              to="/konsul"
+              className="inline-flex items-center justify-center gap-2.5 w-full px-8 py-4 text-base font-semibold text-slate-700 hover:text-slate-900 transition-colors duration-200 mt-3"
+            >
+              Coba Konsultasi AI Sekarang
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
