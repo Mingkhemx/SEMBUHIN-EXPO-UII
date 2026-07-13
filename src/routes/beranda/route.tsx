@@ -139,7 +139,7 @@ function Index() {
                   >
                     {/* Primary Button - Solid emerald */}
                     <Link
-                      to="/twin"
+                      to="/dokter"
                       className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-white rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 bg-emerald-600 hover:bg-emerald-500 shadow-xl"
                     >
                       <div className="relative flex items-center gap-3">
