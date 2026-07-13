@@ -253,12 +253,12 @@ function MembershipPage() {
   // ─── SUCCESS PAGE ────────────────────────────────────────────────────────────
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white flex items-center justify-center px-4 py-12">
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="max-w-md w-full text-center"
+          className="max-w-lg w-full"
         >
           {/* Success icon with animation */}
           <div className="relative mb-8 flex justify-center">
@@ -266,7 +266,7 @@ function MembershipPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-              className="w-28 h-28 rounded-full bg-emerald-100 flex items-center justify-center"
+              className="w-28 h-28 rounded-full bg-emerald-100 flex items-center justify-center shadow-lg"
             >
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
@@ -300,23 +300,64 @@ function MembershipPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="space-y-3 mb-8"
+            className="text-center space-y-3 mb-8"
           >
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">
               Pembelian Berhasil! 🎉
             </h1>
-            <p className="text-slate-500 text-base leading-relaxed">
+            <p className="text-slate-600 text-base leading-relaxed">
               Selamat! Kamu sekarang sudah menjadi anggota{" "}
               <span className="font-bold text-sky-600">Sembuhin Premium</span>. Nikmati semua
               fitur AI kesehatan tanpa batas.
             </p>
           </motion.div>
 
-          {/* Feature chips */}
+          {/* Payment Summary Card */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
+            className="bg-white border border-slate-200 rounded-2xl p-6 mb-8 shadow-lg"
+          >
+            <div className="space-y-5">
+              {/* Card Info */}
+              <div className="flex items-center gap-3 pb-5 border-b border-slate-100">
+                <div className="h-10 w-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg" />
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Metode Pembayaran</p>
+                  <p className="text-sm font-bold text-slate-900">Mastercard</p>
+                </div>
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+              </div>
+
+              {/* Payment Details */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">Paket Premium</span>
+                  <span className="font-semibold text-slate-900">Bulanan</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">Harga</span>
+                  <span className="font-semibold text-slate-900">Rp {fmt(price)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">Biaya Transaksi</span>
+                  <span className="font-semibold text-emerald-600">GRATIS</span>
+                </div>
+                
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <span className="font-bold text-slate-900">Total</span>
+                  <span className="text-2xl font-black text-sky-600">Rp {fmt(price)}</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Feature chips */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
             className="grid grid-cols-2 gap-3 mb-8"
           >
             {[
@@ -327,7 +368,7 @@ function MembershipPage() {
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-2.5 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 text-left"
+                className="flex items-center gap-2.5 bg-sky-50 border border-sky-100 rounded-xl px-3 py-3 text-left"
               >
                 <Icon className="w-4 h-4 text-sky-600 flex-shrink-0" />
                 <span className="text-xs font-semibold text-slate-700 leading-snug">{label}</span>
@@ -339,22 +380,41 @@ function MembershipPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55 }}
+            transition={{ delay: 0.65 }}
+            className="space-y-3"
           >
             <Link
               to="/beranda"
-              className="inline-flex items-center justify-center gap-2.5 w-full px-8 py-4 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors duration-200 shadow-lg shadow-blue-600/20"
+              className="inline-flex items-center justify-center gap-2.5 w-full px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-xl transition-all duration-200 shadow-lg shadow-sky-500/30 hover:scale-[1.01] active:scale-[0.98]"
             >
               <Home className="w-5 h-5" />
               Kembali ke Beranda
             </Link>
             <Link
               to="/konsul"
-              className="inline-flex items-center justify-center gap-2.5 w-full px-8 py-4 text-base font-semibold text-slate-700 hover:text-slate-900 transition-colors duration-200 mt-3"
+              className="inline-flex items-center justify-center gap-2.5 w-full px-8 py-4 text-base font-semibold text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-xl transition-all duration-200 border border-sky-200"
             >
               Coba Konsultasi AI Sekarang
               <ArrowRight className="w-4 h-4" />
             </Link>
+          </motion.div>
+
+          {/* Trust badges */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.75 }}
+            className="flex items-center justify-center gap-4 mt-6 pt-6 border-t border-slate-200 text-xs text-slate-500"
+          >
+            <div className="flex items-center gap-1.5">
+              <Shield className="h-4 w-4 text-emerald-500" />
+              <span>Aman & Terenkripsi</span>
+            </div>
+            <div className="w-0.5 h-4 bg-slate-300/50" />
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <span>Garansi 7 Hari</span>
+            </div>
           </motion.div>
         </motion.div>
       </div>
