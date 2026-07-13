@@ -90,133 +90,75 @@ function Index() {
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900/50 via-slate-800/40 to-slate-900/50" />
         </div>
 
-        {/* MAIN CONTENT - ASYMMETRIC GRID */}
+        {/* MAIN CONTENT - CENTERED LAYOUT */}
         <div className="relative z-10 min-h-screen flex items-center pt-20 pb-16">
-          <div className="max-w-7xl mx-auto w-full px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-            {/* LEFT SIDE - TEXT CONTENT */}
+          <div className="max-w-5xl mx-auto w-full px-4 text-center">
+            {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="flex flex-col justify-center space-y-8 order-2 lg:order-1"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-white/90 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-widest shadow-lg mb-8"
             >
-              {/* Badge */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-white/90 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-widest shadow-lg"
-              >
-                <Shield className="w-4 h-4 text-emerald-600" />
-                {t("home.standard_badge")}
-              </motion.div>
+              <Shield className="w-4 h-4 text-emerald-600" />
+              {t("home.standard_badge")}
+            </motion.div>
 
-              {/* Animated Content */}
-              <div className="space-y-6 min-h-[280px] flex flex-col justify-center">
-                <AnimatePresence mode="wait">
+            {/* Animated Content */}
+            <div className="space-y-8 max-w-3xl mx-auto">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={contentIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-8"
+                >
+                  {/* Headline */}
+                  <div className="space-y-4">
+                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.1] text-white">
+                      {rotationContent[contentIndex].topTitle}
+                    </h1>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.2] text-emerald-400">
+                      {rotationContent[contentIndex].bottomTitle}
+                    </h2>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xl sm:text-2xl font-normal leading-relaxed max-w-2xl mx-auto text-white/95">
+                    {rotationContent[contentIndex].desc}
+                  </p>
+
+                  {/* CTA Buttons */}
                   <motion.div
-                    key={contentIndex}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-6"
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
                   >
-                    {/* Headline with professional styling */}
-                    <div className="space-y-4">
-                      <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.1] text-white">
-                        {rotationContent[contentIndex].topTitle}
-                      </h1>
-                      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.2] text-emerald-400">
-                        {rotationContent[contentIndex].bottomTitle}
-                      </h2>
-                    </div>
-
-                    {/* Description with enhanced readability */}
-                    <p className="text-lg font-normal leading-relaxed max-w-lg drop-shadow-md text-white/95">
-                      {rotationContent[contentIndex].desc}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              {/* CTA Buttons - Professional solid */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex flex-col sm:flex-row gap-4 pt-4"
-              >
-                {/* Primary Button - Solid emerald */}
-                <Link
-                  to="/twin"
-                  className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 bg-emerald-600 hover:bg-emerald-500 shadow-lg"
-                >
-                  <div className="relative flex items-center gap-2.5">
-                    <span>{t("home.start_btn")}</span>
-                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </Link>
-
-                {/* Secondary Button - Solid white */}
-                <Link
-                  to="/konsul"
-                  className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-700 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 bg-white hover:bg-slate-50 border border-slate-200 shadow-md"
-                >
-                  <div className="relative">{t("home.ai_btn")}</div>
-                </Link>
-              </motion.div>
-            </motion.div>
-
-            {/* RIGHT SIDE - STATS CARDS (CLEAN PROFESSIONAL) */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="order-1 lg:order-2"
-            >
-              {/* Floating stats cards */}
-              <div className="relative h-full flex items-center justify-center lg:justify-end">
-                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-6 w-full max-w-sm">
-                  {[
-                    {
-                      stat: "24/7",
-                      label: t("home.stats.ai_care"),
-                      delay: 0.4,
-                    },
-                    {
-                      stat: "1 Jam",
-                      label: t("home.stats.pharmacy"),
-                      delay: 0.5,
-                    },
-                    {
-                      stat: "100%",
-                      label: t("home.stats.records"),
-                      delay: 0.6,
-                    },
-                  ].map((item, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: item.delay }}
-                      className="group cursor-default"
+                    {/* Primary Button - Solid emerald */}
+                    <Link
+                      to="/twin"
+                      className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-white rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 bg-emerald-600 hover:bg-emerald-500 shadow-xl"
                     >
-                      <div className="relative rounded-xl bg-white/95 backdrop-blur-sm border border-slate-200 p-6 transition-all duration-300 hover:bg-white hover:border-emerald-300 hover:scale-105 shadow-lg">
-                        <div className="space-y-2">
-                          <div className="text-4xl font-black text-emerald-600 group-hover:text-emerald-700 transition-colors">
-                            {item.stat}
-                          </div>
-                          <p className="text-sm text-slate-600 font-medium group-hover:text-slate-700 transition-colors uppercase tracking-wider">
-                            {item.label}
-                          </p>
-                        </div>
+                      <div className="relative flex items-center gap-3">
+                        <span>{t("home.start_btn")}</span>
+                        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
+                    </Link>
+
+                    {/* Secondary Button - Solid white */}
+                    <Link
+                      to="/konsul"
+                      className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-slate-700 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 bg-white hover:bg-slate-50 border border-slate-200 shadow-xl"
+                    >
+                      <div className="relative">{t("home.ai_btn")}</div>
+                    </Link>
+                  </motion.div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </section>
