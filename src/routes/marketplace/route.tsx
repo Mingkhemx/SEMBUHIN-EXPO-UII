@@ -196,19 +196,28 @@ function Marketplace() {
 
       if (orderError) throw orderError;
 
+      console.log("📦 Order created:", order.id);
+
       // 2. Save to payment_orders for analytics tracking
       const orderId = `SMBH-PHARM-${order.id.substring(0, 8)}`;
+      console.log("💾 Saving to payment_orders:", { orderId, userId: user.id, amount: cartTotal });
+      
       try {
-        await supabase.from('payment_orders').upsert({
+        const { error: paymentError } = await supabase.from('payment_orders').upsert({
           order_id: orderId,
           user_id: user.id,
           amount: cartTotal,
           status: 'paid',
           order_type: 'pharmacy'
         });
-        console.log("✅ Pharmacy order saved to payment_orders for analytics");
+        
+        if (paymentError) {
+          console.error("❌ Failed to save to payment_orders:", paymentError);
+        } else {
+          console.log("✅ Pharmacy order saved to payment_orders for analytics");
+        }
       } catch (err) {
-        console.warn("⚠️ Failed to save to payment_orders:", err);
+        console.error("❌ Exception saving to payment_orders:", err);
       }
 
       // 3. Update product stocks
