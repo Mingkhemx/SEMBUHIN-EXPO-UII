@@ -689,68 +689,28 @@ function MembershipPage() {
               })}
             </div>
 
-            {/* Payment Card Container */}
+            {/* Payment Card Container - Simplified */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="relative mb-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 overflow-hidden"
             >
-              {/* Gradient background */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50" />
               
-              <div className="relative z-10">
-                {/* Payment Method Label */}
-                <div className="flex items-center justify-between mb-5">
-                  <span className="text-[11px] font-bold text-white/60 tracking-widest uppercase">
-                    Metode Pembayaran
-                  </span>
-                  <span className="text-[10px] font-semibold bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-2.5 py-1 rounded-lg">
-                    ✓ Aman
-                  </span>
+              <div className="relative z-10 space-y-3">
+                {/* Price Summary */}
+                <div className="flex items-center justify-between py-2 border-b border-white/10">
+                  <span className="text-white/70 text-sm">Harga</span>
+                  <span className="font-semibold text-white">Rp {fmt(price)}</span>
                 </div>
-
-                {/* Card Display */}
-                <div className="mb-5 p-5 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200/50 shadow-lg">
-                  <div className="flex items-start justify-between mb-12">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-md" />
-                      <span className="text-[12px] font-semibold text-slate-600">Mastercard</span>
-                    </div>
-                    <Zap className="h-5 w-5 text-slate-300" />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <p className="text-[13px] font-mono text-slate-700 tracking-widest">
-                      •••• •••• •••• 4242
-                    </p>
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Nama Pemegang</p>
-                        <p className="text-[12px] font-semibold text-slate-800">SEMBUHIN USER</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Berlaku Hingga</p>
-                        <p className="text-[12px] font-semibold text-slate-800">12/25</p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-white/70 text-sm">Biaya</span>
+                  <span className="font-semibold text-emerald-300">GRATIS</span>
                 </div>
-
-                {/* Payment Details */}
-                <div className="space-y-2.5 text-[12px]">
-                  <div className="flex items-center justify-between py-2 border-b border-white/10">
-                    <span className="text-white/70">Subtotal</span>
-                    <span className="font-semibold text-white">Rp {fmt(price)}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-white/10">
-                    <span className="text-white/70">Biaya Transaksi</span>
-                    <span className="font-semibold text-emerald-300">GRATIS</span>
-                  </div>
-                  <div className="flex items-center justify-between py-3 mt-3 pt-3 border-t border-white/20">
-                    <span className="text-white font-bold">Total</span>
-                    <span className="text-lg font-black text-white">Rp {fmt(price)}</span>
-                  </div>
+                <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                  <span className="text-white font-bold">Total</span>
+                  <span className="text-xl font-black text-white">Rp {fmt(price)}</span>
                 </div>
               </div>
             </motion.div>
