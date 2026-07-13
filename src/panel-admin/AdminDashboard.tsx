@@ -156,6 +156,11 @@ export function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
 
+  // Debug: log stats changes
+  useEffect(() => {
+    console.log("📊 Stats state updated:", stats);
+  }, [stats]);
+
   // 1. Fetch Initial Data - Direct dari Supabase
   const fetchDashboardData = async () => {
     try {
@@ -187,14 +192,17 @@ export function AdminDashboard() {
         chatsError: activeConsultations.error,
       });
 
-      setStats({
+      const newStats = {
         totalUsers: usersCount.count || 0,
         totalDoctors: doctorsCount.count || 0,
         pendingRequests: pendingDocs.count || 0,
         activeChats: activeConsultations.count || 0,
         userChange: "+2.5%",
         doctorChange: "+1.2%",
-      });
+      };
+
+      console.log("📊 Setting stats:", newStats);
+      setStats(newStats);
 
       // Fetch Recent Doctor Requests
       const { data: docs, error: docsError } = await supabase
@@ -394,7 +402,7 @@ export function AdminDashboard() {
           {[
             {
               label: "Total Users",
-              value: stats.totalUsers.toLocaleString(),
+              value: String(stats.totalUsers ?? 0),
               change: stats.userChange,
               positive: true,
               icon: <Users className="h-5 w-5" />,
@@ -402,7 +410,7 @@ export function AdminDashboard() {
             },
             {
               label: "Total Dokter",
-              value: stats.totalDoctors.toLocaleString(),
+              value: String(stats.totalDoctors ?? 0),
               change: stats.doctorChange,
               positive: true,
               icon: <Stethoscope className="h-5 w-5" />,
@@ -410,7 +418,7 @@ export function AdminDashboard() {
             },
             {
               label: "Permintaan Pending",
-              value: stats.pendingRequests.toString(),
+              value: String(stats.pendingRequests ?? 0),
               change: stats.pendingRequests > 0 ? `${stats.pendingRequests} baru` : "Bersih",
               positive: false,
               icon: <Clock className="h-5 w-5" />,
@@ -418,7 +426,7 @@ export function AdminDashboard() {
             },
             {
               label: "Chat Aktif",
-              value: stats.activeChats.toString(),
+              value: String(stats.activeChats ?? 0),
               change: "Realtime",
               positive: true,
               icon: <MessageSquare className="h-5 w-5" />,

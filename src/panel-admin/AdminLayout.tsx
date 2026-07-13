@@ -415,7 +415,7 @@ export function AdminStatCard({
           </span>
         )}
       </div>
-      <p className="text-2xl font-extrabold text-slate-900 mb-1">{value}</p>
+      <p className="text-2xl font-extrabold text-slate-900 mb-1">{value || "0"}</p>
       <p className="text-sm text-slate-500">{label}</p>
     </div>
   );
