@@ -188,45 +188,62 @@ function MembershipPage() {
     }
     setIsProcessing(true);
     try {
-      // Call Supabase Edge Function instead of Railway backend
-      const { data, error } = await supabase.functions.invoke("midtrans-token", {
-        body: {
+      console.log("🔵 [Midtrans] Starting payment...");
+      
+      // Panggil backend langsung (Vercel/Railway)
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://sembuhin-expo-uii-production.up.railway.app";
+      
+      console.log("🌐 Calling:", `${backendUrl}/api/payment/membership`);
+      
+      const response = await fetch(`${backendUrl}/api/payment/membership`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           user_id: user.id,
           email: user.email,
           name: user.user_metadata?.full_name || "Pengguna Sembuhin",
           amount: billing === "monthly" ? monthlyPrice : yearlyTotal,
-        },
+        }),
       });
 
-      if (error) throw new Error(error.message || "Gagal membuat transaksi");
+      const data = await response.json();
+      console.log("📨 Backend response:", data);
 
-      if ((window as any).snap && data?.token) {
+      if (!response.ok || !data?.token) {
+        throw new Error(data?.error || "Gagal membuat token pembayaran");
+      }
+
+      // Buka Midtrans Snap
+      if ((window as any).snap) {
+        console.log("🎯 Opening Midtrans Snap...");
         (window as any).snap.pay(data.token, {
           onSuccess: () => {
+            console.log("✅ Payment successful!");
             upgradeToPremium();
             setIsSuccess(true);
-            setIsProcessing(false);
             toast.success("Selamat datang di Sembuhin Premium! 🎉");
           },
           onPending: () => {
+            console.log("⏳ Payment pending...");
             toast.info("Menunggu konfirmasi pembayaran...");
-            setIsProcessing(false);
           },
           onError: () => {
+            console.error("❌ Payment error");
             toast.error("Pembayaran gagal. Silakan coba lagi.");
-            setIsProcessing(false);
           },
           onClose: () => {
+            console.log("🚪 Midtrans popup closed");
             setIsProcessing(false);
           },
         });
       } else if (data?.redirect_url) {
-        // Fallback: open redirect URL if snap is not available
+        console.log("🔄 Redirect ke:", data.redirect_url);
         window.location.href = data.redirect_url;
       } else {
-        throw new Error("Midtrans belum siap. Silakan refresh halaman.");
+        throw new Error("Midtrans snap.js tidak ter-load");
       }
     } catch (err: any) {
+      console.error("❌ Error:", err.message);
       toast.error(err.message || "Koneksi gagal. Coba lagi.");
       setIsProcessing(false);
     }
