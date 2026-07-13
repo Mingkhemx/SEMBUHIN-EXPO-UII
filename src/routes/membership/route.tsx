@@ -258,84 +258,84 @@ function MembershipPage() {
         {/* Dark gray background */}
         <div className="absolute inset-0 bg-gray-900" />
 
-        {/* Confetti at the top */}
-        <div className="absolute top-0 left-0 right-0 h-32 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: -50, rotate: 0 }}
-              animate={{
-                opacity: [0, 1, 1, 0],
-                y: [-50, 100 + Math.random() * 50],
-                rotate: [0, Math.random() * 360],
-                x: [0, (Math.random() - 0.5) * 100],
-              }}
-              transition={{
-                duration: 2 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-                ease: "easeOut",
-              }}
-              className="absolute"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 50}%`,
-              }}
-            >
-              <div
-                className={`w-3 h-3 rounded-full ${
-                  i % 3 === 0 ? "bg-green-400" : i % 3 === 1 ? "bg-white" : "bg-green-300"
-                }`}
-              />
-            </motion.div>
-          ))}
-          {/* Squiggly lines */}
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={`squiggle-${i}`}
-              initial={{ opacity: 0, y: -30 }}
-              animate={{
-                opacity: [0, 0.6, 0.6, 0],
-                y: [-30, 80 + Math.random() * 40],
-              }}
-              transition={{
-                duration: 2.5 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 3,
-                ease: "easeOut",
-              }}
-              className="absolute"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 40}%`,
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M0 10 Q5 0 10 10 T20 10"
-                  stroke={i % 2 === 0 ? "#4ade80" : "#ffffff"}
-                  strokeWidth="2"
-                  fill="none"
-                />
-              </svg>
-            </motion.div>
-          ))}
-        </div>
-
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="relative z-10 max-w-md w-full"
         >
-          {/* Success card */}
-          <div className="bg-gray-800 rounded-3xl p-8 shadow-2xl text-center">
+          {/* Success card with glassmorphism */}
+          <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl text-center overflow-hidden border border-white/20">
+            {/* Confetti inside card */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: -50, rotate: 0 }}
+                  animate={{
+                    opacity: [0, 1, 1, 0],
+                    y: [-50, 100 + Math.random() * 50],
+                    rotate: [0, Math.random() * 360],
+                    x: [0, (Math.random() - 0.5) * 100],
+                  }}
+                  transition={{
+                    duration: 2 + Math.random() * 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 2,
+                    ease: "easeOut",
+                  }}
+                  className="absolute"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 50}%`,
+                  }}
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      i % 3 === 0 ? "bg-green-400" : i % 3 === 1 ? "bg-white" : "bg-green-300"
+                    }`}
+                  />
+                </motion.div>
+              ))}
+              {/* Squiggly lines */}
+              {[...Array(8)].map((_, i) => (
+                <motion.div
+                  key={`squiggle-${i}`}
+                  initial={{ opacity: 0, y: -30 }}
+                  animate={{
+                    opacity: [0, 0.6, 0.6, 0],
+                    y: [-30, 80 + Math.random() * 40],
+                  }}
+                  transition={{
+                    duration: 2.5 + Math.random() * 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 3,
+                    ease: "easeOut",
+                  }}
+                  className="absolute"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 40}%`,
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path
+                      d="M0 10 Q5 0 10 10 T20 10"
+                      stroke={i % 2 === 0 ? "#4ade80" : "#ffffff"}
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  </svg>
+                </motion.div>
+              ))}
+            </div>
+
             {/* Green checkmark circle */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6"
+              className="relative w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 z-10"
             >
               <Check className="w-10 h-10 text-white" />
             </motion.div>
@@ -345,7 +345,7 @@ function MembershipPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-3xl font-bold text-white mb-3"
+              className="relative text-3xl font-bold text-white mb-3 z-10"
             >
               Payment succeeded!
             </motion.h1>
@@ -354,7 +354,7 @@ function MembershipPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-gray-400 text-sm mb-8"
+              className="relative text-gray-300 text-sm mb-8 z-10"
             >
               Your transaction was completed successfully. Thank you for your purchase!
             </motion.p>
@@ -364,6 +364,7 @@ function MembershipPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
+              className="relative z-10"
             >
               <Link
                 to="/beranda"
@@ -373,21 +374,6 @@ function MembershipPage() {
               </Link>
             </motion.div>
           </div>
-
-          {/* Presented by footer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="mt-6 flex items-center justify-center gap-2"
-          >
-            <div className="bg-white/10 rounded-lg px-3 py-2 flex items-center gap-2">
-              <span className="text-white/60 text-xs">presented by</span>
-              <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-            </div>
-          </motion.div>
         </motion.div>
       </div>
     );
