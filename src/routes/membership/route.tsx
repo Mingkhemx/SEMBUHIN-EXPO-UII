@@ -16,6 +16,7 @@ import {
   Home,
   ChevronDown,
   Star,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -630,31 +631,57 @@ function MembershipPage() {
 
             <div className="relative">
               {isPremium ? (
-                <div className="w-full rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-3.5 text-[13px] font-semibold text-emerald-400 text-center">
-                  ✓ Aktif — Kamu sudah Premium
-                </div>
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="w-full rounded-2xl bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 border border-emerald-500/30 py-4 px-5 text-center backdrop-blur-sm"
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[12px] font-bold text-emerald-400 uppercase tracking-wider">Status Aktif</span>
+                  </div>
+                  <p className="text-[14px] font-bold text-emerald-100">✓ Kamu sudah Sembuhin Premium</p>
+                  <p className="text-[11px] text-emerald-300/70 mt-1">Nikmati semua fitur AI kesehatan tanpa batas</p>
+                </motion.div>
               ) : (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleUpgrade}
                   disabled={isProcessing}
-                  className="group w-full rounded-xl bg-white py-3.5 text-[13px] font-bold text-slate-900
-                    hover:bg-slate-50 transition-all duration-200 flex items-center justify-center gap-2
-                    disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_1px_3px_rgba(0,0,0,0.15)]"
+                  className="group w-full rounded-2xl bg-gradient-to-r from-white to-slate-50 py-4 px-6 text-[13px] font-bold text-slate-900
+                    hover:shadow-2xl hover:shadow-white/30 transition-all duration-300 flex items-center justify-center gap-3
+                    disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border border-white/50
+                    relative overflow-hidden"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-sky-400/0 via-sky-400/10 to-sky-400/0 opacity-0 group-hover:opacity-100 transition-opacity" />
                   {isProcessing ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Memproses...
+                      <Loader2 className="h-5 w-5 animate-spin relative z-10" />
+                      <span className="relative z-10">Memproses Pembayaran...</span>
                     </>
                   ) : (
                     <>
-                      {user ? "Upgrade ke Premium" : "Mulai Sekarang"}
-                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                      <span className="text-xl relative z-10">💳</span>
+                      <span className="relative z-10">{user ? "Upgrade ke Premium" : "Mulai Sekarang"}</span>
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 relative z-10" />
                     </>
                   )}
-                </button>
+                </motion.button>
               )}
-              <p className="text-center text-[11px] text-slate-600 mt-3.5 leading-relaxed">
-                Garansi uang kembali 7 hari &nbsp;·&nbsp; Batalkan kapan saja
+              <div className="flex items-center justify-center gap-4 mt-4 text-[11px] text-slate-500/80">
+                <div className="flex items-center gap-1.5">
+                  <Shield className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>100% Aman & Terenkripsi</span>
+                </div>
+                <div className="w-0.5 h-3 bg-slate-300/30" />
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Garansi 7 Hari</span>
+                </div>
+              </div>
+              <p className="text-center text-[11px] text-slate-600/70 mt-3 leading-relaxed font-medium">
+                Batalkan kapan saja tanpa pertanyaan · Tidak ada komitmen jangka panjang
               </p>
             </div>
           </motion.div>
