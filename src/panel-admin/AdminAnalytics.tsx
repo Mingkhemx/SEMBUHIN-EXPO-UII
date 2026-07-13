@@ -183,7 +183,7 @@ export function AdminAnalytics() {
       // Query ke database: ambil semua pembayaran yang berhasil
       const { data: orders, error } = await supabase
         .from("payment_orders")
-        .select("order_id, amount, created_at, status")
+        .select("order_id, amount, created_at, status, order_type")
         .eq("status", "paid")
         .gte("created_at", startDate.toISOString())
         .order("created_at", { ascending: true });
@@ -218,11 +218,8 @@ export function AdminAnalytics() {
         const date = format(new Date(order.created_at), "dd MMM");
 
         // Deteksi: Apakah ini membership atau pharmacy?
-        // Caranya: lihat order_id, jika mengandung "MEMBERSHIP" atau "PREMIUM" = membership
-        // Selain itu = pharmacy
-        const isMembership =
-          order.order_id?.toUpperCase().includes("MEMBERSHIP") ||
-          order.order_id?.toUpperCase().includes("PREMIUM");
+        // Gunakan field order_type yang lebih reliable
+        const isMembership = order.order_type === 'membership';
 
         if (isMembership) {
           membershipRev += amount;

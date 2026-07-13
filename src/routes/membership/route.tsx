@@ -215,12 +215,42 @@ function MembershipPage() {
         throw new Error(data?.error || "Gagal membuat token pembayaran");
       }
 
+      // Simpan order ke Supabase untuk tracking analytics
+      const orderId = data.order_id;
+      if (orderId) {
+        try {
+          await supabase.from('payment_orders').upsert({
+            order_id: orderId,
+            user_id: user.id,
+            amount: billing === "monthly" ? monthlyPrice : yearlyTotal,
+            status: 'pending',
+            order_type: 'membership'
+          });
+          console.log("✅ Order saved to Supabase");
+        } catch (err) {
+          console.warn("⚠️ Failed to save order to Supabase:", err);
+        }
+      }
+
       // Buka Midtrans Snap
       if ((window as any).snap) {
         console.log("🎯 Opening Midtrans Snap...");
         (window as any).snap.pay(data.token, {
-          onSuccess: () => {
+          onSuccess: async () => {
             console.log("✅ Payment successful!");
+            
+            // Update status di Supabase
+            if (orderId) {
+              try {
+                await supabase.from('payment_orders')
+                  .update({ status: 'paid' })
+                  .eq('order_id', orderId);
+                console.log("✅ Payment status updated in Supabase");
+              } catch (err) {
+                console.warn("⚠️ Failed to update payment status:", err);
+              }
+            }
+            
             upgradeToPremium();
             setIsSuccess(true);
             toast.success("Selamat datang di Sembuhin Premium! 🎉");
