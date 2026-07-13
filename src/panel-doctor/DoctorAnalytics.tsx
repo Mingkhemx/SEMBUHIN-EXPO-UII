@@ -133,16 +133,17 @@ export function DoctorAnalytics() {
       // 3. Fetch rating (average from consultations with rating)
       let avgRating = 0;
       try {
-        const { data: ratedConsultations, error: ratingError } = await supabase
+        const { data: allConsultations, error: ratingError } = await supabase
           .from("consultations")
           .select("rating")
-          .eq("doctor_id", doc.id)
-          .not("rating", "is", null)
-          .gt("rating", 0);
+          .eq("doctor_id", doc.id);
 
-        if (!ratingError && ratedConsultations && ratedConsultations.length > 0) {
-          const sum = ratedConsultations.reduce((acc: number, c: any) => acc + (c.rating || 0), 0);
-          avgRating = Math.round((sum / ratedConsultations.length) * 10) / 10;
+        if (!ratingError && allConsultations && allConsultations.length > 0) {
+          const ratedConsultations = allConsultations.filter((c: any) => c.rating && c.rating > 0);
+          if (ratedConsultations.length > 0) {
+            const sum = ratedConsultations.reduce((acc: number, c: any) => acc + (c.rating || 0), 0);
+            avgRating = Math.round((sum / ratedConsultations.length) * 10) / 10;
+          }
         }
       } catch (e) {
         console.log("📊 Rating query failed, using default 0");
@@ -268,7 +269,7 @@ export function DoctorAnalytics() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {analytics.stats.map((stat, i) => (
+          {(analytics.stats || []).map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 16 }}
