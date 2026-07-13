@@ -196,7 +196,22 @@ function Marketplace() {
 
       if (orderError) throw orderError;
 
-      // 2. Update product stocks
+      // 2. Save to payment_orders for analytics tracking
+      const orderId = `SMBH-PHARM-${order.id.substring(0, 8)}`;
+      try {
+        await supabase.from('payment_orders').upsert({
+          order_id: orderId,
+          user_id: user.id,
+          amount: cartTotal,
+          status: 'paid',
+          order_type: 'pharmacy'
+        });
+        console.log("✅ Pharmacy order saved to payment_orders for analytics");
+      } catch (err) {
+        console.warn("⚠️ Failed to save to payment_orders:", err);
+      }
+
+      // 3. Update product stocks
       for (const item of cartItems) {
         const { error: stockError } = await supabase
           .from("products")
