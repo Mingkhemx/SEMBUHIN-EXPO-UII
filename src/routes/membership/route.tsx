@@ -342,7 +342,7 @@ function MembershipPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="relative text-3xl font-bold text-white mb-3 z-10"
+              className="relative text-3xl font-bold text-gray-900 mb-3 z-10"
             >
               Payment succeeded!
             </motion.h1>
@@ -351,7 +351,7 @@ function MembershipPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="relative text-gray-300 text-sm mb-8 z-10"
+              className="relative text-gray-600 text-sm mb-8 z-10"
             >
               Your transaction was completed successfully. Thank you for your purchase!
             </motion.p>
