@@ -702,7 +702,10 @@ function MembershipPage() {
                 {/* Price Summary */}
                 <div className="flex items-center justify-between py-2 border-b border-white/10">
                   <span className="text-white/70 text-sm">Harga</span>
-                  <span className="font-semibold text-white">Rp {fmt(price)}</span>
+                  <div className="text-right">
+                    <span className="font-semibold text-white">Rp {fmt(price)}</span>
+                    <span className="text-white/60 text-xs block">/{billing === "monthly" ? "bulan" : "tahun"}</span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-white/70 text-sm">Biaya</span>
@@ -710,7 +713,10 @@ function MembershipPage() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-white/20">
                   <span className="text-white font-bold">Total</span>
-                  <span className="text-xl font-black text-white">Rp {fmt(price)}</span>
+                  <div className="text-right">
+                    <span className="text-xl font-black text-white">Rp {fmt(price)}</span>
+                    <span className="text-white/60 text-xs block">/{billing === "monthly" ? "bulan" : "tahun"}</span>
+                  </div>
                 </div>
               </div>
             </motion.div>
