@@ -150,7 +150,7 @@ function Index() {
 
                     {/* Secondary Button - Solid white */}
                     <Link
-                      to="/konsul"
+                      to="/dokter"
                       className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-slate-700 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 bg-white hover:bg-slate-50 border border-slate-200 shadow-xl"
                     >
                       <div className="relative">{t("home.ai_btn")}</div>
