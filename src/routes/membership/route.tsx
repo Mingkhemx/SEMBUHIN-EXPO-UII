@@ -254,10 +254,7 @@ function MembershipPage() {
   // ─── SUCCESS PAGE ────────────────────────────────────────────────────────────
   if (isSuccess) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center px-4 py-20">
-        {/* Dark gray background */}
-        <div className="absolute inset-0 bg-gray-900" />
-
+      <div className="relative min-h-screen flex items-center justify-center px-4 py-20 bg-white">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -265,7 +262,7 @@ function MembershipPage() {
           className="relative z-10 max-w-md w-full"
         >
           {/* Success card with glassmorphism */}
-          <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl text-center overflow-hidden border border-white/20">
+          <div className="relative bg-gray-100/50 backdrop-blur-xl rounded-3xl p-8 shadow-2xl text-center overflow-hidden border border-gray-200">
             {/* Confetti inside card */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               {[...Array(20)].map((_, i) => (
