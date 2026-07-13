@@ -113,6 +113,9 @@ export function DoctorDashboard() {
       // Set stats
       setStats({
         todayConsultations: todayCount || 0,
+        totalPatients: totalCount || 0,
+        completedToday: completedCount || 0,
+        unreadMessages: pendingCount || 0,
         totalConsultations: totalCount || 0,
         pendingConsultations: pendingCount || 0,
         completedConsultations: completedCount || 0,
@@ -246,7 +249,7 @@ export function DoctorDashboard() {
                   <TrendingUp className="h-4 w-4 text-emerald-400" />
                 )}
               </div>
-              <p className="text-2xl font-bold text-slate-900">{loading ? "—" : stat.value}</p>
+              <p className="text-2xl font-bold text-slate-900">{loading ? "—" : (stat.value ?? 0)}</p>
               <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
             </motion.div>
           ))}
