@@ -192,10 +192,11 @@ function MembershipPage() {
     try {
       console.log("🔵 [Midtrans] Starting payment...");
       
-      // Panggil backend langsung (Vercel/Railway)
+      // Panggil backend untuk Midtrans payment (diperlukan untuk keamanan API keys)
+      // Backend ini diperlukan untuk handle Midtrans API secara secure
       const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://sembuhin-expo-uii-production.up.railway.app";
       
-      console.log("🌐 Calling:", `${backendUrl}/api/payment/membership`);
+      console.log("🌐 Calling payment backend:", `${backendUrl}/api/payment/membership`);
       
       const response = await fetch(`${backendUrl}/api/payment/membership`, {
         method: "POST",

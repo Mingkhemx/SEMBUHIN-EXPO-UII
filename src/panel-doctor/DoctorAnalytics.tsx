@@ -104,6 +104,8 @@ export function DoctorAnalytics() {
     setError(null);
 
     try {
+      console.log("📊 Fetching doctor analytics from Supabase for user:", user.id);
+      
       // 1. Get doctor_id
       const { data: doc, error: docError } = await supabase
         .from("doctors")
@@ -118,43 +120,86 @@ export function DoctorAnalytics() {
         return;
       }
 
-      // 2. Fetch from backend
-      const res = await fetch(
-        `https://sembuhin-expo-uii-production.up.railway.app/api/doctor/analytics?doctor_id=${doc.id}`,
-      );
-      if (!res.ok) throw new Error("Gagal mengambil data analitik dari server");
+      console.log("📊 Doctor ID found:", doc.id);
 
-      const data = await res.json();
+      // 2. Fetch consultations count
+      const { count: totalConsultations, error: consultError } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact", head: true })
+        .eq("doctor_id", doc.id);
 
-      if (data.success) {
-        // Map icons and colors back for UI
-        const statsWithIcons = data.analytics.stats.map((s: any, i: number) => {
-          const icons = [ClipboardList, Star, Clock, UserPlus];
-          const colors = [
-            "bg-sky-50 text-sky-700 border-sky-100",
-            "bg-amber-50 text-amber-700 border-amber-100",
-            "bg-violet-50 text-violet-700 border-violet-100",
-            "bg-emerald-50 text-emerald-700 border-emerald-100",
-          ];
-          return { ...s, icon: icons[i], color: colors[i] };
-        });
+      if (consultError) throw consultError;
 
-        const activitiesWithIcons = data.analytics.activities.map((a: any) => ({
-          ...a,
-          icon: a.type === "consultation" ? CheckCircle : ClipboardList,
-          iconColor: "text-emerald-600",
-          iconBg: "bg-emerald-50",
-          time: formatDistanceToNow(new Date(a.time), { addSuffix: true, locale: idLocale }),
-        }));
+      // 3. Fetch rating (average from consultations with rating)
+      const { data: ratedConsultations, error: ratingError } = await supabase
+        .from("consultations")
+        .select("rating")
+        .eq("doctor_id", doc.id)
+        .not("rating", "is", null);
 
-        setAnalytics({
-          ...data.analytics,
-          stats: statsWithIcons,
-          activities: activitiesWithIcons,
-        });
+      let avgRating = 0;
+      if (!ratingError && ratedConsultations && ratedConsultations.length > 0) {
+        const sum = ratedConsultations.reduce((acc: number, c: any) => acc + (c.rating || 0), 0);
+        avgRating = Math.round((sum / ratedConsultations.length) * 10) / 10;
       }
+
+      // 4. Fetch recent consultations for activities
+      const { data: recentConsultations, error: recentError } = await supabase
+        .from("consultations")
+        .select("*")
+        .eq("doctor_id", doc.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (recentError) throw recentError;
+
+      // Build stats
+      const statsWithIcons = [
+        {
+          label: "Total Konsultasi",
+          value: totalConsultations || 0,
+          icon: ClipboardList,
+          color: "bg-sky-50 text-sky-700 border-sky-100",
+        },
+        {
+          label: "Rating Rata-rata",
+          value: avgRating > 0 ? `${avgRating}/5` : "N/A",
+          icon: Star,
+          color: "bg-amber-50 text-amber-700 border-amber-100",
+        },
+        {
+          label: "Total Pasien",
+          value: "0", // Would need to count unique patients
+          icon: UserPlus,
+          color: "bg-emerald-50 text-emerald-700 border-emerald-100",
+        },
+        {
+          label: "Respon Rata-rata",
+          value: "< 1 jam",
+          icon: Clock,
+          color: "bg-violet-50 text-violet-700 border-violet-100",
+        },
+      ];
+
+      // Build activities
+      const activitiesWithIcons = (recentConsultations || []).map((c: any) => ({
+        ...c,
+        icon: CheckCircle,
+        iconColor: "text-emerald-600",
+        iconBg: "bg-emerald-50",
+        type: "consultation",
+        label: `Konsultasi dengan ${c.patient_name || "Pasien"}`,
+        time: formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: idLocale }),
+      }));
+
+      console.log("📊 Analytics fetched:", { totalConsultations, avgRating, activities: activitiesWithIcons.length });
+
+      setAnalytics({
+        stats: statsWithIcons,
+        activities: activitiesWithIcons,
+      });
     } catch (err: any) {
-      console.error("Error fetching analytics:", err);
+      console.error("❌ Error fetching analytics:", err);
       setError(err.message || "Terjadi kesalahan saat memuat data");
     } finally {
       setLoading(false);

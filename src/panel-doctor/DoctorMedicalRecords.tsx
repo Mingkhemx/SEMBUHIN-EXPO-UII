@@ -246,15 +246,43 @@ export function DoctorMedicalRecords() {
     if (!doctorId) return;
     setPatientsLoading(true);
     try {
-      const params = new URLSearchParams({ doctor_id: doctorId, per_page: "50" });
-      if (searchPatient) params.set("search", searchPatient);
-      const res = await fetch(
-        `https://sembuhin-expo-uii-production.up.railway.app/api/doctor/patients?${params}`,
-      );
-      const data = await res.json();
-      if (data.success) setPatients(data.data);
+      console.log("📋 Fetching patients from Supabase for doctor:", doctorId);
+      
+      let query = supabase
+        .from("consultations")
+        .select("patient_id")
+        .eq("doctor_id", doctorId);
+
+      const { data: consultations, error: consultError } = await query;
+      
+      if (consultError) throw consultError;
+
+      // Get unique patient IDs
+      const patientIds = [...new Set(consultations?.map(c => c.patient_id) || [])];
+      
+      if (patientIds.length === 0) {
+        setPatients([]);
+        return;
+      }
+
+      // Fetch patient profiles
+      let patientsQuery = supabase
+        .from("profiles")
+        .select("id, full_name, email, date_of_birth, gender, avatar_url")
+        .in("id", patientIds);
+
+      if (searchPatient) {
+        patientsQuery = patientsQuery.or(`full_name.ilike.%${searchPatient}%,email.ilike.%${searchPatient}%`);
+      }
+
+      const { data: patients, error: patientsError } = await patientsQuery;
+      
+      if (patientsError) throw patientsError;
+      
+      console.log("📋 Patients fetched:", patients?.length || 0);
+      setPatients(patients || []);
     } catch (e) {
-      console.error(e);
+      console.error("❌ Error fetching patients:", e);
     } finally {
       setPatientsLoading(false);
     }
@@ -269,17 +297,47 @@ export function DoctorMedicalRecords() {
     setRecordsLoading(true);
     setRecordsError(null);
     try {
-      const res = await fetch(
-        `https://sembuhin-expo-uii-production.up.railway.app/api/patient/medical-records?patient_id=${patientId}`,
-      );
-      const data = await res.json();
-      if (data.success) {
-        setRecords(data.data);
-        setStats(data.stats);
-      } else {
-        throw new Error(data.error || "Gagal mengambil data");
-      }
+      console.log("📋 Fetching medical records from Supabase for patient:", patientId);
+      
+      // Fetch consultations for this patient
+      const { data: consultations, error: consultError } = await supabase
+        .from("consultations")
+        .select("*")
+        .eq("patient_id", patientId)
+        .order("created_at", { ascending: false });
+
+      if (consultError) throw consultError;
+
+      // Convert consultations to medical records format
+      const medicalRecords: MedicalRecord[] = (consultations || []).map((c: any) => ({
+        id: c.id,
+        type: "konsultasi",
+        title: c.complaint || "Konsultasi Umum",
+        date: c.created_at,
+        doctor: c.doctor_name || "Dokter",
+        facility: "Sembuhin Online",
+        status: c.status || "completed",
+        summary: c.diagnosis || "Tidak ada diagnosis",
+        details: {
+          "Keluhan": c.complaint || "-",
+          "Diagnosis": c.diagnosis || "-",
+          "Status Pembayaran": c.payment_status || "-",
+        },
+      }));
+
+      // Calculate stats
+      const stats: Stats = {
+        total: medicalRecords.length,
+        konsultasi: medicalRecords.filter(r => r.type === "konsultasi").length,
+        lab: medicalRecords.filter(r => r.type === "lab").length,
+        resep: medicalRecords.filter(r => r.type === "resep").length,
+      };
+
+      console.log("📋 Medical records fetched:", medicalRecords.length);
+      setRecords(medicalRecords);
+      setStats(stats);
     } catch (e: any) {
+      console.error("❌ Error fetching medical records:", e);
       setRecordsError(e.message);
     } finally {
       setRecordsLoading(false);

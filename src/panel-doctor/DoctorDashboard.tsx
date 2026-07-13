@@ -72,18 +72,53 @@ export function DoctorDashboard() {
     setLoading(true);
 
     try {
-      // 1. Fetch stats from backend
-      const statsRes = await fetch(
-        `https://sembuhin-expo-uii-production.up.railway.app/api/doctor/dashboard-stats?doctor_id=${doctorId}`,
-      );
-      const statsData = await statsRes.json();
-
-      if (statsData.success) {
-        setStats(statsData.stats);
-      }
-
-      // 2. Fetch recent consultations from Supabase (masih oke direct untuk data detail/list)
+      console.log("📊 Fetching doctor dashboard from Supabase for doctor:", doctorId);
+      
+      // 1. Fetch today's consultations count
       const today = new Date().toISOString().split("T")[0];
+      const { count: todayCount, error: todayError } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact", head: true })
+        .eq("doctor_id", doctorId)
+        .eq("appointment_date", today);
+
+      if (todayError) throw todayError;
+
+      // 2. Fetch total consultations
+      const { count: totalCount, error: totalError } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact", head: true })
+        .eq("doctor_id", doctorId);
+
+      if (totalError) throw totalError;
+
+      // 3. Fetch pending consultations
+      const { count: pendingCount, error: pendingError } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact", head: true })
+        .eq("doctor_id", doctorId)
+        .eq("consultation_status", "pending");
+
+      if (pendingError) throw pendingError;
+
+      // 4. Fetch completed consultations
+      const { count: completedCount, error: completedError } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact", head: true })
+        .eq("doctor_id", doctorId)
+        .eq("consultation_status", "completed");
+
+      if (completedError) throw completedError;
+
+      // Set stats
+      setStats({
+        todayConsultations: todayCount || 0,
+        totalConsultations: totalCount || 0,
+        pendingConsultations: pendingCount || 0,
+        completedConsultations: completedCount || 0,
+      });
+
+      // 5. Fetch recent consultations from Supabase
       const { data: consultations } = await supabase
         .from("consultations")
         .select(
@@ -94,8 +129,10 @@ export function DoctorDashboard() {
         .order("appointment_time", { ascending: true });
 
       setRecentConsultations((consultations || []) as RecentConsultation[]);
+      
+      console.log("📊 Dashboard stats fetched:", { todayCount, totalCount, pendingCount, completedCount });
     } catch (err) {
-      console.error("Error fetching dashboard data:", err);
+      console.error("❌ Error fetching dashboard data:", err);
     } finally {
       setLoading(false);
     }
